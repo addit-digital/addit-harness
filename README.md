@@ -30,11 +30,12 @@ existing hooks are preserved. Re-running backs up replaced files to `*.bak.<ts>`
 | Path | What | How it's sourced |
 |------|------|------------------|
 | `CLAUDE.md` | Lean global memory: operating model + hard rules | Authored; follows [Anthropic memory](https://code.claude.com/docs/en/memory) & [best-practices](https://www.anthropic.com/engineering/claude-code-best-practices) |
-| `rules/engineering-loop.md` | Always-on plan→verify→commit model + anti-patterns | Authored |
+| `rules/engineering-loop.md` | Always-on plan→verify→commit model + anti-patterns; sets diagram-rich (mermaid) plan/design-doc standards | Authored |
 | `rules/{java,go,typescript}.md` | **Thin auto-loaded pointers** (Tier 1) — route to the vendored references | Authored (routing only, no convention text) |
 | `references/{go,java,typescript}/` | **Vendored convention guides + linked authorities, read on-demand** (Tier 2) | **Vendored from recognized sources** (Uber Go Guide, bulletproof-react, sanjeed5/Google-derived) + links to authorities — see each `README.md` |
 | `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, feature-investigator | **Vendored + pinned** — see `agents/SOURCES.md` |
 | `skills/adr/` | `/adr` — record Architecture Decision Records (**MADR 4.0**) | Adopts MADR (see `skills/SOURCES.md`) |
+| `skills/save-plan/` | `/save-plan` — save a plan to `docs/plans/` (or `--temp`) so mermaid renders in an IDE/GitHub | Authored |
 | `settings.json` | Default model + permissions + official plugins (`enabledPlugins`) | Authored |
 | `mcp.example.json` | Disabled Atlassian/DB scaffolding (opt-in) | Reference config |
 | `templates/CLAUDE.project.md` | Per-repo memory template | Authored |
