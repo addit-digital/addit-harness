@@ -41,6 +41,10 @@ trivial, easily-reversed choices.
    and consequences (good and bad). Ask the user only for what you can't infer —
    especially *alternatives rejected and why*, the most valuable part.
 4. **Write** `docs/adr/NNNN-kebab-case-title.md` using the matching template below.
+   When the decision involves architecture or flow, embed a mermaid diagram
+   (component `graph`/`flowchart` and/or `sequenceDiagram`) in *Context and Problem
+   Statement* and/or per option — ADRs live as files / on GitHub, so mermaid
+   renders. Skip it for non-structural decisions.
 5. **Update the index** `docs/adr/README.md` with a row: number, title (link),
    status, date.
 6. **Report** the path and a one-line summary. Don't commit unless asked.
@@ -59,6 +63,14 @@ decision-makers: {who decided}
 
 {2–3 sentences, or a short story; optionally phrased as a question. Link issues/
 boards if relevant.}
+
+<!-- Optional, when the decision is structural — delete if not applicable -->
+## Architecture / Flow
+
+```mermaid
+graph TD
+  A[Component A] --> B[Component B]
+```
 
 ## Considered Options
 
@@ -92,6 +104,14 @@ informed: {kept up to date (one-way)}
 ## Context and Problem Statement
 
 {2–3 sentences or a short story; optionally a question. Link issues/boards.}
+
+<!-- Optional, when the decision is structural — delete if not applicable -->
+## Architecture / Flow
+
+```mermaid
+graph TD
+  A[Component A] --> B[Component B]
+```
 
 ## Decision Drivers
 
