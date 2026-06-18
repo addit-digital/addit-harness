@@ -90,6 +90,43 @@ Delegate isolated work to keep your main context clean:
 `@architect-reviewer`, `@backend-architect`, and `@feature-investigator`
 (investigate a feature/product request before building → spec/PRD-lite).
 
+## Use cases
+
+Concrete workflows showing which configs fire together.
+
+**Build a new feature**
+1. `@feature-investigator` → requirements/scope (spec/PRD-lite) before any code.
+2. Plan it — a diagram-rich plan (mermaid), then `/save-plan` to view it rendered
+   in an IDE/GitHub (the terminal can't render mermaid).
+3. Implement — Tier-1 `rules/<lang>.md` auto-load per file type; Claude reads the
+   vendored `references/<lang>/` guides on demand.
+4. `@code-reviewer` → checks correctness, security, *and* adherence to the
+   vendored conventions (file:line violations).
+
+**Review or debug existing code**
+- `@code-reviewer` on a diff — flags convention violations with file:line.
+- `@debugger` for a failing test or stack trace — isolates root cause.
+
+**Make an architecture decision**
+- `@architect-reviewer` / `@backend-architect` to weigh the design, then `/adr`
+  to record it (MADR) under `docs/adr/`.
+
+**Day-to-day coding in Go / Java / TS**
+- Just open the file — language conventions auto-apply (Tier 1) and the reviewer
+  enforces them; no command needed. Claude pulls deeper `references/` only for
+  substantial work.
+
+**Keep costs down**
+- Default `opusplan` (Opus plans, Sonnet executes); `/model` to switch, `/effort
+  low` for simple tasks, and delegate noisy work to subagents. See *Model & cost*.
+
+**Connect Jira / a database**
+- Enable the relevant server from `mcp.example.json`. See *Enabling MCP*.
+
+**Set up a specific repo**
+- Copy `templates/CLAUDE.project.md` → the repo's `./CLAUDE.md` for
+  codebase-specific facts (keep them out of global memory).
+
 ## Model & cost
 
 The goal is **good-enough model per task** to lower spend without hurting code
