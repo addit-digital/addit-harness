@@ -1,0 +1,46 @@
+{
+  "model": "opusplan",
+  "autoMemoryEnabled": true,
+
+  "permissions": {
+    "allow": [
+      "Skill",
+      "Read",
+      "Grep",
+      "Glob",
+      "Bash(go test:*)",
+      "Bash(go build:*)",
+      "Bash(go vet:*)",
+      "Bash(gofmt:*)",
+      "Bash(mvn test:*)",
+      "Bash(mvn verify:*)",
+      "Bash(./gradlew test:*)",
+      "Bash(./gradlew build:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm build:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)"
+    ],
+    "deny": []
+  },
+
+  "extraKnownMarketplaces": {
+    "anthropic-agent-skills": {
+      "source": { "source": "github", "repo": "anthropics/skills" }
+    }
+  },
+
+  "enabledPlugins": {
+    "gopls-lsp@claude-plugins-official": true,
+    "jdtls-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "pr-review-toolkit@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "document-skills@anthropic-agent-skills": true
+  }
+}

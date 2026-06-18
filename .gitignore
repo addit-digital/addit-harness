@@ -1,0 +1,8 @@
+# Machine-specific overrides — never commit secrets or local tweaks
+**/settings.local.json
+**/mcp.local.json
+**/*.local.md
+
+# Editor / OS noise
+.DS_Store
+*.swp
