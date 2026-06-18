@@ -1,0 +1,58 @@
+{
+  "_README": "DISABLED SCAFFOLDING — not installed by install.sh and not loaded by Claude Code. When you want an integration, copy the relevant entry into ~/.claude/.mcp.json (under an `mcpServers` object), fill in credentials, and put secrets in ~/.claude/mcp.local.json (gitignored) rather than committing them. See repo README section 'Enabling MCP'.",
+
+  "atlassian_cloud_OFFICIAL": {
+    "_about": "Official Atlassian Rovo remote MCP (hosted, OAuth on first connect, Jira+Confluence+Compass). Cloud only (*.atlassian.net). Install via CLI: `claude mcp add --transport http atlassian https://mcp.atlassian.com/v1/mcp`",
+    "transport": "http",
+    "url": "https://mcp.atlassian.com/v1/mcp"
+  },
+
+  "atlassian_datacenter_ALTERNATIVE": {
+    "_about": "Community sooperset/mcp-atlassian — required for self-hosted Jira/Confluence Server/Data Center (also supports Cloud). Auth via API token (Cloud) or PAT (DC).",
+    "command": "uvx",
+    "args": ["mcp-atlassian"],
+    "env": {
+      "JIRA_URL": "https://your-company.atlassian.net",
+      "JIRA_USERNAME": "you@company.com",
+      "JIRA_API_TOKEN": "<token — keep in mcp.local.json>",
+      "CONFLUENCE_URL": "https://your-company.atlassian.net/wiki",
+      "CONFLUENCE_USERNAME": "you@company.com",
+      "CONFLUENCE_API_TOKEN": "<token — keep in mcp.local.json>"
+    }
+  },
+
+  "postgres_RECOMMENDED": {
+    "_about": "crystaldba/postgres-mcp (Postgres MCP Pro): schema exploration, EXPLAIN, index tuning, health checks. Defaults to restricted/read-only — good for prod. The old @modelcontextprotocol/server-postgres is archived; do not use it.",
+    "command": "docker",
+    "args": ["-i", "--rm", "-e", "DATABASE_URI", "crystaldba/postgres-mcp"],
+    "env": {
+      "DATABASE_URI": "postgresql://user:pass@localhost:5432/dbname"
+    }
+  },
+
+  "mysql_OPTION_node": {
+    "_about": "benborla/mcp-server-mysql (Node/npx). Read-only by default; writes opt-in via ALLOW_*_OPERATION env flags. Node 20+, MySQL 5.7+.",
+    "command": "npx",
+    "args": ["-y", "@benborla29/mcp-server-mysql"],
+    "env": {
+      "MYSQL_HOST": "127.0.0.1",
+      "MYSQL_PORT": "3306",
+      "MYSQL_USER": "readonly",
+      "MYSQL_PASS": "<keep in mcp.local.json>",
+      "MYSQL_DB": "dbname"
+    }
+  },
+
+  "mysql_OPTION_python": {
+    "_about": "designcomputer/mysql_mcp_server (Python/uvx). Most recent release, built-in SSH tunneling. Install via `claude mcp add --transport stdio mysql uvx mysql_mcp_server`.",
+    "command": "uvx",
+    "args": ["mysql_mcp_server"],
+    "env": {
+      "MYSQL_HOST": "127.0.0.1",
+      "MYSQL_PORT": "3306",
+      "MYSQL_USER": "readonly",
+      "MYSQL_PASSWORD": "<keep in mcp.local.json>",
+      "MYSQL_DATABASE": "dbname"
+    }
+  }
+}
