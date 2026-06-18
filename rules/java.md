@@ -2,27 +2,12 @@
 paths: ["**/*.java"]
 ---
 
-# Java conventions (essentials)
+# Java
 
-Always-on when editing Java (17+, Spring Boot where relevant). The
-non-negotiables; match the existing module's style first. For depth (Spring
-patterns, JPA/Hibernate, concurrency, testing, worked examples) read the relevant topic in `~/.claude/references/java/` (start at its
-`README.md` index) before substantial Java work.
+When editing Java, follow the vendored conventions in `~/.claude/references/java/`
+(start at its `README.md`). The README links the authorities (Effective Java,
+Google Java Style, Spring reference docs, spring-petclinic) and the stack
+specifics (Spring MVC + WebFlux, Spring Data, Kafka, Gradle/Maven).
 
-- **Immutability first:** `final` fields, records for data carriers, unmodifiable
-  collections at boundaries. Validate args early (`Objects.requireNonNull`).
-- **No null in new APIs:** use `Optional` for absent return values (never for
-  fields/params, never bare `.get()`).
-- **DI = constructor injection only.** No field/`@Autowired`-on-field injection.
-- **Layering:** thin controllers (HTTP + validation), services for logic,
-  repositories for persistence. Don't leak entities across the web boundary — use
-  DTOs. Externalize config (`@ConfigurationProperties`).
-- **Exceptions:** throw specific types; never catch-and-swallow or use exceptions
-  for control flow. Wrap with the cause; close resources with try-with-resources.
-- **JPA:** beware N+1 (fetch joins/entity graphs); keep transactions at the
-  service layer; don't let lazy loading escape the transaction.
-- **Concurrency:** prefer `java.util.concurrent` over raw threads; never block on
-  the reactive event loop (WebFlux).
-- **Testing:** JUnit 5 + AssertJ + Mockito; prefer slice tests
-  (`@WebMvcTest`/`@DataJpaTest`) over `@SpringBootTest`; cover error cases; add a
-  regression test with every bug fix.
+Read the relevant guide before substantial Java work, and match the existing
+module's style where it differs.

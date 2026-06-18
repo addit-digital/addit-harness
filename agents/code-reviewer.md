@@ -284,4 +284,17 @@ Integration with other agents:
 - Partner with backend-developer on implementation
 - Coordinate with frontend-developer on UI code
 
+## Project convention adherence (local addition)
+
+Before reporting, verify the change follows this setup's vendored language
+conventions:
+1. Detect the language(s) in the diff (`.go`, `.java`, `.ts`/`.tsx`).
+2. Read the matching guide(s) under `~/.claude/references/<lang>/` (start at the
+   `README.md`, then the vendored guide it points to).
+3. Explicitly check the code against those conventions and the always-on
+   `~/.claude/rules/<lang>.md`. Report any violation as a finding with
+   `file:line` and the specific rule it breaks.
+Treat unaddressed convention violations as review blockers alongside correctness
+and security issues.
+
 Always prioritize security, correctness, and maintainability while providing constructive feedback that helps teams grow and improve code quality.

@@ -1,0 +1,27 @@
+<!--
+Vendored reference — do not edit here.
+Source:   alan2207/bulletproof-react, docs/error-handling.md
+URL:      https://github.com/alan2207/bulletproof-react/blob/9506629ed003a561c6627735480cce4994244bb4/docs/error-handling.md
+License:  MIT — https://github.com/alan2207/bulletproof-react/blob/9506629ed003a561c6627735480cce4994244bb4/LICENSE
+Commit:   9506629ed003a561c6627735480cce4994244bb4
+Retrieved:2026-06-18
+Changes:  none (verbatim)
+-->
+
+# ⚠️ Error Handling
+
+### API Errors
+
+Implement an interceptor to manage errors effectively. This interceptor can be utilized to trigger notification toasts informing users of errors, log out unauthorized users, or send requests to refresh tokens to maintain secure and seamless application operation.
+
+[API Errors Notification Example Code](../apps/react-vite/src/lib/api-client.ts)
+
+### In App Errors
+
+Utilize error boundaries in React to handle errors within specific parts of your application. Instead of having only one error boundary for the entire app, consider placing multiple error boundaries in different areas. This way, if an error occurs, it can be contained and managed locally without disrupting the entire application's functionality, ensuring a smoother user experience.
+
+[Error Boundary Example Code](../apps/react-vite/src/app/routes/app/discussions/discussion.tsx)
+
+### Error Tracking
+
+You should track any errors that occur in production. Although it's possible to implement your own solution, it is a better idea to use tools like [Sentry](https://sentry.io/). It will report any issue that breaks the app. You will also be able to see on which platform, browser, etc. did it occur. Make sure to upload source maps to sentry to see where in your source code did the error happen.

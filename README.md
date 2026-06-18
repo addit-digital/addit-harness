@@ -31,9 +31,9 @@ existing hooks are preserved. Re-running backs up replaced files to `*.bak.<ts>`
 |------|------|------------------|
 | `CLAUDE.md` | Lean global memory: operating model + hard rules | Authored; follows [Anthropic memory](https://code.claude.com/docs/en/memory) & [best-practices](https://www.anthropic.com/engineering/claude-code-best-practices) |
 | `rules/engineering-loop.md` | Always-on plan→verify→commit model + anti-patterns | Authored |
-| `rules/{java,go,typescript}.md` | **Lean per-language essentials, auto-applied** (Tier 1) | Adapted from [awesome-cursorrules](https://github.com/PatrickJS/awesome-cursorrules) + established idioms |
-| `references/{go,java,typescript}/` | **Extensive per-topic conventions + examples, read on-demand** (Tier 2) — one file per topic + `README.md` index | Adapted from canonical style guides + Spring/React docs; Go → Gin + MongoDB/`database/sql`; TS → React/Next.js/React Native |
-| `agents/*.md` | Role subagents: code-reviewer, debugger, architect-reviewer, backend-architect | **Vendored + pinned** — see `agents/SOURCES.md` |
+| `rules/{java,go,typescript}.md` | **Thin auto-loaded pointers** (Tier 1) — route to the vendored references | Authored (routing only, no convention text) |
+| `references/{go,java,typescript}/` | **Vendored convention guides + linked authorities, read on-demand** (Tier 2) | **Vendored from recognized sources** (Uber Go Guide, bulletproof-react, sanjeed5/Google-derived) + links to authorities — see each `README.md` |
+| `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, feature-investigator | **Vendored + pinned** — see `agents/SOURCES.md` |
 | `skills/adr/` | `/adr` — record Architecture Decision Records (**MADR 4.0**) | Adopts MADR (see `skills/SOURCES.md`) |
 | `settings.json` | Default model + permissions + official plugins (`enabledPlugins`) | Authored |
 | `mcp.example.json` | Disabled Atlassian/DB scaffolding (opt-in) | Reference config |
@@ -42,33 +42,39 @@ existing hooks are preserved. Re-running backs up replaced files to `*.bak.<ts>`
 Three ways assets are delivered:
 - **Adopted (declarative):** official plugins enabled via `settings.json` — track
   their marketplace, safe to auto-update.
-- **Vendored (pinned):** community subagents/skills copied in at a fixed commit
-  for reproducibility (provenance in `*/SOURCES.md`).
-- **Adapted:** rules/memory authored from established sources.
+- **Vendored (pinned):** subagents *and* the language convention guides, copied in
+  at a fixed commit for reproducibility (provenance + license in `*/SOURCES.md`
+  and each `references/*/README.md`).
+- **Authored (routing/process only):** `CLAUDE.md`, `rules/engineering-loop.md`,
+  and the thin Tier-1 pointer rules — no hand-written language conventions.
 
-### Auto-applied language conventions — two tiers (the main feature)
-Conventions are split to give depth *and* low token cost:
+### Language conventions — vendored from well-known sources (two tiers)
+The convention text comes from **recognized, established sources**, not authored
+prose:
 
-- **Tier 1 — `rules/{java,go,typescript}.md`** carry `paths:` frontmatter, so when
-  you work in a Go file the lean Go essentials load automatically — **no command
-  to invoke**. Open a `.java` file and Java essentials apply; Go ones don't. These
-  are short (the non-negotiables) so the in-language token cost stays small.
-- **Tier 2 — `references/{go,java,typescript}/`** hold the *extensive* conventions
-  with worked examples, **split into one file per topic** (e.g.
-  `references/java/persistence-spring-data.md`) with a `README.md` index. They are
-  **not** path-scoped, so they never auto-load; each Tier-1 rule points to the
-  index, and Claude reads only the relevant topic with the Read tool **when doing
-  substantial work**. Cost ≈ zero until needed, and even then only the one topic
-  loads. Go covers Gin + MongoDB/`database/sql`; Java covers MVC + WebFlux + Kafka
-  + Spring Data + Gradle/Maven; TS covers React/Next.js/React Native.
+- **Tier 1 — `rules/{java,go,typescript}.md`** carry `paths:` frontmatter and
+  auto-load when you touch that language. They contain **only a pointer** to the
+  vendored references — no rules of our own.
+- **Tier 2 — `references/{go,java,typescript}/`** hold the vendored guides + a
+  `README.md` that lists what's vendored and links the link-only authorities.
+  Not path-scoped, so they never auto-load; Claude reads the relevant guide on
+  demand for substantial work.
 
-Why this matters: path-scoped rules load only in-language (not every session) and
-the whole file stays for that session — so keeping Tier 1 lean and pushing depth
-to on-demand Tier 2 is the token-efficient pattern
-([memory docs](https://code.claude.com/docs/en/memory),
-[skills docs](https://code.claude.com/docs/en/skills)). The global `CLAUDE.md`
-stays under 200 lines. TypeScript conventions target **React / Next.js / React
-Native** (frontend & mobile).
+What's vendored vs linked (full provenance + licenses in each `README.md`):
+
+| Stack | Vendored (in-repo) | Linked authorities |
+|-------|--------------------|--------------------|
+| Go | Uber Go Style Guide (Apache-2.0) | Effective Go, Go Code Review Comments, Google Go Style; Gin & mongo-go-driver |
+| Java/Spring | sanjeed5 `java.mdc` (CC0, Google-derived) | Effective Java, Google Java Style, Spring docs, spring-petclinic |
+| TS / React / Next / RN | bulletproof-react docs (MIT) + sanjeed5 TS/React/Next/RN `.mdc` (CC0) | react.dev, Next.js docs, React Native docs, TypeScript Handbook, Total TypeScript |
+
+Honest caveat: the genuinely comprehensive Java/TS *style guides* (Effective Java,
+Google's guides) are a book / HTML, so they're **linked** while the in-repo text
+for those stacks comes from the CC0 `sanjeed5` collection (script-generated,
+derived from the official guides — a solid baseline; defer to the linked
+authorities on any conflict). Go and React/Next use human-authored vendored
+guides (Uber, bulletproof-react). The **`code-reviewer` subagent is wired to check
+adherence** to these references.
 
 ### Official plugins (declared in `settings.json`)
 Enabled from the auto-available `claude-plugins-official` marketplace (+
@@ -79,7 +85,9 @@ They install on first start, or run `./install.sh --plugins` to do it now.
 
 ### Subagents
 Delegate isolated work to keep your main context clean:
-`@code-reviewer`, `@debugger`, `@architect-reviewer`, `@backend-architect`.
+`@code-reviewer` (also checks convention adherence), `@debugger`,
+`@architect-reviewer`, `@backend-architect`, and `@feature-investigator`
+(investigate a feature/product request before building → spec/PRD-lite).
 
 ## Model & cost
 
@@ -102,6 +110,7 @@ prevented) and Sonnet's strong, cheaper execution against your rules.
 | `backend-architect` | `opus` | Design decisions prevent downstream rework |
 | `code-reviewer` | `opus` | A strong reviewer = less *manual* review for you |
 | `debugger` | `sonnet` | Iterative; escalate with `/model` if stuck |
+| `feature-investigator` | `sonnet` | Requirements/spec investigation (upstream default) |
 
 Future mechanical agents (test-runners, formatters) should use `haiku`. Override
 all subagents at once with `CLAUDE_CODE_SUBAGENT_MODEL`.

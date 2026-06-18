@@ -1,20 +1,19 @@
-# Go conventions — on-demand reference index
+# Go — conventions (vendored + authorities)
 
-Deep, source-backed Go conventions split by topic. These are Tier-2: read on demand, **not** auto-loaded. The always-on essentials live in `../../rules/go.md`. Open only the file relevant to the task at hand.
+On-demand reference (not auto-loaded). The Tier-1 rule `rules/go.md` points here.
+All convention text is **vendored from recognized sources**, not hand-written.
 
-| Topic file | Open it when you are… |
-| --- | --- |
-| [project-layout.md](project-layout.md) | Structuring a module/repo — `cmd/`, `internal/`, package naming, `go.mod`, build tags. |
-| [naming-formatting.md](naming-formatting.md) | Naming identifiers, receivers, interfaces; gofmt/goimports, acronym case, doc comments. |
-| [types-interfaces.md](types-interfaces.md) | Designing structs/interfaces — accept-interfaces/return-concrete, receivers, zero values, functional options. |
-| [errors.md](errors.md) | Handling errors — `%w` wrapping, `errors.Is/As/Join`, sentinels, custom types, panic/recover. |
-| [concurrency.md](concurrency.md) | Writing goroutines, channels, `context`, cancellation, worker pools, errgroup, rate limiting. |
-| [sync-atomics.md](sync-atomics.md) | Using mutexes, `sync.Once`/`Pool`, typed atomics; avoiding lock-copy bugs and data races. |
-| [data-structures.md](data-structures.md) | Working with slices, maps, and strings — nil/aliasing/capacity, map order, UTF-8/runes. |
-| [generics.md](generics.md) | Writing generic containers/algorithms — type params, constraints, inference, when not to. |
-| [json-serialization.md](json-serialization.md) | Marshaling JSON — struct tags, `omitempty` pitfalls, nullable pointers, custom marshalers, strict decode. |
-| [logging-slog.md](logging-slog.md) | Adding structured logging with `log/slog` — attrs, handlers, context/trace IDs, hygiene. |
-| [config.md](config.md) | Loading configuration — flags vs env precedence, typed config, fail-fast validation, secrets. |
-| [persistence.md](persistence.md) | Talking to a database — MongoDB (`mongo-go-driver`) primary, plus `database/sql`; migrations. |
-| [http-gin.md](http-gin.md) | Building an HTTP service with Gin — routing/groups, binding+validation, middleware, errors, graceful shutdown. |
-| [testing.md](testing.md) | Writing tests/benchmarks — table-driven subtests, fakes, fuzzing, `-race`, golangci-lint. |
+## Vendored (read these)
+| File | Source | License |
+|------|--------|---------|
+| `uber-go-style-guide.md` | [Uber Go Style Guide](https://github.com/uber-go/guide) (the most-cited third-party Go guide; comprehensive, human-authored) | Apache-2.0 |
+
+## Authorities to read (link-only — not copied)
+- [Effective Go](https://go.dev/doc/effective_go) — foundational idiomatic Go (Go team).
+- [Go Code Review Comments](https://go.dev/wiki/CodeReviewComments) — the de-facto reviewer checklist.
+- [Google Go Style Guide](https://google.github.io/styleguide/go/) — comprehensive style + decisions.
+- [Go Proverbs](https://go-proverbs.github.io/) — design philosophy.
+
+## Stack-specific (this user)
+- Web: [gin-gonic/gin](https://github.com/gin-gonic/gin) — examples & docs for idiomatic Gin.
+- Data: [mongodb/mongo-go-driver](https://github.com/mongodb/mongo-go-driver) — official driver patterns (now); `database/sql` ([guide](https://go.dev/doc/database/)) for the SQL future.
