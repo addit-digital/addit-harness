@@ -68,9 +68,10 @@ place_file "$REPO_DIR/CLAUDE.md"     "$CLAUDE_DIR/CLAUDE.md"
 place_file "$REPO_DIR/settings.json" "$CLAUDE_DIR/settings.json"
 
 # Directories (merge per-file)
-place_dir  "$REPO_DIR/rules"  "$CLAUDE_DIR/rules"
-place_dir  "$REPO_DIR/agents" "$CLAUDE_DIR/agents"
-place_dir  "$REPO_DIR/skills" "$CLAUDE_DIR/skills"
+place_dir  "$REPO_DIR/rules"      "$CLAUDE_DIR/rules"
+place_dir  "$REPO_DIR/references" "$CLAUDE_DIR/references"
+place_dir  "$REPO_DIR/agents"     "$CLAUDE_DIR/agents"
+place_dir  "$REPO_DIR/skills"     "$CLAUDE_DIR/skills"
 
 echo "Files installed."
 echo
