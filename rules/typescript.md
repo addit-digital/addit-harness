@@ -6,8 +6,8 @@ paths: ["**/*.ts", "**/*.tsx"]
 
 Always-on when editing TS/TSX. Frontend & mobile focus. The non-negotiables;
 match the existing project's style first. For depth (React patterns, Next.js App
-Router, React Native, state management, worked examples) read
-`~/.claude/references/typescript.md` before substantial work.
+Router, React Native, state management, worked examples) read the relevant topic in `~/.claude/references/typescript/` (start at its
+`README.md` index) before substantial work.
 
 - **Type safety:** `strict` on. No implicit `any` (prefer `unknown` at
   boundaries + narrowing). No `// @ts-ignore` (use `// @ts-expect-error` with a

@@ -2,7 +2,7 @@
 
 | Skill | Origin | Notes |
 |-------|--------|-------|
-| `adr/` | Adapted from the `architecture-decision-records` skill in [affaan-m/everything-claude-code](https://github.com/affaan-m/everything-claude-code/blob/main/skills/architecture-decision-records/SKILL.md) (commit `ceca28852e5b31edbbf66ebccc8fd163dd14208e`), following Michael Nygard's standard ADR format. | Authored fresh as a lean, self-contained `SKILL.md` rather than copied, to avoid pulling in the source repo's broader harness. |
+| `adr/` | Authored fresh; adopts the **MADR 4.0** format ([adr.github.io/madr](https://adr.github.io/madr/), [github.com/adr/madr](https://github.com/adr/madr)). Templates embedded verbatim from upstream. | Default = MADR minimal, with a full variant; Nygard kept as a fallback. Conventions (NNNN numbering, status lifecycle, supersede-don't-edit, README index) follow `adr-tools`/MADR norms. Prior art reviewed: [wshobson/agents ADR skill](https://github.com/wshobson/agents/blob/main/plugins/documentation-generation/skills/architecture-decision-records/SKILL.md), [affaan-m/everything-claude-code](https://github.com/affaan-m/everything-claude-code/blob/main/skills/architecture-decision-records/SKILL.md). Format gallery: [joelparkerhenderson/architecture-decision-record](https://github.com/joelparkerhenderson/architecture-decision-record). |
 
 ## Skills adopted as plugins (not vendored here)
 These are enabled via `settings.json` / `install.sh`, not stored in this repo:

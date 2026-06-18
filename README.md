@@ -32,9 +32,9 @@ existing hooks are preserved. Re-running backs up replaced files to `*.bak.<ts>`
 | `CLAUDE.md` | Lean global memory: operating model + hard rules | Authored; follows [Anthropic memory](https://code.claude.com/docs/en/memory) & [best-practices](https://www.anthropic.com/engineering/claude-code-best-practices) |
 | `rules/engineering-loop.md` | Always-on plan→verify→commit model + anti-patterns | Authored |
 | `rules/{java,go,typescript}.md` | **Lean per-language essentials, auto-applied** (Tier 1) | Adapted from [awesome-cursorrules](https://github.com/PatrickJS/awesome-cursorrules) + established idioms |
-| `references/{java,go,typescript}.md` | **Extensive conventions + examples, read on-demand** (Tier 2) | Same sources; TS targets React/Next.js/React Native |
+| `references/{go,java,typescript}/` | **Extensive per-topic conventions + examples, read on-demand** (Tier 2) — one file per topic + `README.md` index | Adapted from canonical style guides + Spring/React docs; Go → Gin + MongoDB/`database/sql`; TS → React/Next.js/React Native |
 | `agents/*.md` | Role subagents: code-reviewer, debugger, architect-reviewer, backend-architect | **Vendored + pinned** — see `agents/SOURCES.md` |
-| `skills/adr/` | `/adr` — record Architecture Decision Records | Adapted (see `skills/SOURCES.md`) |
+| `skills/adr/` | `/adr` — record Architecture Decision Records (**MADR 4.0**) | Adopts MADR (see `skills/SOURCES.md`) |
 | `settings.json` | Default model + permissions + official plugins (`enabledPlugins`) | Authored |
 | `mcp.example.json` | Disabled Atlassian/DB scaffolding (opt-in) | Reference config |
 | `templates/CLAUDE.project.md` | Per-repo memory template | Authored |
@@ -53,10 +53,14 @@ Conventions are split to give depth *and* low token cost:
   you work in a Go file the lean Go essentials load automatically — **no command
   to invoke**. Open a `.java` file and Java essentials apply; Go ones don't. These
   are short (the non-negotiables) so the in-language token cost stays small.
-- **Tier 2 — `references/{java,go,typescript}.md`** hold the *extensive*
-  conventions with worked examples. They are **not** path-scoped, so they never
-  auto-load; each Tier-1 rule points to its reference, and Claude reads it with
-  the Read tool **only when doing substantial work**. Cost ≈ zero until needed.
+- **Tier 2 — `references/{go,java,typescript}/`** hold the *extensive* conventions
+  with worked examples, **split into one file per topic** (e.g.
+  `references/java/persistence-spring-data.md`) with a `README.md` index. They are
+  **not** path-scoped, so they never auto-load; each Tier-1 rule points to the
+  index, and Claude reads only the relevant topic with the Read tool **when doing
+  substantial work**. Cost ≈ zero until needed, and even then only the one topic
+  loads. Go covers Gin + MongoDB/`database/sql`; Java covers MVC + WebFlux + Kafka
+  + Spring Data + Gradle/Maven; TS covers React/Next.js/React Native.
 
 Why this matters: path-scoped rules load only in-language (not every session) and
 the whole file stays for that session — so keeping Tier 1 lean and pushing depth

@@ -6,7 +6,8 @@ paths: ["**/*.go"]
 
 Always-on when editing Go. The non-negotiables; match the existing module's style
 first. For depth (concurrency, interfaces, API/resource patterns, testing,
-worked examples) read `~/.claude/references/go.md` before substantial Go work.
+worked examples) read the relevant topic in `~/.claude/references/go/` (start at its
+`README.md` index) before substantial Go work.
 
 - **Formatting/tooling:** `gofmt`/`goimports` clean; passes `go vet` (and
   `golangci-lint` if configured). Never hand-format.

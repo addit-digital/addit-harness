@@ -6,8 +6,8 @@ paths: ["**/*.java"]
 
 Always-on when editing Java (17+, Spring Boot where relevant). The
 non-negotiables; match the existing module's style first. For depth (Spring
-patterns, JPA/Hibernate, concurrency, testing, worked examples) read
-`~/.claude/references/java.md` before substantial Java work.
+patterns, JPA/Hibernate, concurrency, testing, worked examples) read the relevant topic in `~/.claude/references/java/` (start at its
+`README.md` index) before substantial Java work.
 
 - **Immutability first:** `final` fields, records for data carriers, unmodifiable
   collections at boundaries. Validate args early (`Objects.requireNonNull`).
