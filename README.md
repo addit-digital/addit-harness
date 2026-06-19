@@ -31,11 +31,12 @@ existing hooks are preserved. Re-running backs up replaced files to `*.bak.<ts>`
 |------|------|------------------|
 | `CLAUDE.md` | Lean global memory: operating model + hard rules | Authored; follows [Anthropic memory](https://code.claude.com/docs/en/memory) & [best-practices](https://www.anthropic.com/engineering/claude-code-best-practices) |
 | `rules/engineering-loop.md` | Always-on plan→verify→commit model + anti-patterns; sets diagram-rich (mermaid) plan/design-doc standards | Authored |
-| `rules/{java,go,typescript}.md` | **Thin auto-loaded pointers** (Tier 1) — route to the vendored references | Authored (routing only, no convention text) |
-| `references/{go,java,typescript}/` | **Vendored convention guides + linked authorities, read on-demand** (Tier 2) | **Vendored from recognized sources** (Uber Go Guide, bulletproof-react, sanjeed5/Google-derived) + links to authorities — see each `README.md` |
+| `rules/{java,go,typescript}.md` | **Thin auto-loaded pointers** (Tier 1) — route to the references | Authored (routing only, no convention text) |
+| `references/{go,java,typescript}/` | **Convention guides + linked authorities, read on-demand** (Tier 2) | Go: codebase-derived from app-erp; Java/TS: vendored from recognized sources — see each `README.md` |
 | `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, feature-investigator | **Vendored + pinned** — see `agents/SOURCES.md` |
 | `skills/adr/` | `/adr` — record Architecture Decision Records (**MADR 4.0**) | Adopts MADR (see `skills/SOURCES.md`) |
 | `skills/save-plan/` | `/save-plan` — save a plan to `docs/plans/` (or `--temp`) so mermaid renders in an IDE/GitHub | Authored |
+| `skills/go-conventions/` | `/go-conventions [--refresh]` — scan a Go repo and write `.claude/go-conventions.md` (project-specific layer on top of the global baseline) | Authored |
 | `settings.json` | Default model + permissions + official plugins (`enabledPlugins`) | Authored |
 | `mcp.example.json` | Disabled Atlassian/DB scaffolding (opt-in) | Reference config |
 | `templates/CLAUDE.project.md` | Per-repo memory template | Authored |
@@ -43,39 +44,43 @@ existing hooks are preserved. Re-running backs up replaced files to `*.bak.<ts>`
 Three ways assets are delivered:
 - **Adopted (declarative):** official plugins enabled via `settings.json` — track
   their marketplace, safe to auto-update.
-- **Vendored (pinned):** subagents *and* the language convention guides, copied in
-  at a fixed commit for reproducibility (provenance + license in `*/SOURCES.md`
-  and each `references/*/README.md`).
+- **Vendored (pinned):** subagents *and* Java/TS convention guides, copied in at a
+  fixed commit for reproducibility (provenance + license in `*/SOURCES.md` and
+  each `references/*/README.md`).
 - **Authored (routing/process only):** `CLAUDE.md`, `rules/engineering-loop.md`,
-  and the thin Tier-1 pointer rules — no hand-written language conventions.
+  thin Tier-1 pointer rules, and the Go conventions file (codebase-derived).
 
-### Language conventions — vendored from well-known sources (two tiers)
-The convention text comes from **recognized, established sources**, not authored
-prose:
+### Language conventions — two tiers + per-project layer
 
 - **Tier 1 — `rules/{java,go,typescript}.md`** carry `paths:` frontmatter and
-  auto-load when you touch that language. They contain **only a pointer** to the
-  vendored references — no rules of our own.
-- **Tier 2 — `references/{go,java,typescript}/`** hold the vendored guides + a
-  `README.md` that lists what's vendored and links the link-only authorities.
-  Not path-scoped, so they never auto-load; Claude reads the relevant guide on
-  demand for substantial work.
+  auto-load when you touch that language. They contain **only a pointer** — no
+  convention text of their own.
+- **Tier 2 — `references/{go,java,typescript}/`** hold the convention guides + a
+  `README.md`. Not path-scoped; Claude reads them on demand for substantial work.
+- **Per-project — `.claude/go-conventions.md`** in any Go repo. Run
+  `/go-conventions` to generate it; `rules/go.md` loads it automatically.
 
-What's vendored vs linked (full provenance + licenses in each `README.md`):
+| Stack | In-repo reference | Linked authorities |
+|-------|-------------------|--------------------|
+| Go | `references/go/app-erp-conventions.md` (codebase-derived: Gin · MongoDB v2 · slog · OTel) + per-project `.claude/go-conventions.md` | Effective Go, Go Code Review Comments, Google Go Style |
+| Java/Spring | sanjeed5 `java.mdc` (CC0, Google-derived) | Effective Java, Google Java Style, Spring docs |
+| TS / React / Next / RN | bulletproof-react docs (MIT) + sanjeed5 TS/React/Next/RN `.mdc` (CC0) | react.dev, Next.js docs, TypeScript Handbook, Total TypeScript |
 
-| Stack | Vendored (in-repo) | Linked authorities |
-|-------|--------------------|--------------------|
-| Go | Uber Go Style Guide (Apache-2.0) | Effective Go, Go Code Review Comments, Google Go Style; Gin & mongo-go-driver |
-| Java/Spring | sanjeed5 `java.mdc` (CC0, Google-derived) | Effective Java, Google Java Style, Spring docs, spring-petclinic |
-| TS / React / Next / RN | bulletproof-react docs (MIT) + sanjeed5 TS/React/Next/RN `.mdc` (CC0) | react.dev, Next.js docs, React Native docs, TypeScript Handbook, Total TypeScript |
+The Go reference is **codebase-derived** (not a third-party style guide) — it
+reflects the actual patterns in addit-digital/app-erp and expands per-project
+via `/go-conventions`. The **`code-reviewer` subagent checks adherence** to
+whichever conventions apply.
 
-Honest caveat: the genuinely comprehensive Java/TS *style guides* (Effective Java,
-Google's guides) are a book / HTML, so they're **linked** while the in-repo text
-for those stacks comes from the CC0 `sanjeed5` collection (script-generated,
-derived from the official guides — a solid baseline; defer to the linked
-authorities on any conflict). Go and React/Next use human-authored vendored
-guides (Uber, bulletproof-react). The **`code-reviewer` subagent is wired to check
-adherence** to these references.
+### Iterating & giving feedback on plans or code
+
+The "no way to say change this" problem is mostly a **terminal UI gap**:
+
+| Scenario | What to do |
+|----------|-----------|
+| **Revising a plan** | Choose **"Keep planning with feedback"** when Claude presents a plan. Type your correction and Claude stays in plan mode. `Ctrl+G` opens the plan file in your editor to edit directly. |
+| **Inline comments on code (web)** | Open the diff view → click any line → leave a comment. Comments queue and bundle with your next message — this is the easiest "change *this* line" path. |
+| **Giving feedback in the terminal** | There's no line-selection UI. Reference the code as `pkg/sales/service.go:45` in your message, or paste the relevant lines. Press `Esc` to interrupt Claude mid-run and redirect. |
+| **Browser plan review** | Run `/ultraplan <task>` → open the browser link → leave inline comments on specific sections → iterate before executing. |
 
 ### Official plugins (declared in `settings.json`)
 Enabled from the auto-available `claude-plugins-official` marketplace (+
