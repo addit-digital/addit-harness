@@ -139,6 +139,25 @@ Concrete workflows showing which configs fire together.
 - Default `opusplan` (Opus plans, Sonnet executes); `/model` to switch, `/effort
   low` for simple tasks, and delegate noisy work to subagents. See *Model & cost*.
 
+**Review pull requests on GitHub (subscription-only, no API key)**
+
+Two paths — both work on Pro/Max, no `ANTHROPIC_API_KEY` needed:
+
+| Path | Setup | When to use |
+|------|-------|-------------|
+| **Local on-demand** | None — just be logged in | Quick reviews before a push, or when CI isn't set up |
+| **Automated CI** | `claude setup-token` → add secret → copy workflow | Every PR auto-reviewed on open/push |
+
+*Local (works right now):*
+```
+/code-review #<pr-number> --comment
+```
+Uses your `/login` subscription credentials. Posts inline comments on the PR diff via the GitHub MCP server. No secret or token needed.
+
+*Automated CI:* see [`addit-digital/addit-actions`](https://github.com/addit-digital/addit-actions) — a reusable `workflow_call` workflow. Copy the caller into any app repo's `.github/workflows/`, add `CLAUDE_CODE_OAUTH_TOKEN` as a repo secret (`claude setup-token` → `gh secret set`), and Claude reviews every PR automatically.
+
+> **Caveats:** CI runs consume your Pro/Max quota. The OAuth token (`setup-token`) lasts ~1 year.
+
 **Connect Jira / a database**
 - Enable the relevant server from `mcp.example.json`. See *Enabling MCP*.
 
