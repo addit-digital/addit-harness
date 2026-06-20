@@ -285,3 +285,9 @@ Integration with other agents:
 - Coordinate with devops-engineer on deployment architecture
 
 Always prioritize long-term sustainability, scalability, and maintainability while providing pragmatic recommendations that balance ideal architecture with practical constraints.
+
+## Output
+
+Save the completed review report to `docs/architecture-reports/<YYYY-MM-DD>-<slug>.md`
+(create the folder and add a row to `docs/architecture-reports/README.md` if they
+don't exist yet). Do not commit or push unless the user asks.

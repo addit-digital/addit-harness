@@ -19,6 +19,21 @@ harness plan file) or the most recent plan/design doc written in this session.
 Preserve it verbatim, including all mermaid blocks and section structure. If no
 plan exists yet, say so and stop — don't invent one.
 
+## Where it goes — artifact routing
+
+This skill is for **implementation plans** (phased steps, to-do lists, acceptance
+criteria). The broader taxonomy:
+
+| Artifact | Folder | Produced by |
+|----------|--------|-------------|
+| Implementation plan | `docs/plans/` | This skill (default) |
+| Architecture design / solution doc (no to-do list) | `docs/solutions/` | `@backend-architect`, `@frontend-architect` directly |
+| Architecture review report | `docs/architecture-reports/` | `@architect-reviewer` directly |
+
+For a pure architecture design or review report, skip this skill — the relevant
+agent writes directly to the correct folder following the same naming convention
+(`<YYYY-MM-DD>-<slug>.md`, create folder + `README.md` index row if missing).
+
 ## Choosing permanent vs temporary
 - **Permanent** (default): `docs/plans/<YYYY-MM-DD>-<kebab-title>.md`, tracked in
   git. Best for design docs worth keeping and for remote sessions (push → view on

@@ -34,9 +34,11 @@ project's own `CLAUDE.md` (see `templates/CLAUDE.project.md`), not here.
 - Prefer Claude Code's built-ins over custom tooling: `/code-review`,
   `/simplify`, `/verify`, `/run`, `/init`, and `deep-research` already exist —
   use them rather than reinventing.
-- Make plans and design docs visual: diagram-rich (mermaid) and saved to a file
-  with `/save-plan` so I can view them rendered (the terminal can't) — see the
-  engineering loop.
+- Make plans and design docs visual: diagram-rich (mermaid) and saved to the
+  repo — implementation plans via `/save-plan` → `docs/plans/`, architecture
+  designs → `docs/solutions/`, review reports → `docs/architecture-reports/`.
+  See the engineering loop for the full taxonomy. Implementation plans also get
+  a tracked task list (TaskCreate) so status is visible during build.
 - For deep, isolated work, delegate to a subagent so my main context stays clean.
 - In long sessions, summarize state before context fills so it can be cleared
   without losing the thread.
