@@ -1,5 +1,15 @@
 # claude-config
 
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+![Claude Code](https://img.shields.io/badge/Claude_Code-compatible-orange)
+![Go](https://img.shields.io/badge/Go-00ADD8?logo=go&logoColor=white)
+![Java](https://img.shields.io/badge/Java-ED8B00?logo=openjdk&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+
+Claude Code's out-of-the-box global config is a blank slate. This repo gives you a battle-tested starting point for backend engineers: language conventions that auto-load per file type, specialized subagents (architect, reviewer, debugger, developer), a plan→verify→commit engineering loop baked into the system prompt, and a one-line install. Philosophy: curate established assets and adapt them — don't hand-roll what already exists.
+
+---
+
 My personal, global [Claude Code](https://code.claude.com) configuration for
 Java / Go / TypeScript backend & distributed-systems work.
 
