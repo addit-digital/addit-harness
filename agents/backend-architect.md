@@ -1,6 +1,6 @@
 ---
 name: backend-architect
-description: Expert backend architect specializing in scalable API design, microservices architecture, and distributed systems. Masters REST/GraphQL/gRPC APIs, event-driven architectures, service mesh patterns, and modern backend frameworks. Handles service boundary definition, inter-service communication, resilience patterns, and observability. Use PROACTIVELY when creating new backend services or APIs.
+description: Expert backend architect specializing in scalable API design, microservices architecture, and distributed systems. Masters REST/GraphQL/gRPC APIs, event-driven architectures, service mesh patterns, and modern backend frameworks. Handles service boundary definition, inter-service communication, resilience patterns, and observability. Use for up-front DESIGN of new backend services or APIs (contracts, boundaries, trade-offs) — produces design docs and guidance, not the implementation. To WRITE the code, use backend-developer (or frontend-developer for UI).
 model: opus
 ---
 
