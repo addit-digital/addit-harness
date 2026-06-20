@@ -43,7 +43,7 @@ existing hooks are preserved. Re-running backs up replaced files to `*.bak.<ts>`
 | `rules/engineering-loop.md` | Always-on plan→verify→commit model + anti-patterns; sets diagram-rich (mermaid) plan/design-doc standards | Authored |
 | `rules/{java,go,typescript}.md` | **Thin auto-loaded pointers** (Tier 1) — route to the references | Authored (routing only, no convention text) |
 | `references/{go,java,typescript}/` | **Convention guides + linked authorities, read on-demand** (Tier 2) | Go: codebase-derived from app-erp; Java/TS: vendored from recognized sources — see each `README.md` |
-| `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, feature-investigator, backend-developer, frontend-developer | **Vendored + pinned** (except `backend-developer`/`frontend-developer`, authored) — see `agents/SOURCES.md` |
+| `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, frontend-architect, feature-investigator, backend-developer, frontend-developer | **Vendored + pinned** (except `backend-architect`/`frontend-architect`/`backend-developer`/`frontend-developer`, authored) — see `agents/SOURCES.md` |
 | `skills/adr/` | `/adr` — record Architecture Decision Records (**MADR 4.0**) | Adopts MADR (see `skills/SOURCES.md`) |
 | `skills/save-plan/` | `/save-plan` — save a plan to `docs/plans/` (or `--temp`) so mermaid renders in an IDE/GitHub | Authored |
 | `skills/go-conventions/` | `/go-conventions [--refresh]` — scan a Go repo and write `.claude/go-conventions.md` (project-specific layer on top of the global baseline) | Authored |
@@ -102,7 +102,8 @@ They install on first start, or run `./install.sh --plugins` to do it now.
 ### Subagents
 Delegate isolated work to keep your main context clean:
 `@code-reviewer` (also checks convention adherence), `@debugger`,
-`@architect-reviewer`, `@backend-architect` (up-front design only),
+`@architect-reviewer`, `@backend-architect` (up-front API/service design only),
+`@frontend-architect` (up-front component/rendering/state design only),
 `@feature-investigator` (investigate a feature/product request before building →
 spec/PRD-lite), and the implementation agents `@backend-developer` (Go ·
 Java/Spring) and `@frontend-developer` (TS/React/Next/RN) — senior craftsmen that
@@ -127,8 +128,9 @@ Concrete workflows showing which configs fire together.
 - `@debugger` for a failing test or stack trace — isolates root cause.
 
 **Make an architecture decision**
-- `@architect-reviewer` / `@backend-architect` to weigh the design, then `/adr`
-  to record it (MADR) under `docs/adr/`.
+- `@backend-architect` for API/service design or `@frontend-architect` for
+  component/rendering/state design — then `/adr` to record it (MADR) under
+  `docs/adr/`. Use `@architect-reviewer` to evaluate an existing design.
 
 **Day-to-day coding in Go / Java / TS**
 - Just open the file — language conventions auto-apply (Tier 1) and the reviewer
@@ -184,6 +186,7 @@ prevented) and Sonnet's strong, cheaper execution against your rules.
 |----------|-------|-----|
 | `architect-reviewer` | `opus` | High-value, infrequent design judgment |
 | `backend-architect` | `opus` | Design decisions prevent downstream rework |
+| `frontend-architect` | `opus` | Rendering/state/component design — same rationale as backend-architect |
 | `code-reviewer` | `opus` | A strong reviewer = less *manual* review for you |
 | `backend-developer` | `sonnet` | Implementation/execution — fast + cheap against the conventions |
 | `frontend-developer` | `sonnet` | Implementation/execution — fast + cheap against the conventions |
