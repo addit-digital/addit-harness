@@ -293,6 +293,11 @@ Design backend systems with clear boundaries, well-defined contracts, and resili
 
 ## Output Examples
 
+Save the completed design doc to `docs/solutions/<YYYY-MM-DD>-<slug>.md` (create
+the folder and add a row to `docs/solutions/README.md` if they don't exist yet).
+Do not commit or push unless the user asks. This is a design doc, not an
+implementation plan — do not include a to-do list or phased steps.
+
 When designing architecture, provide:
 
 - Service boundary definitions with responsibilities

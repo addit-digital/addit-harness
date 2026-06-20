@@ -16,6 +16,11 @@ Always-on. The mental model for every non-trivial task.
    `sequenceDiagram` for request/interaction flows; add a file-change map for
    multi-file work. Skip diagrams only for trivial edits (typo / one-liner /
    rename). See "Design documentation & viewing" below.
+   After plan approval, persist it with `/save-plan` → `docs/plans/` (the
+   harness scratch file at `~/.claude/plans/` is ephemeral working state, not
+   the home). Then create a tracked task list with TaskCreate from the plan's
+   phased steps so implementation status is visible; update each task
+   (TaskUpdate) as it completes.
 4. **Implement in small, verifiable units** — one concern at a time.
 5. **Verify with tooling** — run tests/build/lint or `/verify`. Observe real
    behavior; don't assert success from reading the code.
@@ -33,6 +38,17 @@ Always-on. The mental model for every non-trivial task.
   GitHub — both render mermaid. ADRs and PR descriptions already live as files /
   on GitHub, so they render there too.
 
+### Doc taxonomy — where each artifact lives
+
+| Folder | Holds | Produced by |
+|--------|-------|-------------|
+| `docs/plans/` | **Implementation plans** — phased steps, to-do lists, acceptance criteria | Main Claude via `/save-plan` |
+| `docs/solutions/` | **Architecture solution/design docs** — no to-do list, pure design | `@backend-architect`, `@frontend-architect`, or main Claude for design-only output |
+| `docs/architecture-reports/` | **Architecture review reports** | `@architect-reviewer` |
+
+All three: `<YYYY-MM-DD>-<slug>.md`; create the folder + a `README.md` index
+row on first use; don't commit/push unless asked.
+
 ## Anti-patterns to avoid
 - **Mega-prompt**: cramming many unrelated goals into one turn. Split them.
 - **Endless session**: letting context degrade instead of summarizing + clearing.
@@ -42,3 +58,7 @@ Always-on. The mental model for every non-trivial task.
 - **Re-explaining context**: re-sending what's already in memory or the repo;
   put durable facts in `CLAUDE.md`/`rules/`, not repeated prose.
 - **Scope creep in a change**: mixing refactor + feature + fix in one diff.
+- **Wrong plan location**: writing plans to `~/.claude/plans/`, `.cursor/plans/`,
+  or any IDE/harness scratch directory. Those are ephemeral working files — the
+  durable artifact belongs in the repo under `docs/plans/` (via `/save-plan`),
+  `docs/solutions/`, or `docs/architecture-reports/` per the taxonomy above.

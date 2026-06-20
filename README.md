@@ -45,7 +45,7 @@ existing hooks are preserved. Re-running backs up replaced files to `*.bak.<ts>`
 | `references/{go,java,typescript}/` | **Convention guides + linked authorities, read on-demand** (Tier 2) | Go: codebase-derived from app-erp; Java/TS: vendored from recognized sources — see each `README.md` |
 | `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, frontend-architect, feature-investigator, backend-developer, frontend-developer | **Vendored + pinned** (except `backend-architect`/`frontend-architect`/`backend-developer`/`frontend-developer`, authored) — see `agents/SOURCES.md` |
 | `skills/adr/` | `/adr` — record Architecture Decision Records (**MADR 4.0**) | Adopts MADR (see `skills/SOURCES.md`) |
-| `skills/save-plan/` | `/save-plan` — save a plan to `docs/plans/` (or `--temp`) so mermaid renders in an IDE/GitHub | Authored |
+| `skills/save-plan/` | `/save-plan` — persist an **implementation plan** to `docs/plans/` (or `--temp`) so mermaid renders in an IDE/GitHub. Architecture designs → `docs/solutions/`; review reports → `docs/architecture-reports/` (written directly by the relevant agent) | Authored |
 | `skills/go-conventions/` | `/go-conventions [--refresh]` — scan a Go repo and write `.claude/go-conventions.md` (project-specific layer on top of the global baseline) | Authored |
 | `settings.json` | Default model + permissions + official plugins (`enabledPlugins`) | Authored |
 | `mcp.example.json` | Disabled Atlassian/DB scaffolding (opt-in) | Reference config |
@@ -115,8 +115,10 @@ Concrete workflows showing which configs fire together.
 
 **Build a new feature**
 1. `@feature-investigator` → requirements/scope (spec/PRD-lite) before any code.
-2. Plan it — a diagram-rich plan (mermaid), then `/save-plan` to view it rendered
-   in an IDE/GitHub (the terminal can't render mermaid).
+2. Plan it — a diagram-rich plan (mermaid), then `/save-plan` → `docs/plans/`
+   to view it rendered in an IDE/GitHub (the terminal can't render mermaid).
+   TaskCreate a tracked task list from the plan's phased steps so status is
+   visible; TaskUpdate each task as it completes.
 3. Implement — `@backend-developer` and/or `@frontend-developer` write + verify
    the code; Tier-1 `rules/<lang>.md` auto-load per file type and they read the
    vendored `references/<lang>/` guides on demand.
@@ -128,9 +130,11 @@ Concrete workflows showing which configs fire together.
 - `@debugger` for a failing test or stack trace — isolates root cause.
 
 **Make an architecture decision**
-- `@backend-architect` for API/service design or `@frontend-architect` for
-  component/rendering/state design — then `/adr` to record it (MADR) under
-  `docs/adr/`. Use `@architect-reviewer` to evaluate an existing design.
+- `@backend-architect` (API/service) or `@frontend-architect` (component/rendering/state)
+  produce a design doc → saved to `docs/solutions/<date>-<slug>.md`.
+- `@architect-reviewer` evaluates an existing design → saved to
+  `docs/architecture-reports/<date>-<slug>.md`.
+- Record the decision with `/adr` (MADR) under `docs/adr/`.
 
 **Day-to-day coding in Go / Java / TS**
 - Just open the file — language conventions auto-apply (Tier 1) and the reviewer
