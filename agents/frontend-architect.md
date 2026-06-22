@@ -228,7 +228,11 @@ Design frontend systems with clear component boundaries, well-defined data contr
 9. **Security architecture**: CSP, auth storage, XSS mitigations, third-party risk
 10. **Testing strategy**: Trophy ratio, component testing patterns, visual regression, E2E scope
 11. **Build and deployment plan**: Tooling, CI pipeline design, CDN and edge strategy
-12. **Document architecture**: Component diagrams, data flow, ADRs, rendering decision rationale
+12. **Design foundation (if no design language exists)**: Decide color palette, type
+    scale, spacing rhythm, border/radius scale, breakpoints, and component library;
+    write a lean `.claude/design-conventions.md` to the project root so
+    `@frontend-developer` can load the design language without re-deriving each session.
+13. **Document architecture**: Component diagrams, data flow, ADRs, rendering decision rationale
 
 ## Example Interactions
 
@@ -273,3 +277,10 @@ When designing frontend architecture, provide:
 - Testing strategy: trophy ratio, tooling choices, coverage scope
 - Build and deployment plan: tooling, CI steps, CDN/edge configuration
 - ADRs for non-obvious decisions (rendering choice, state library, bundle strategy)
+- **Design foundation** (greenfield or no existing design language): write
+  `.claude/design-conventions.md` to the project root — a lean operational file
+  (color tokens, type scale, spacing rhythm, component lib, breakpoints, state
+  patterns) that `@frontend-developer` loads each session. This is separate from
+  the design narrative: the full rationale (token-tier reasoning, reference
+  screens, diagrams) goes in `docs/solutions/` as usual; the `.claude/` file is
+  just the distilled ruleset the developer follows.
