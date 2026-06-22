@@ -47,6 +47,7 @@ existing hooks are preserved. Re-running backs up replaced files to `*.bak.<ts>`
 | `skills/adr/` | `/adr` — record Architecture Decision Records (**MADR 4.0**) | Adopts MADR (see `skills/SOURCES.md`) |
 | `skills/save-plan/` | `/save-plan` — persist an **implementation plan** to `docs/plans/` (or `--temp`) so mermaid renders in an IDE/GitHub. Architecture designs → `docs/solutions/`; review reports → `docs/architecture-reports/` (written directly by the relevant agent) | Authored |
 | `skills/go-conventions/` | `/go-conventions [--refresh]` — scan a Go repo and write `.claude/go-conventions.md` (project-specific layer on top of the global baseline) | Authored |
+| `skills/design-conventions/` | `/design-conventions [--refresh]` — scan a TS/React project's existing UI layer and write `.claude/design-conventions.md` (visual design language: tokens, type/spacing/color scales, component lib, layout rhythm, state patterns). For greenfield projects, `@frontend-architect` generates this file instead. | Authored |
 | `settings.json` | Default model + permissions + official plugins (`enabledPlugins`) | Authored |
 | `mcp.example.json` | Disabled Atlassian/DB scaffolding (opt-in) | Reference config |
 | `templates/CLAUDE.project.md` | Per-repo memory template | Authored |
@@ -69,6 +70,10 @@ Three ways assets are delivered:
   `README.md`. Not path-scoped; Claude reads them on demand for substantial work.
 - **Per-project — `.claude/go-conventions.md`** in any Go repo. Run
   `/go-conventions` to generate it; `rules/go.md` loads it automatically.
+- **Per-project — `.claude/design-conventions.md`** in any TS/React project. Run
+  `/design-conventions` on an existing project to derive it; for greenfield,
+  `@frontend-architect` generates it. `rules/typescript.md` instructs loading it
+  first for any UI work.
 
 | Stack | In-repo reference | Linked authorities |
 |-------|-------------------|--------------------|
