@@ -7,3 +7,6 @@
 .DS_Store
 *.swp
 .idea/
+
+# Local docs — plans, solutions, and reports are project-local artifacts, not global config
+docs/
