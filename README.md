@@ -43,7 +43,7 @@ existing hooks are preserved. Re-running backs up replaced files to `*.bak.<ts>`
 | `rules/engineering-loop.md` | Always-on plan→verify→commit model + anti-patterns; sets diagram-rich (mermaid) plan/design-doc standards | Authored |
 | `rules/{java,go,typescript}.md` | **Thin auto-loaded pointers** (Tier 1) — route to the references | Authored (routing only, no convention text) |
 | `references/{go,java,typescript}/` | **Convention guides + linked authorities, read on-demand** (Tier 2) | Go: codebase-derived from app-erp; Java/TS: vendored from recognized sources — see each `README.md` |
-| `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, frontend-architect, feature-investigator, backend-developer, frontend-developer | **Vendored + pinned** (except `backend-architect`/`frontend-architect`/`backend-developer`/`frontend-developer`, authored) — see `agents/SOURCES.md` |
+| `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, frontend-architect, ux-designer, feature-investigator, backend-developer, frontend-developer | **Vendored + pinned** (except `backend-architect`/`frontend-architect`/`ux-designer`/`backend-developer`/`frontend-developer`, authored) — see `agents/SOURCES.md` |
 | `skills/adr/` | `/adr` — record Architecture Decision Records (**MADR 4.0**) | Adopts MADR (see `skills/SOURCES.md`) |
 | `skills/save-plan/` | `/save-plan` — persist an **implementation plan** to `docs/plans/` (or `--temp`) so mermaid renders in an IDE/GitHub. Architecture designs → `docs/solutions/`; review reports → `docs/architecture-reports/` (written directly by the relevant agent) | Authored |
 | `skills/go-conventions/` | `/go-conventions [--refresh]` — scan a Go repo and write `.claude/go-conventions.md` (project-specific layer on top of the global baseline) | Authored |
@@ -109,6 +109,9 @@ Delegate isolated work to keep your main context clean:
 `@code-reviewer` (also checks convention adherence), `@debugger`,
 `@architect-reviewer`, `@backend-architect` (up-front API/service design only),
 `@frontend-architect` (up-front component/rendering/state design only),
+`@ux-designer` (user flows, journey maps, IA, wireframes, interaction specs, and
+usability audits — reads the project's design system, bridges UX to UI patterns,
+defers component/token/a11y architecture to `@frontend-architect`),
 `@feature-investigator` (investigate a feature/product request before building →
 spec/PRD-lite), and the implementation agents `@backend-developer` (Go ·
 Java/Spring) and `@frontend-developer` (TS/React/Next/RN) — senior craftsmen that
@@ -120,14 +123,19 @@ Concrete workflows showing which configs fire together.
 
 **Build a new feature**
 1. `@feature-investigator` → requirements/scope (spec/PRD-lite) before any code.
-2. Plan it — a diagram-rich plan (mermaid), then `/save-plan` → `docs/plans/`
+2. `@ux-designer` → user flows, journey map, IA, wireframes, state matrix, and
+   interaction specs. Reads `.claude/design-conventions.md`; flags design system
+   gaps for `@frontend-architect`.
+3. `@frontend-architect` → component/rendering/state architecture informed by the
+   UX spec; resolves any design system gaps flagged by `@ux-designer`.
+4. Plan it — a diagram-rich plan (mermaid), then `/save-plan` → `docs/plans/`
    to view it rendered in an IDE/GitHub (the terminal can't render mermaid).
    TaskCreate a tracked task list from the plan's phased steps so status is
    visible; TaskUpdate each task as it completes.
-3. Implement — `@backend-developer` and/or `@frontend-developer` write + verify
+5. Implement — `@backend-developer` and/or `@frontend-developer` write + verify
    the code; Tier-1 `rules/<lang>.md` auto-load per file type and they read the
    vendored `references/<lang>/` guides on demand.
-4. `@code-reviewer` → checks correctness, security, *and* adherence to the
+6. `@code-reviewer` → checks correctness, security, *and* adherence to the
    vendored conventions (file:line violations).
 
 **Review or debug existing code**
@@ -196,6 +204,7 @@ prevented) and Sonnet's strong, cheaper execution against your rules.
 | `architect-reviewer` | `opus` | High-value, infrequent design judgment |
 | `backend-architect` | `opus` | Design decisions prevent downstream rework |
 | `frontend-architect` | `opus` | Rendering/state/component design — same rationale as backend-architect |
+| `ux-designer` | `opus` | UX flow/journey/usability design — design-tier, upstream of frontend-architect |
 | `code-reviewer` | `opus` | A strong reviewer = less *manual* review for you |
 | `backend-developer` | `sonnet` | Implementation/execution — fast + cheap against the conventions |
 | `frontend-developer` | `sonnet` | Implementation/execution — fast + cheap against the conventions |
