@@ -1,0 +1,39 @@
+name: New agent or rule request
+description: Suggest a new subagent, language rule, or skill
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: pain
+    attributes:
+      label: What pain does this remove?
+      description: Describe the concrete problem — no speculative tooling.
+    validations:
+      required: true
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options:
+        - Subagent
+        - Language rule (Tier 1 pointer)
+        - Language convention guide (Tier 2 reference)
+        - Skill / slash command
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Describe the agent/rule/skill and its scope. Link any source or prior art.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I checked that a similar agent/rule doesn't already exist
+          required: true
+        - label: This has a concrete, present use case (not speculative)
+          required: true

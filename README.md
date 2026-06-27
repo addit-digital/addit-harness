@@ -19,6 +19,21 @@ hand-roll what already exists. The repo is a thin **curation + config layer**, n
 a pile of bespoke skills. It deliberately reuses Claude Code's built-ins
 (`/code-review`, `/simplify`, `/verify`, `/run`, `/init`, `deep-research`).
 
+## Why this config?
+
+**Without it:** Claude Code starts as a blank slate — no engineering loop, no conventions, no subagents. You either wing it session to session or spend hours wiring up memory, rules, and delegation yourself, then rebuild it on every machine.
+
+**With it:** one command gives you a reproducible, opinionated starting point:
+
+| | Blank slate | This config |
+|---|---|---|
+| Engineering process | Ad-hoc | plan→verify→commit loop baked in |
+| Language conventions | Manual context injection every session | Auto-load per file type (Go · Java · TS) |
+| Code review | Ask Claude to review | `@code-reviewer` enforces the conventions with file:line citations |
+| Complex work | Monolithic context | Delegate to specialized subagents; main context stays clean |
+| Design work | Describe and hope | `@ux-designer` → `@figma-designer` → `@frontend-architect` pipeline |
+| New machine | Redo everything | `./install.sh` |
+
 ## Install
 
 ```bash
@@ -125,6 +140,28 @@ design clean structures, write tests, and verify code against the conventions.
 Concrete workflows showing which configs fire together.
 
 **Build a new feature**
+
+```mermaid
+flowchart LR
+  FI["@feature-investigator\nspec / PRD-lite"]
+  UX["@ux-designer\nflows · wireframes · IA"]
+  FG["@figma-designer *(optional)*\nFigma frames + tokens"]
+  FA["@frontend-architect\ncomponent architecture"]
+  SP["/save-plan → docs/plans/\nTaskCreate tracked steps"]
+  BD["@backend-developer"]
+  FE["@frontend-developer"]
+  CR["@code-reviewer\nconventions + security"]
+
+  FI --> UX
+  UX --> FG
+  UX --> FA
+  FG --> FA
+  FA --> SP
+  SP --> BD & FE
+  BD --> CR
+  FE --> CR
+```
+
 1. `@feature-investigator` → requirements/scope (spec/PRD-lite) before any code.
 2. `@ux-designer` → user flows, journey map, IA, wireframes, state matrix, and
    interaction specs. Reads `.claude/design-conventions.md`; flags design system
@@ -250,6 +287,15 @@ Both Atlassian and database MCP are intentionally **off** for now. To enable:
 - **Atlassian Data Center:** community `sooperset/mcp-atlassian` (token/PAT).
 - **Postgres:** `crystaldba/postgres-mcp` (read-only by default).
 - **MySQL:** `benborla/mcp-server-mysql` or `designcomputer/mysql_mcp_server`.
+
+## Roadmap
+
+See [open issues](https://github.com/addit-digital/claude-config/issues?q=label%3Aroadmap) for planned work. Candidates:
+
+- `/design-review` skill — audit a `docs/solutions/` design doc against the project's conventions
+- `@security-reviewer` subagent — dedicated security-focused review pass
+
+Contributions welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md). Issues labeled [`good first issue`](https://github.com/addit-digital/claude-config/issues?q=label%3A%22good+first+issue%22) are a good entry point.
 
 ## Extending
 
