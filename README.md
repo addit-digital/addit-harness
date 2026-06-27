@@ -43,7 +43,7 @@ existing hooks are preserved. Re-running backs up replaced files to `*.bak.<ts>`
 | `rules/engineering-loop.md` | Always-on plan→verify→commit model + anti-patterns; sets diagram-rich (mermaid) plan/design-doc standards | Authored |
 | `rules/{java,go,typescript}.md` | **Thin auto-loaded pointers** (Tier 1) — route to the references | Authored (routing only, no convention text) |
 | `references/{go,java,typescript}/` | **Convention guides + linked authorities, read on-demand** (Tier 2) | Go: codebase-derived from app-erp; Java/TS: vendored from recognized sources — see each `README.md` |
-| `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, frontend-architect, ux-designer, feature-investigator, backend-developer, frontend-developer | **Vendored + pinned** (except `backend-architect`/`frontend-architect`/`ux-designer`/`backend-developer`/`frontend-developer`, authored) — see `agents/SOURCES.md` |
+| `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, frontend-architect, ux-designer, figma-designer, feature-investigator, backend-developer, frontend-developer | **Vendored + pinned** (except `backend-architect`/`frontend-architect`/`ux-designer`/`figma-designer`/`backend-developer`/`frontend-developer`, authored) — see `agents/SOURCES.md` |
 | `skills/adr/` | `/adr` — record Architecture Decision Records (**MADR 4.0**) | Adopts MADR (see `skills/SOURCES.md`) |
 | `skills/save-plan/` | `/save-plan` — persist an **implementation plan** to `docs/plans/` (or `--temp`) so mermaid renders in an IDE/GitHub. Architecture designs → `docs/solutions/`; review reports → `docs/architecture-reports/` (written directly by the relevant agent) | Authored |
 | `skills/go-conventions/` | `/go-conventions [--refresh]` — scan a Go repo and write `.claude/go-conventions.md` (project-specific layer on top of the global baseline) | Authored |
@@ -112,6 +112,9 @@ Delegate isolated work to keep your main context clean:
 `@ux-designer` (user flows, journey maps, IA, wireframes, interaction specs, and
 usability audits — reads the project's design system, bridges UX to UI patterns,
 defers component/token/a11y architecture to `@frontend-architect`),
+`@figma-designer` (materializes UX specs into Figma frames, components, auto-
+layout, variables, and tokens via the official Figma MCP — composes downstream of
+`@ux-designer`; requires `figma@claude-plugins-official` plugin),
 `@feature-investigator` (investigate a feature/product request before building →
 spec/PRD-lite), and the implementation agents `@backend-developer` (Go ·
 Java/Spring) and `@frontend-developer` (TS/React/Next/RN) — senior craftsmen that
@@ -125,9 +128,13 @@ Concrete workflows showing which configs fire together.
 1. `@feature-investigator` → requirements/scope (spec/PRD-lite) before any code.
 2. `@ux-designer` → user flows, journey map, IA, wireframes, state matrix, and
    interaction specs. Reads `.claude/design-conventions.md`; flags design system
-   gaps for `@frontend-architect`.
-3. `@frontend-architect` → component/rendering/state architecture informed by the
-   UX spec; resolves any design system gaps flagged by `@ux-designer`.
+   gaps for `@frontend-architect`. Saves spec to `docs/solutions/`.
+3. `@figma-designer` *(optional)* → materializes the UX spec into Figma frames,
+   components, auto-layout, and tokens via the official Figma MCP. Requires the
+   Figma plugin + MCP connected (see *Enabling MCP*).
+4. `@frontend-architect` → component/rendering/state architecture informed by the
+   UX spec; resolves any design system gaps flagged by `@ux-designer` or
+   `@figma-designer`.
 4. Plan it — a diagram-rich plan (mermaid), then `/save-plan` → `docs/plans/`
    to view it rendered in an IDE/GitHub (the terminal can't render mermaid).
    TaskCreate a tracked task list from the plan's phased steps so status is
@@ -205,6 +212,7 @@ prevented) and Sonnet's strong, cheaper execution against your rules.
 | `backend-architect` | `opus` | Design decisions prevent downstream rework |
 | `frontend-architect` | `opus` | Rendering/state/component design — same rationale as backend-architect |
 | `ux-designer` | `opus` | UX flow/journey/usability design — design-tier, upstream of frontend-architect |
+| `figma-designer` | `sonnet` | Figma execution — materializes specs into Figma via MCP; execution-tier like developer agents |
 | `code-reviewer` | `opus` | A strong reviewer = less *manual* review for you |
 | `backend-developer` | `sonnet` | Implementation/execution — fast + cheap against the conventions |
 | `frontend-developer` | `sonnet` | Implementation/execution — fast + cheap against the conventions |
@@ -237,6 +245,7 @@ Both Atlassian and database MCP are intentionally **off** for now. To enable:
    never commit them.
 3. Restart Claude Code; check with `/mcp`.
 
+- **Figma (official plugin — recommended):** run `./install.sh --plugins` (already adds `figma@claude-plugins-official`). Open any Figma file → authorise Claude Code in the plugin panel → OAuth completes → `/mcp` confirms the Figma server is connected. Write-to-canvas is in beta and will become usage-based/paid — confirm your plan covers cost before running `@figma-designer` for large tasks. See `mcp.example.json` → `figma_OFFICIAL` for the manual MCP-only path and `figma_COMMUNITY_ALTERNATIVE` for the free-plan plugin-bridge option.
 - **Atlassian Cloud:** `claude mcp add --transport http atlassian https://mcp.atlassian.com/v1/mcp` (official Rovo server, OAuth).
 - **Atlassian Data Center:** community `sooperset/mcp-atlassian` (token/PAT).
 - **Postgres:** `crystaldba/postgres-mcp` (read-only by default).
