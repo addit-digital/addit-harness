@@ -17,6 +17,7 @@ Retrieved: 2026-06-18.
 | `backend-developer.md` | **Authored** (not vendored) | — | — | Backend implementation agent: a senior backend engineer + software craftsman (Go · Java/Spring) that designs clean structures, writes test cases, and verifies code following this setup's `references/{go,java}/` guides and `rules/{go,java}.md`. Authored because there was no implementation agent to adopt and the closest upstream candidate couldn't be copied verbatim through available tooling. Body aligns with `CLAUDE.md` hard rules + the engineering loop; `model: sonnet` for fast execution. |
 | `frontend-developer.md` | **Authored** (not vendored) | — | — | Frontend implementation agent: a senior frontend engineer + software craftsman (TS/React/Next/RN) that designs clean component structures, writes test cases, and verifies code following `references/typescript/` and `rules/typescript.md`. Authored for the same reasons as `backend-developer`; `model: sonnet`. To swap either to a vendored copy later, re-fetch the upstream file at a pinned commit, append a "Project convention adherence" section like `code-reviewer`, and update this row. |
 | `ux-designer.md` | **Authored (blended)** — lifts journey mapping, usability heuristics, and persona sections from [VoltAgent/awesome-claude-code-subagents](https://github.com/VoltAgent/awesome-claude-code-subagents) `categories/08-business-product/ux-researcher.md` and interaction/state-design patterns from `categories/01-core-development/ui-designer.md`, both at pinned commit `5983fe3b4ea2785335ac1712c4aa1ac4e13a8fa2` | — | Authored because no single upstream agent covers the UX flow layer (flows/journeys/IA/wireframes/usability audits + UI-pattern advisory) without heavily duplicating the existing `frontend-architect`. Follows the architect skeleton (`model: opus`, no `tools` key, saves to `docs/solutions/`). Scope: consumes `.claude/design-conventions.md`; defers token/component/ARIA architecture to `@frontend-architect`. |
+| `figma-designer.md` | **Authored** (not vendored) | — | — | Figma execution agent: materializes UX specs and design-system conventions into Figma frames, components, auto-layout, variables, and tokens via the official Figma MCP server (`mcp.figma.com`). Authored because no upstream agent drives Figma write-to-canvas; composes downstream of `@ux-designer`. `model: sonnet` (execution-tier); `tools: Read, Glob, Grep` (focused executor — MCP tools are additive from the connected Figma server). Requires `figma@claude-plugins-official` plugin + Figma remote MCP connected. |
 
 ## Subagent model routing
 Models are tuned for cost/quality (see README → Model & cost): `code-reviewer`
@@ -24,8 +25,9 @@ and `architect-reviewer` = `opus` (upstream), `backend-architect` = `opus`
 (changed from `inherit`), `debugger` = `sonnet` (upstream), `feature-investigator`
 = `sonnet` (upstream), `backend-developer` and `frontend-developer` = `sonnet`
 (authored), `ux-designer` = `opus` (authored — design-tier, same rationale as
-architects). Override any of these by editing the `model:` field, or
-globally via `CLAUDE_CODE_SUBAGENT_MODEL`.
+architects), `figma-designer` = `sonnet` (authored — execution-tier, same
+rationale as developer agents). Override any of these by editing the `model:`
+field, or globally via `CLAUDE_CODE_SUBAGENT_MODEL`.
 
 ## Notes
 - Both source repos track `main` with no tagged releases — that's why we vendor

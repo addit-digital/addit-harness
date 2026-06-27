@@ -89,7 +89,7 @@ if [[ "$DO_PLUGINS" == "1" ]]; then
     echo "Registering marketplaces + installing official plugins..."
     claude plugin marketplace add anthropics/skills || true
     for p in gopls-lsp jdtls-lsp typescript-lsp pr-review-toolkit \
-             commit-commands security-guidance; do
+             commit-commands security-guidance figma; do
       claude plugin install "$p@claude-plugins-official" || true
     done
     claude plugin install document-skills@anthropic-agent-skills || true
