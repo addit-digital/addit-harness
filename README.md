@@ -6,12 +6,17 @@
 ![Java](https://img.shields.io/badge/Java-ED8B00?logo=openjdk&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
 
-Claude Code's out-of-the-box global config is a blank slate. This repo gives you a battle-tested starting point for backend engineers: language conventions that auto-load per file type, specialized subagents (architect, reviewer, debugger, developer), a plan→verify→commit engineering loop baked into the system prompt, and a one-line install. Philosophy: curate established assets and adapt them — don't hand-roll what already exists.
+Claude Code's out-of-the-box global config is a blank slate. This repo turns it into a **full digital product development kit** — covering every layer from idea to ship: legal compliance, UX design, architecture, implementation in Go · Java · TypeScript, and code review, all wired into a plan→verify→commit engineering loop. One-line install. Philosophy: curate established assets and adapt them — don't hand-roll what already exists.
 
 ---
 
-My personal, global [Claude Code](https://code.claude.com) configuration for
-Java / Go / TypeScript backend & distributed-systems work.
+A global [Claude Code](https://code.claude.com) configuration that covers the full
+digital product development loop — from idea investigation and legal compliance
+through UX design, backend/frontend architecture, and implementation in
+Go · Java/Spring · TypeScript/React/Next.js, to code review and debugging.
+Built for **SaaS founders and product engineers** who own the full feature
+lifecycle and want every layer of that loop to have an opinionated, specialized
+subagent behind it.
 
 **Philosophy:** adopt established, well-known assets (the official plugin
 marketplace + reputable community collections) and adapt/pin them — don't
@@ -28,10 +33,11 @@ a pile of bespoke skills. It deliberately reuses Claude Code's built-ins
 | | Blank slate | This config |
 |---|---|---|
 | Engineering process | Ad-hoc | plan→verify→commit loop baked in |
+| Legal compliance | Manual check (or skipped) before shipping | `@saas-legal-advisor` assesses impact of every feature change; drafts/reviews T&C, Privacy Policy, cookie policies, DPAs |
 | Language conventions | Manual context injection every session | Auto-load per file type (Go · Java · TS) |
 | Code review | Ask Claude to review | `@code-reviewer` enforces the conventions with file:line citations |
 | Complex work | Monolithic context | Delegate to specialized subagents; main context stays clean |
-| Design work | Describe and hope | `@ux-designer` → `@figma-designer` → `@frontend-architect` pipeline |
+| UX & design | Describe and hope | `@ux-designer` → `@figma-designer` → `@frontend-architect` pipeline |
 | New machine | Redo everything | `./install.sh` |
 
 ## Install
@@ -58,7 +64,7 @@ existing hooks are preserved. Re-running backs up replaced files to `*.bak.<ts>`
 | `rules/engineering-loop.md` | Always-on plan→verify→commit model + anti-patterns; sets diagram-rich (mermaid) plan/design-doc standards | Authored |
 | `rules/{java,go,typescript}.md` | **Thin auto-loaded pointers** (Tier 1) — route to the references | Authored (routing only, no convention text) |
 | `references/{go,java,typescript}/` | **Convention guides + linked authorities, read on-demand** (Tier 2) | Go: codebase-derived from app-erp; Java/TS: vendored from recognized sources — see each `README.md` |
-| `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, frontend-architect, ux-designer, figma-designer, feature-investigator, backend-developer, frontend-developer | **Vendored + pinned** (except `backend-architect`/`frontend-architect`/`ux-designer`/`figma-designer`/`backend-developer`/`frontend-developer`, authored) — see `agents/SOURCES.md` |
+| `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, frontend-architect, ux-designer, figma-designer, feature-investigator, backend-developer, frontend-developer, saas-legal-advisor | **Vendored + pinned** (except `backend-architect`/`frontend-architect`/`ux-designer`/`figma-designer`/`backend-developer`/`frontend-developer`/`saas-legal-advisor`, authored) — see `agents/SOURCES.md` |
 | `skills/adr/` | `/adr` — record Architecture Decision Records (**MADR 4.0**) | Adopts MADR (see `skills/SOURCES.md`) |
 | `skills/save-plan/` | `/save-plan` — persist an **implementation plan** to `docs/plans/` (or `--temp`) so mermaid renders in an IDE/GitHub. Architecture designs → `docs/solutions/`; review reports → `docs/architecture-reports/` (written directly by the relevant agent) | Authored |
 | `skills/go-conventions/` | `/go-conventions [--refresh]` — scan a Go repo and write `.claude/go-conventions.md` (project-specific layer on top of the global baseline) | Authored |
@@ -131,9 +137,14 @@ defers component/token/a11y architecture to `@frontend-architect`),
 layout, variables, and tokens via the official Figma MCP — composes downstream of
 `@ux-designer`; requires `figma@claude-plugins-official` plugin),
 `@feature-investigator` (investigate a feature/product request before building →
-spec/PRD-lite), and the implementation agents `@backend-developer` (Go ·
-Java/Spring) and `@frontend-developer` (TS/React/Next/RN) — senior craftsmen that
-design clean structures, write tests, and verify code against the conventions.
+spec/PRD-lite), `@saas-legal-advisor` (SaaS-specialized legal advisor — assesses
+legal impact of product changes, drafts and reviews privacy policies, T&C, cookie
+policies, DPAs, and other compliance docs; reads the project's declared primary
+jurisdiction from `CLAUDE.md`; use proactively whenever a feature touches user
+data, payments, third-party integrations, or account types), and the implementation
+agents `@backend-developer` (Go · Java/Spring) and `@frontend-developer`
+(TS/React/Next/RN) — senior craftsmen that design clean structures, write tests,
+and verify code against the conventions.
 
 ## Use cases
 
@@ -144,6 +155,7 @@ Concrete workflows showing which configs fire together.
 ```mermaid
 flowchart LR
   FI["@feature-investigator\nspec / PRD-lite"]
+  LA["@saas-legal-advisor *(if data/payments/integrations)*\nlegal impact → doc updates"]
   UX["@ux-designer\nflows · wireframes · IA"]
   FG["@figma-designer *(optional)*\nFigma frames + tokens"]
   FA["@frontend-architect\ncomponent architecture"]
@@ -152,7 +164,9 @@ flowchart LR
   FE["@frontend-developer"]
   CR["@code-reviewer\nconventions + security"]
 
+  FI --> LA
   FI --> UX
+  LA --> SP
   UX --> FG
   UX --> FA
   FG --> FA
@@ -163,23 +177,28 @@ flowchart LR
 ```
 
 1. `@feature-investigator` → requirements/scope (spec/PRD-lite) before any code.
-2. `@ux-designer` → user flows, journey map, IA, wireframes, state matrix, and
+2. `@saas-legal-advisor` *(if the feature touches user data, payments, third-party
+   integrations, or account types)* → runs in parallel with UX design; produces an
+   impact table (Critical/Important/Advisory) and drafts updated legal clauses.
+   Saves assessment to `docs/legal/`. Legal doc updates must ship before or with
+   the feature — not after.
+3. `@ux-designer` → user flows, journey map, IA, wireframes, state matrix, and
    interaction specs. Reads `.claude/design-conventions.md`; flags design system
    gaps for `@frontend-architect`. Saves spec to `docs/solutions/`.
-3. `@figma-designer` *(optional)* → materializes the UX spec into Figma frames,
+4. `@figma-designer` *(optional)* → materializes the UX spec into Figma frames,
    components, auto-layout, and tokens via the official Figma MCP. Requires the
    Figma plugin + MCP connected (see *Enabling MCP*).
-4. `@frontend-architect` → component/rendering/state architecture informed by the
+5. `@frontend-architect` → component/rendering/state architecture informed by the
    UX spec; resolves any design system gaps flagged by `@ux-designer` or
    `@figma-designer`.
-4. Plan it — a diagram-rich plan (mermaid), then `/save-plan` → `docs/plans/`
+6. Plan it — a diagram-rich plan (mermaid), then `/save-plan` → `docs/plans/`
    to view it rendered in an IDE/GitHub (the terminal can't render mermaid).
    TaskCreate a tracked task list from the plan's phased steps so status is
    visible; TaskUpdate each task as it completes.
-5. Implement — `@backend-developer` and/or `@frontend-developer` write + verify
+7. Implement — `@backend-developer` and/or `@frontend-developer` write + verify
    the code; Tier-1 `rules/<lang>.md` auto-load per file type and they read the
    vendored `references/<lang>/` guides on demand.
-6. `@code-reviewer` → checks correctness, security, *and* adherence to the
+8. `@code-reviewer` → checks correctness, security, *and* adherence to the
    vendored conventions (file:line violations).
 
 **Review or debug existing code**
@@ -192,6 +211,33 @@ flowchart LR
 - `@architect-reviewer` evaluates an existing design → saved to
   `docs/architecture-reports/<date>-<slug>.md`.
 - Record the decision with `/adr` (MADR) under `docs/adr/`.
+
+**Assess legal impact before shipping a feature**
+- Before a feature that touches user data, payments, or third-party services ships,
+  invoke `@saas-legal-advisor` with the feature description or PR diff.
+- It produces an impact table (Critical / Important / Advisory) mapping each change
+  to the specific legal document and clause affected, then drafts the updated clause(s).
+- Output saved to `docs/legal/<date>-<slug>.md`. Update the live documents before
+  or alongside the feature — never after.
+
+```
+@saas-legal-advisor "We're adding Stripe Connect, storing payment method tokens,
+and sending transactional emails via Resend — what needs to change in our legal docs?"
+```
+
+**Review or draft legal documents**
+- Audit an existing doc for regulatory gaps, staleness, or cross-document inconsistencies:
+  `@saas-legal-advisor "Audit our Privacy Policy against current GDPR requirements"`
+- Draft a new document from scratch:
+  `@saas-legal-advisor "Write a Data Processing Agreement for enterprise customers"`
+- The agent reads the project's `CLAUDE.md` for the declared primary jurisdiction and
+  applies that framework first. Add secondary jurisdictions (e.g. GDPR for EU users)
+  in your request or in `CLAUDE.md`.
+
+**New third-party integration**
+- Any new SDK, API, or analytics tool is a legal event — it introduces a new data
+  processor and may require cookie consent, privacy policy updates, or DPA amendments.
+- Ask `@saas-legal-advisor` with the integration name before the code ships.
 
 **Day-to-day coding in Go / Java / TS**
 - Just open the file — language conventions auto-apply (Tier 1) and the reviewer
@@ -255,6 +301,7 @@ prevented) and Sonnet's strong, cheaper execution against your rules.
 | `frontend-developer` | `sonnet` | Implementation/execution — fast + cheap against the conventions |
 | `debugger` | `sonnet` | Iterative; escalate with `/model` if stuck |
 | `feature-investigator` | `sonnet` | Requirements/spec investigation (upstream default) |
+| `saas-legal-advisor` | `opus` | Legal reasoning + compliance assessment — high-stakes advisory; wrong guidance is costly |
 
 Future mechanical agents (test-runners, formatters) should use `haiku`. Override
 all subagents at once with `CLAUDE_CODE_SUBAGENT_MODEL`.

@@ -18,6 +18,7 @@ Retrieved: 2026-06-18.
 | `frontend-developer.md` | **Authored** (not vendored) | — | — | Frontend implementation agent: a senior frontend engineer + software craftsman (TS/React/Next/RN) that designs clean component structures, writes test cases, and verifies code following `references/typescript/` and `rules/typescript.md`. Authored for the same reasons as `backend-developer`; `model: sonnet`. To swap either to a vendored copy later, re-fetch the upstream file at a pinned commit, append a "Project convention adherence" section like `code-reviewer`, and update this row. |
 | `ux-designer.md` | **Authored (blended)** — lifts journey mapping, usability heuristics, and persona sections from [VoltAgent/awesome-claude-code-subagents](https://github.com/VoltAgent/awesome-claude-code-subagents) `categories/08-business-product/ux-researcher.md` and interaction/state-design patterns from `categories/01-core-development/ui-designer.md`, both at pinned commit `5983fe3b4ea2785335ac1712c4aa1ac4e13a8fa2` | — | Authored because no single upstream agent covers the UX flow layer (flows/journeys/IA/wireframes/usability audits + UI-pattern advisory) without heavily duplicating the existing `frontend-architect`. Follows the architect skeleton (`model: opus`, no `tools` key, saves to `docs/solutions/`). Scope: consumes `.claude/design-conventions.md`; defers token/component/ARIA architecture to `@frontend-architect`. |
 | `figma-designer.md` | **Authored** (not vendored) | — | — | Figma execution agent: materializes UX specs and design-system conventions into Figma frames, components, auto-layout, variables, and tokens via the official Figma MCP server (`mcp.figma.com`). Authored because no upstream agent drives Figma write-to-canvas; composes downstream of `@ux-designer`. `model: sonnet` (execution-tier); `tools: Read, Glob, Grep` (focused executor — MCP tools are additive from the connected Figma server). Requires `figma@claude-plugins-official` plugin + Figma remote MCP connected. |
+| `saas-legal-advisor.md` | **Authored (blended)** — lifts focus areas, key regulations, and document types from [wshobson/agents](https://github.com/wshobson/agents) `plugins/hr-legal-compliance/agents/legal-advisor.md` at pinned commit `56848874a27cf0812b20a067ff3cf4eb8e0a7858` | — | `name` changed from `legal-advisor` to `saas-legal-advisor`; `model` changed from `sonnet` to `opus` (advisory-tier, same rationale as `architect-reviewer` and `ux-designer`); `tools` extended with `WebFetch, WebSearch` for regulatory research; body significantly augmented with: (1) Change Impact Analysis — the core gap no upstream agent covers: given a feature/PR/integration, identify which legal docs and clauses need updating, rate severity, and draft the updated clauses; (2) Document Review & Gap Analysis section; (3) SaaS-Specific Clauses section; (4) Workflow Position within this setup; (5) structured output format with impact tables and gap analysis tables; (6) `docs/legal/` output folder convention. |
 
 ## Subagent model routing
 Models are tuned for cost/quality (see README → Model & cost): `code-reviewer`
@@ -26,8 +27,10 @@ and `architect-reviewer` = `opus` (upstream), `backend-architect` = `opus`
 = `sonnet` (upstream), `backend-developer` and `frontend-developer` = `sonnet`
 (authored), `ux-designer` = `opus` (authored — design-tier, same rationale as
 architects), `figma-designer` = `sonnet` (authored — execution-tier, same
-rationale as developer agents). Override any of these by editing the `model:`
-field, or globally via `CLAUDE_CODE_SUBAGENT_MODEL`.
+rationale as developer agents), `saas-legal-advisor` = `opus` (authored — advisory-tier;
+legal reasoning and compliance assessment are high-stakes and benefit from strongest
+synthesis). Override any of these by editing the `model:` field, or globally via
+`CLAUDE_CODE_SUBAGENT_MODEL`.
 
 ## Notes
 - Both source repos track `main` with no tagged releases — that's why we vendor
