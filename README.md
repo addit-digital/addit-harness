@@ -13,7 +13,8 @@ Claude Code's out-of-the-box global config is a blank slate. This repo turns it 
 A global [Claude Code](https://code.claude.com) configuration that covers the full
 digital product development loop — from idea investigation and legal compliance
 through UX design, backend/frontend architecture, and implementation in
-Go · Java/Spring · TypeScript/React/Next.js, to code review and debugging.
+Go · Java/Spring · TypeScript (Bun backend · React/Next.js frontend), to code
+review and debugging.
 Built for **SaaS founders and product engineers** who own the full feature
 lifecycle and want every layer of that loop to have an opinionated, specialized
 subagent behind it.
@@ -142,9 +143,9 @@ legal impact of product changes, drafts and reviews privacy policies, T&C, cooki
 policies, DPAs, and other compliance docs; reads the project's declared primary
 jurisdiction from `CLAUDE.md`; use proactively whenever a feature touches user
 data, payments, third-party integrations, or account types), and the implementation
-agents `@backend-developer` (Go · Java/Spring) and `@frontend-developer`
-(TS/React/Next/RN) — senior craftsmen that design clean structures, write tests,
-and verify code against the conventions.
+agents `@backend-developer` (Go · Java/Spring · TypeScript/Bun) and
+`@frontend-developer` (TS/React/Next/RN) — senior craftsmen that design clean
+structures, write tests, and verify code against the conventions.
 
 ## Use cases
 
