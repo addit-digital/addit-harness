@@ -157,6 +157,7 @@ Design backend systems with clear boundaries, well-defined contracts, and resili
 ### Framework & Technology Expertise
 
 - **Node.js**: Express, NestJS, Fastify, Koa, async patterns
+- **Bun**: Elysia, Hono, native `Bun.serve`, `bun test`
 - **Python**: FastAPI, Django, Flask, async/await, ASGI
 - **Java**: Spring Boot, Micronaut, Quarkus, reactive patterns
 - **Go**: Gin, Echo, Chi, goroutines, channels
