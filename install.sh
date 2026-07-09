@@ -19,6 +19,7 @@ CLAUDE_DIR="${CLAUDE_HOME:-$HOME/.claude}"
 MODE="copy"
 DO_PLUGINS=0
 STAMP="$(date +%Y%m%d-%H%M%S)"
+BACKUP_DIR="$CLAUDE_DIR/.install-backups/$STAMP"
 
 for arg in "$@"; do
   case "$arg" in
@@ -37,10 +38,15 @@ info() { printf '  %s\n' "$1"; }
 place_file() {
   local src="$1" dest="$2"
   mkdir -p "$(dirname "$dest")"
-  # If a real (non-symlink) file is in the way, back it up once.
+  # If a real (non-symlink) file is in the way, back it up once, into
+  # BACKUP_DIR (mirroring its path under CLAUDE_DIR) rather than cluttering
+  # the destination directory with a sibling .bak file.
   if [[ -e "$dest" && ! -L "$dest" ]]; then
-    cp -p "$dest" "$dest.bak.$STAMP"
-    info "backed up existing $dest -> $dest.bak.$STAMP"
+    local rel="${dest#"$CLAUDE_DIR"/}"
+    local backup_dest="$BACKUP_DIR/$rel"
+    mkdir -p "$(dirname "$backup_dest")"
+    cp -p "$dest" "$backup_dest"
+    info "backed up existing $dest -> $backup_dest"
   fi
   rm -f "$dest"
   if [[ "$MODE" == "link" ]]; then
@@ -76,8 +82,11 @@ place_dir  "$REPO_DIR/skills"     "$CLAUDE_DIR/skills"
 echo "Files installed."
 echo
 echo "Notes:"
+if [[ -d "$BACKUP_DIR" ]]; then
+  info "Existing files that were overwritten are backed up under $BACKUP_DIR."
+fi
 info "settings.json was replaced (old one backed up). If you had custom"
-info "permissions/hooks, merge them back from the .bak file."
+info "permissions/hooks, merge them back from $BACKUP_DIR/settings.json."
 info "MCP is intentionally NOT installed. To enable Atlassian/DB later, copy an"
 info "entry from mcp.example.json into $CLAUDE_DIR/.mcp.json and put secrets in"
 info "$CLAUDE_DIR/mcp.local.json (gitignored). See README 'Enabling MCP'."
