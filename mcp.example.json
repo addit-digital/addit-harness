@@ -65,5 +65,61 @@
       "MYSQL_PASSWORD": "<keep in mcp.local.json>",
       "MYSQL_DATABASE": "dbname"
     }
+  },
+
+  "aws_OFFICIAL": {
+    "_about": "Official AWS Labs MCP servers (awslabs/mcp, 9k+ stars). aws-api covers general AWS API access (EC2, S3, IAM, etc.); auth via your existing AWS credentials (~/.aws/credentials or env vars) — no separate token needed. Used by @cloud-architect and @devops-engineer. Add more servers from the same repo (aws-documentation, aws-pricing, aws-cost-explorer, ...) as needed.",
+    "command": "uvx",
+    "args": ["awslabs.aws-api-mcp-server@latest"]
+  },
+
+  "aws_iac_OPTIONAL": {
+    "_about": "Companion to aws_OFFICIAL — Infrastructure-as-Code focused AWS MCP server (CloudFormation/CDK generation and validation). Same auth as aws_OFFICIAL.",
+    "command": "uvx",
+    "args": ["awslabs.aws-iac-mcp-server@latest"]
+  },
+
+  "azure_OFFICIAL": {
+    "_about": "Official Azure MCP Server (Microsoft, developed at github.com/microsoft/mcp — the older Azure/azure-mcp repo is archived). Auth via `az login` (reuses your Azure CLI session) or environment-based service principal credentials.",
+    "command": "npx",
+    "args": ["-y", "@azure/mcp@latest", "server", "start"]
+  },
+
+  "gcp_NO_OFFICIAL_SERVER": {
+    "_about": "No unified official Google Cloud MCP server exists as of this writing. Closest options are narrowly scoped: GoogleCloudPlatform/cloud-run-mcp (Cloud Run only) and GoogleCloudPlatform/gke-mcp (GKE only) — add one of those manually if your work is scoped to just that service. Otherwise @cloud-architect/@devops-engineer fall back to the `gcloud` CLI directly via Bash.",
+    "_disabled": true
+  },
+
+  "digitalocean_OFFICIAL": {
+    "_about": "Official DigitalOcean Labs MCP server (digitalocean-labs/mcp-digitalocean — the older digitalocean/digitalocean-mcp repo is archived and redirects here). --services accepts a comma-separated list; shown here scoped to compute/infra-relevant services — add genai-* or insights if needed.",
+    "command": "npx",
+    "args": ["@digitalocean/mcp", "--services", "apps,droplets,doks,docr,databases,accounts"],
+    "env": {
+      "DIGITALOCEAN_API_TOKEN": "<token — keep in mcp.local.json>"
+    }
+  },
+
+  "terraform_OFFICIAL": {
+    "_about": "Official HashiCorp Terraform MCP server. Runs as a Docker container — requires Docker installed and running. TFE_TOKEN/TFE_ADDRESS are only needed for Terraform Cloud/Enterprise integration; the form below omits both for local/OSS Terraform use.",
+    "command": "docker",
+    "args": ["run", "-i", "--rm", "hashicorp/terraform-mcp-server:1.0.0"]
+  },
+
+  "kubernetes_OFFICIAL": {
+    "_about": "kubernetes-mcp-server (manusa/containers, most-starred Kubernetes MCP server) — supports Kubernetes and OpenShift. Reads your existing kubeconfig (~/.kube/config) and current context; no separate credentials needed.",
+    "command": "npx",
+    "args": ["-y", "kubernetes-mcp-server@latest"]
+  },
+
+  "docker_OFFICIAL": {
+    "_about": "Docker's built-in MCP Gateway (part of Docker Desktop's MCP Toolkit — no separate npm/uvx package). Requires Docker Desktop installed with the MCP Toolkit enabled. Exposes container/image management as MCP tools alongside a catalog of other Dockerized MCP servers.",
+    "command": "docker",
+    "args": ["mcp", "gateway", "run"]
+  },
+
+  "cloudflare_OFFICIAL": {
+    "_about": "Official Cloudflare MCP server (cloudflare/mcp, 'Code Mode' — token-efficient access to Cloudflare's entire API: WAF, DDoS/Magic Transit, Bot Management, Zero Trust/Access, DNS, CDN, Workers). Used by @cloud-architect and @devops-engineer for edge-security config. OAuth on first connect (or an API token for CI/automation — see repo README for that path). Cloudflare also ships narrower domain-specific servers (observability, DNS analytics, audit logs, CASB) at *.mcp.cloudflare.com if you want curated tools for one product area instead of full API breadth.",
+    "transport": "http",
+    "url": "https://mcp.cloudflare.com/mcp"
   }
 }

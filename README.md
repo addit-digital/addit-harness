@@ -65,7 +65,7 @@ existing hooks are preserved. Re-running backs up replaced files to `*.bak.<ts>`
 | `rules/engineering-loop.md` | Always-on plan→verify→commit model + anti-patterns; sets diagram-rich (mermaid) plan/design-doc standards | Authored |
 | `rules/{java,go,typescript}.md` | **Thin auto-loaded pointers** (Tier 1) — route to the references | Authored (routing only, no convention text) |
 | `references/{go,java,typescript}/` | **Convention guides + linked authorities, read on-demand** (Tier 2) | Go: codebase-derived from app-erp; Java/TS: vendored from recognized sources — see each `README.md` |
-| `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, frontend-architect, ux-designer, figma-designer, feature-investigator, backend-developer, frontend-developer, saas-legal-advisor | **Vendored + pinned** (except `backend-architect`/`frontend-architect`/`ux-designer`/`figma-designer`/`backend-developer`/`frontend-developer`/`saas-legal-advisor`, authored) — see `agents/SOURCES.md` |
+| `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, frontend-architect, ux-designer, figma-designer, feature-investigator, backend-developer, frontend-developer, saas-legal-advisor, cloud-architect, devops-engineer | **Vendored + pinned** (except `backend-architect`/`frontend-architect`/`ux-designer`/`figma-designer`/`backend-developer`/`frontend-developer`/`saas-legal-advisor`, authored) — see `agents/SOURCES.md` |
 | `skills/adr/` | `/adr` — record Architecture Decision Records (**MADR 4.0**) | Adopts MADR (see `skills/SOURCES.md`) |
 | `skills/save-plan/` | `/save-plan` — persist an **implementation plan** to `docs/plans/` (or `--temp`) so mermaid renders in an IDE/GitHub. Architecture designs → `docs/solutions/`; review reports → `docs/architecture-reports/` (written directly by the relevant agent) | Authored |
 | `skills/go-conventions/` | `/go-conventions [--refresh]` — scan a Go repo and write `.claude/go-conventions.md` (project-specific layer on top of the global baseline) | Authored |
@@ -142,10 +142,18 @@ spec/PRD-lite), `@saas-legal-advisor` (SaaS-specialized legal advisor — assess
 legal impact of product changes, drafts and reviews privacy policies, T&C, cookie
 policies, DPAs, and other compliance docs; reads the project's declared primary
 jurisdiction from `CLAUDE.md`; use proactively whenever a feature touches user
-data, payments, third-party integrations, or account types), and the implementation
-agents `@backend-developer` (Go · Java/Spring · TypeScript/Bun) and
+data, payments, third-party integrations, or account types), `@cloud-architect`
+(multi-cloud/Kubernetes infrastructure design **and** audits of existing
+infrastructure — AWS/Azure/GCP/OCI/DigitalOcean, IaC strategy, cost, security,
+DR; defers implementation to `@devops-engineer`), and the implementation
+agents `@backend-developer` (Go · Java/Spring · TypeScript/Bun),
 `@frontend-developer` (TS/React/Next/RN) — senior craftsmen that design clean
-structures, write tests, and verify code against the conventions.
+structures, write tests, and verify code against the conventions — and
+`@devops-engineer` (writes and verifies the actual Terraform/Kubernetes
+manifests/Dockerfiles/CI pipelines against a `@cloud-architect` design, plus
+hands-on Linux systems administration — systemd, networking, SSH, logs — on
+the VMs/nodes underneath; prefers the cloud/infra MCP servers in
+`mcp.example.json` when connected, falls back to the provider CLI otherwise).
 
 ## Use cases
 
@@ -205,6 +213,21 @@ flowchart LR
 **Review or debug existing code**
 - `@code-reviewer` on a diff — flags convention violations with file:line.
 - `@debugger` for a failing test or stack trace — isolates root cause.
+
+**Design or implement infrastructure**
+- `@cloud-architect` for up-front design (new environment, migration, multi-cloud
+  strategy) → design doc saved to `docs/solutions/`.
+- `@cloud-architect` to **audit existing infrastructure** (cost, security,
+  reliability, IaC drift) → review report saved to `docs/architecture-reports/`
+  with Critical/Important/Advisory findings, same pattern as `@architect-reviewer`.
+- `@devops-engineer` to implement the design or act on the review's findings —
+  writes and verifies actual Terraform/Kubernetes manifests/Dockerfiles/CI config,
+  plus edge security (Cloudflare WAF/DDoS/Zero Trust or the hyperscaler-native
+  equivalent) and vulnerability/IaC/secrets scanning per the design.
+- Both prefer the AWS/Azure/DigitalOcean/Terraform/Kubernetes/Docker/Cloudflare
+  MCP servers in `mcp.example.json` when connected (see *Enabling MCP*), falling
+  back to the provider CLI via Bash otherwise. Google Cloud has no unified official MCP
+  server yet, so GCP work falls back to `gcloud` directly.
 
 **Make an architecture decision**
 - `@backend-architect` (API/service) or `@frontend-architect` (component/rendering/state)
@@ -303,6 +326,8 @@ prevented) and Sonnet's strong, cheaper execution against your rules.
 | `debugger` | `sonnet` | Iterative; escalate with `/model` if stuck |
 | `feature-investigator` | `sonnet` | Requirements/spec investigation (upstream default) |
 | `saas-legal-advisor` | `opus` | Legal reasoning + compliance assessment — high-stakes advisory; wrong guidance is costly |
+| `cloud-architect` | `opus` | Infra design + review — mistakes are costly and often hard to reverse |
+| `devops-engineer` | `sonnet` | Implementation/execution against a design — fast + cheap, same rationale as the other `*-developer` agents |
 
 Future mechanical agents (test-runners, formatters) should use `haiku`. Override
 all subagents at once with `CLAUDE_CODE_SUBAGENT_MODEL`.
@@ -335,6 +360,14 @@ Both Atlassian and database MCP are intentionally **off** for now. To enable:
 - **Atlassian Data Center:** community `sooperset/mcp-atlassian` (token/PAT).
 - **Postgres:** `crystaldba/postgres-mcp` (read-only by default).
 - **MySQL:** `benborla/mcp-server-mysql` or `designcomputer/mysql_mcp_server`.
+- **Cloud/infra (used by `@cloud-architect` / `@devops-engineer`):** official
+  servers for AWS (`awslabs/mcp`), Azure (`@azure/mcp`), DigitalOcean
+  (`digitalocean-labs/mcp-digitalocean`), Terraform (`hashicorp/terraform-mcp-server`,
+  via Docker), Kubernetes (`kubernetes-mcp-server`), Docker (`docker mcp
+  gateway`, built into Docker Desktop's MCP Toolkit), and Cloudflare
+  (`cloudflare/mcp` — WAF, DDoS, Zero Trust, DNS, CDN; OAuth) — see
+  `mcp.example.json`. Google Cloud has no unified official MCP server yet; both
+  agents fall back to the `gcloud` CLI directly.
 
 ## Roadmap
 
