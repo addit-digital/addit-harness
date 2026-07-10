@@ -53,6 +53,20 @@ track the plugin's own git checkout. Default is copy.
 The script backs up anything it would overwrite (matching `install.sh`'s
 existing behavior) and prints a summary of what it placed and where.
 
+For `--scope global`, it also retires any leftover unprefixed `agents/`
+and `skills/` from a pre-plugin install (`install.sh --target claude`
+used to copy those straight into `~/.claude/agents` and `~/.claude/skills`
+unprefixed — the plugin now exposes the same content as
+`addit-harness:<name>`, so the old copies are stale duplicates). A legacy
+install predates the plugin, so its content has usually drifted from
+whatever the plugin ships today — exact-match wouldn't catch most real
+duplicates. Instead it compares line-level similarity: a name match at or
+above 50% similar is treated as the same file at a different revision (backed
+up, then removed — so even a wrongly-flagged heavy customization is
+recoverable from the backup, never destroyed outright); anything less
+similar is left in place and reported, since it's more likely a genuinely
+unrelated file that happens to share the name.
+
 ## When to re-run
 
 - After the plugin auto-updates (new `rules/`/`references/`/`settings.json`

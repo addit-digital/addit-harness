@@ -85,6 +85,89 @@ backup_and_place_tree() {
   done < <(find "$src_dir" -type f -print0)
 }
 
+# Before the plugin existed, install.sh's `--target claude` path copied
+# agents/*.md and skills/*/ verbatim and unprefixed into ~/.claude/agents and
+# ~/.claude/skills. The plugin now exposes that same content prefixed
+# (addit-harness:code-reviewer, etc.), so anyone who ran the old install path
+# and then adopted the plugin ends up with both the unprefixed legacy copy
+# and the prefixed plugin copy listed side by side. Only ~/.claude is ever
+# affected — the legacy script had no project-scope path — so this only runs
+# for --scope global.
+#
+# Matching by name alone isn't safe (a name collision with the user's own,
+# unrelated agent/skill would delete their file) and matching by exact byte
+# content isn't effective (a legacy install predates the plugin's existence,
+# so its content has near-certainly drifted from whatever the plugin ships
+# today — measured 97-100% line similarity on real drifted copies vs. ~3% on
+# a genuinely unrelated file of the same name, so a similarity threshold cuts
+# cleanly between "same file, different revision" and "coincidental name
+# collision"). Anything at/above the threshold is backed up then removed —
+# so even a wrongly-flagged heavy customization is recoverable from the
+# backup, never destroyed outright. Anything below is left alone and
+# reported for the user to check by hand.
+LEGACY_SIMILARITY_THRESHOLD=50
+
+line_similarity_pct() {
+  local a="$1" b="$2" la lb changed total
+  la=$(wc -l < "$a"); lb=$(wc -l < "$b")
+  changed=$(diff "$a" "$b" 2>/dev/null | grep -c '^[<>]' || true)
+  total=$((la + lb))
+  if [[ "$total" -eq 0 ]]; then echo 100; return; fi
+  echo $(( 100 - (changed * 100 / total) ))
+}
+
+cleanup_legacy_claude_dupes() {
+  local legacy_agents="$HOME/.claude/agents" legacy_skills="$HOME/.claude/skills"
+  local retired_agents=0 retired_skills=0
+  local skipped=()
+  local legacy_backup="$BACKUP_ROOT/legacy-superseded-by-plugin"
+  local f name d pct
+
+  if [[ -d "$legacy_agents" ]]; then
+    for f in "$PLUGIN_ROOT"/agents/*.md; do
+      [[ -e "$f" ]] || continue
+      name="$(basename "$f")"
+      if [[ -e "$legacy_agents/$name" ]]; then
+        pct="$(line_similarity_pct "$f" "$legacy_agents/$name")"
+        if [[ "$pct" -ge "$LEGACY_SIMILARITY_THRESHOLD" ]]; then
+          mkdir -p "$legacy_backup/agents"
+          cp -p "$legacy_agents/$name" "$legacy_backup/agents/$name"
+          rm -f "$legacy_agents/$name"
+          retired_agents=$((retired_agents + 1))
+        else
+          skipped+=("agents/$name (${pct}% similar)")
+        fi
+      fi
+    done
+  fi
+
+  if [[ -d "$legacy_skills" ]]; then
+    for d in "$PLUGIN_ROOT"/skills/*/; do
+      [[ -e "$d" ]] || continue
+      name="$(basename "$d")"
+      if [[ -e "$legacy_skills/$name/SKILL.md" && -e "$d/SKILL.md" ]]; then
+        pct="$(line_similarity_pct "$d/SKILL.md" "$legacy_skills/$name/SKILL.md")"
+        if [[ "$pct" -ge "$LEGACY_SIMILARITY_THRESHOLD" ]]; then
+          mkdir -p "$legacy_backup/skills"
+          cp -RPp "$legacy_skills/$name" "$legacy_backup/skills/$name"
+          rm -rf "$legacy_skills/$name"
+          retired_skills=$((retired_skills + 1))
+        else
+          skipped+=("skills/$name (${pct}% similar)")
+        fi
+      fi
+    done
+  fi
+
+  if [[ "$retired_agents" -gt 0 || "$retired_skills" -gt 0 ]]; then
+    info "retired $retired_agents legacy agent(s) + $retired_skills legacy skill(s) from a pre-plugin install"
+    info "(>=${LEGACY_SIMILARITY_THRESHOLD}% similar to this plugin's shipped versions; backups -> $legacy_backup/)"
+  fi
+  if [[ ${#skipped[@]} -gt 0 ]]; then
+    info "left ${#skipped[@]} name-matching but dissimilar item(s) alone (likely an unrelated file) — review by hand: ${skipped[*]}"
+  fi
+}
+
 echo "addit-harness setup: placing config (scope: $SCOPE, mode: $MODE)"
 echo
 
@@ -106,6 +189,10 @@ info "placed references/ -> $REFERENCES_DEST"
 
 backup_and_place "$PLUGIN_ROOT/settings.json" "$SETTINGS_DEST"
 info "placed settings.json -> $SETTINGS_DEST"
+
+if [[ "$SCOPE" == "global" ]]; then
+  cleanup_legacy_claude_dupes
+fi
 
 echo
 echo "Done."
