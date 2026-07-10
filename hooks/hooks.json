@@ -1,0 +1,16 @@
+{
+  "description": "addit-harness — reminds you to re-run /addit-harness:setup when the plugin has updated past what was last synced",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/check-setup-version.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -194,11 +194,52 @@ if [[ "$SCOPE" == "global" ]]; then
   cleanup_legacy_claude_dupes
 fi
 
+# Record a content hash of just the files this script actually copies
+# (CLAUDE.md, AGENTS.md, rules/, references/, settings.json — agents/ and
+# skills/ don't need this, the plugin loader already serves those live), so
+# the SessionStart hook (hooks/check-setup-version.sh) can tell the user to
+# re-run this skill only when THOSE files change — not on every plugin
+# version bump, most of which don't touch them at all. Keep this hashing
+# logic identical to the copy in check-setup-version.sh.
+setup_content_hash() {
+  python3 -c "
+import hashlib, pathlib, sys
+root = pathlib.Path(sys.argv[1])
+paths = [root / n for n in ('CLAUDE.md', 'AGENTS.md', 'settings.json')]
+for sub in ('rules', 'references'):
+    d = root / sub
+    if d.is_dir():
+        paths.extend(d.rglob('*'))
+h = hashlib.sha256()
+for p in sorted({p for p in paths if p.is_file()}):
+    h.update(str(p.relative_to(root)).encode())
+    h.update(p.read_bytes())
+print(h.hexdigest())
+" "$1"
+}
+
+SETUP_CONTENT_HASH="$(setup_content_hash "$PLUGIN_ROOT")"
+PLUGIN_VERSION="$(python3 -c "
+import json
+print(json.load(open('$PLUGIN_ROOT/.claude-plugin/plugin.json'))['version'])
+" 2>/dev/null || echo "unknown")"
+if [[ "$SCOPE" == "global" ]]; then
+  MARKER="$DEST_ROOT/.addit-harness-setup-version"
+else
+  mkdir -p "$DEST_ROOT/.claude"
+  MARKER="$DEST_ROOT/.claude/.addit-harness-setup-version"
+fi
+{
+  echo "$SETUP_CONTENT_HASH"
+  echo "$PLUGIN_VERSION"
+} > "$MARKER"
+
 echo
 echo "Done."
 info "Backups of anything overwritten live under $BACKUP_ROOT/ (if anything was backed up)."
 if [[ "$SCOPE" == "global" ]]; then
   info "Re-run /addit-harness:setup after the plugin auto-updates to re-sync these files."
+  info "(a SessionStart reminder will also tell you when a newer version is available)"
 else
   info "This project now has its own CLAUDE.md/rules — other projects are unaffected."
 fi
