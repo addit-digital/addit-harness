@@ -113,7 +113,7 @@ Do **not** commit the file unless the user asks.
 
 ## Notes
 
-- This skill writes to the *target project* repo, not to the claude-config repo.
+- This skill writes to the *target project* repo, not to the addit-harness repo.
 - The file it generates is a supplement to `~/.claude/references/go/app-erp-conventions.md`,
   not a replacement. Put only the *delta* — what differs from or extends the global baseline.
 - If the project is a perfect match for the baseline (same stack, same patterns), say so

@@ -1,20 +1,27 @@
-# claude-config
+# addit-harness
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Claude Code](https://img.shields.io/badge/Claude_Code-compatible-orange)
+![Cursor](https://img.shields.io/badge/Cursor-compatible-000000)
+![Codex CLI](https://img.shields.io/badge/Codex_CLI-compatible-412991)
+![Kiro](https://img.shields.io/badge/Kiro-compatible-8A3FFC)
 ![Go](https://img.shields.io/badge/Go-00ADD8?logo=go&logoColor=white)
 ![Java](https://img.shields.io/badge/Java-ED8B00?logo=openjdk&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
 
-Claude Code's out-of-the-box global config is a blank slate. This repo turns it into a **full digital product development kit** — covering every layer from idea to ship: legal compliance, UX design, architecture, implementation in Go · Java · TypeScript, and code review, all wired into a plan→verify→commit engineering loop. One-line install. Philosophy: curate established assets and adapt them — don't hand-roll what already exists.
+A coding agent's out-of-the-box config is a blank slate. **addit-harness** is the config harness that turns it into a **full digital product development kit** — covering every layer from idea to ship: legal compliance, UX design, architecture, implementation in Go · Java · TypeScript, and code review, all wired into a plan→verify→commit engineering loop. One-line install, auto-detecting whichever agent(s) you have. Philosophy: curate established assets and adapt them — don't hand-roll what already exists.
 
 ---
 
-A global [Claude Code](https://code.claude.com) configuration that covers the full
-digital product development loop — from idea investigation and legal compliance
-through UX design, backend/frontend architecture, and implementation in
-Go · Java/Spring · TypeScript (Bun backend · React/Next.js frontend), to code
-review and debugging.
+A shared configuration that covers the full digital product development loop —
+from idea investigation and legal compliance through UX design,
+backend/frontend architecture, and implementation in Go · Java/Spring ·
+TypeScript (Bun backend · React/Next.js frontend), to code review and
+debugging — synced into [Claude Code](https://code.claude.com),
+[Cursor](https://cursor.com), [Codex CLI](https://developers.openai.com/codex),
+and [Kiro](https://kiro.dev). See [*Other coding agents*](#other-coding-agents)
+for what's covered per tool (GitHub Copilot support is planned, not yet
+implemented — see *Roadmap*).
 Built for **SaaS founders and product engineers** who own the full feature
 lifecycle and want every layer of that loop to have an opinionated, specialized
 subagent behind it.
@@ -44,24 +51,31 @@ a pile of bespoke skills. It deliberately reuses Claude Code's built-ins
 ## Install
 
 ```bash
-git clone <this-repo> ~/src/claude-config && cd ~/src/claude-config
-./install.sh             # copy files into ~/.claude (backs up anything it replaces)
-./install.sh --link      # OR symlink instead, so edits track git
-./install.sh --plugins   # also register marketplaces + install official plugins now
+git clone <this-repo> ~/src/addit-harness && cd ~/src/addit-harness
+./install.sh              # auto-detect: sync every supported agent found on this machine
+./install.sh --target X   # force one: claude|cursor|kiro|codex (copilot: see Roadmap)
+./install.sh --link       # symlink instead of copy, so edits track git
+./install.sh --plugins    # claude only: also register marketplaces + install official plugins
 ```
 
-`install.sh` maps each item to its required place under `~/.claude/` and merges
-per-file — it never clobbers the whole directory, so `projects/`, history, and
-existing hooks are preserved. Re-running backs up replaced files to `*.bak.<ts>`.
+`install.sh` checks each tool's CLI on `PATH` or home directory (`~/.claude`,
+`~/.cursor`, `~/.kiro`, `~/.codex`) and syncs config into whichever it finds —
+no tool is a privileged default, Claude Code included. It merges per-file into
+each tool's home, never clobbering the whole directory, so `projects/`,
+history, and existing hooks are preserved. Re-running backs up anything it
+replaces to `<tool-home>/.install-backups/<timestamp>/`.
 
 > If you already had a `~/.claude/settings.json`, it's backed up and replaced —
-> merge any custom permissions/hooks back from the `.bak` file.
+> merge any custom permissions/hooks back from the backup.
 
 ## What's in here
 
 | Path | What | How it's sourced |
 |------|------|------------------|
-| `CLAUDE.md` | Lean global memory: operating model + hard rules | Authored; follows [Anthropic memory](https://code.claude.com/docs/en/memory) & [best-practices](https://www.anthropic.com/engineering/claude-code-best-practices) |
+| `AGENTS.md` | Canonical, tool-neutral global memory: operating model + hard rules. Every tool's baseline is generated from this file (see *Other coding agents*) | Authored; follows [Anthropic memory](https://code.claude.com/docs/en/memory) & [best-practices](https://www.anthropic.com/engineering/claude-code-best-practices) |
+| `CLAUDE.md` | 2-line `@import` pointer (`@AGENTS.md`, `@rules/engineering-loop.md`) — Claude Code specifically requires this literal filename | Authored |
+| `tools.config.json` | Declarative per-tool mapping: where each artifact goes for claude/cursor/kiro/codex/copilot, and the few real content transforms (Kiro tool tags, Codex TOML) | Authored |
+| `sync_tools.py` | Interpreter for `tools.config.json`, called once per tool by `install.sh` | Authored |
 | `rules/engineering-loop.md` | Always-on plan→verify→commit model + anti-patterns; sets diagram-rich (mermaid) plan/design-doc standards | Authored |
 | `rules/{java,go,typescript}.md` | **Thin auto-loaded pointers** (Tier 1) — route to the references | Authored (routing only, no convention text) |
 | `references/{go,java,typescript}/` | **Convention guides + linked authorities, read on-demand** (Tier 2) | Go: codebase-derived from app-erp; Java/TS: vendored from recognized sources — see each `README.md` |
@@ -107,6 +121,42 @@ The Go reference is **codebase-derived** (not a third-party style guide) — it
 reflects the actual patterns in addit-digital/app-erp and expands per-project
 via `/go-conventions`. The **`code-reviewer` subagent checks adherence** to
 whichever conventions apply.
+
+## Other coding agents
+
+`AGENTS.md` is the single canonical source — every tool's config is generated
+from it (plus `rules/`, `references/`, `agents/`) by `sync_tools.py`, driven by
+the declarative mapping in `tools.config.json`. Claude Code is one entry in
+that mapping, not a privileged default: `install.sh` treats it exactly like
+the others.
+
+Most of what gets synced is **placement**, not transformation — same content,
+different path and frontmatter key names. Two tools need a real content
+transform for subagents specifically, because their tool-restriction model
+differs from Claude's exact tool names:
+
+| Tool | Baseline (`AGENTS.md` + engineering loop) | Language conventions | Subagents (`agents/*.md`) |
+|------|------|------|------|
+| **Claude Code** | `~/.claude/CLAUDE.md` (`@import`) | `~/.claude/rules/*.md` (auto-load via `paths:`) | `~/.claude/agents/*.md` — passthrough |
+| **Cursor** | `~/.cursor/rules/global.mdc` (`alwaysApply`) | `~/.cursor/rules/*.mdc` (`globs`) | Nothing to do — Cursor 2.4+ reads `~/.claude/agents/*.md` natively |
+| **Kiro** | `~/.kiro/steering/global.md` (`inclusion: always`) | `~/.kiro/steering/*.md` (`inclusion: fileMatch`) | `~/.kiro/agents/*.md` — tool names remapped to Kiro's category tags (`read`/`write`/`shell`/`web`/...) |
+| **Codex CLI** | `~/.codex/AGENTS.md` (native filename, no rename needed) | folded into the same `AGENTS.md` | `~/.codex/agents/*.toml` — converted to TOML; tool-restriction becomes a derived `sandbox_mode` (`read-only` vs `workspace-write`), since Codex has no per-tool allowlist |
+| **GitHub Copilot** | *(planned — see Roadmap)* | | |
+
+Vendored prose that hardcodes a `~/.claude/references/...` path (e.g.
+`rules/go.md`) is rewritten per tool to that tool's own reference path
+(`~/.cursor/references/...`, etc.) so the pointer actually resolves.
+
+MCP is **not** auto-synced for any tool — `mcp.example.json` is a disabled,
+human-curated catalogue by design (see its own `_README` entry): pick an
+entry, fill in credentials by hand, and paste it into the tool's real MCP
+config yourself (`install.sh`'s footer prints the right target path per tool
+after every run). See *Enabling MCP* below for the Claude Code specifics.
+
+Skills (`/adr`, `/save-plan`, etc.) are placed as files for the other tools
+today, but porting them with correct per-tool invocation semantics (Cursor
+commands, Kiro manual steering, Codex prompts, Copilot prompt files) is
+planned, not yet implemented — see *Roadmap*.
 
 ### Iterating & giving feedback on plans or code
 
@@ -371,12 +421,18 @@ Both Atlassian and database MCP are intentionally **off** for now. To enable:
 
 ## Roadmap
 
-See [open issues](https://github.com/addit-digital/claude-config/issues?q=label%3Aroadmap) for planned work. Candidates:
+See [open issues](https://github.com/addit-digital/addit-harness/issues?q=label%3Aroadmap) for planned work. Candidates:
 
+- **GitHub Copilot support** — project-scoped bundle (`.github/copilot-instructions.md`,
+  `.github/instructions/*.instructions.md`, `.github/agents/*.agent.md`), since
+  Copilot has no machine-wide home directory to sync into like the other tools
+- **Skills as real slash-commands/prompts** per tool (`.cursor/commands/`, Kiro
+  manual-inclusion steering, `~/.codex/prompts/`, `.github/prompts/*.prompt.md`)
+  with correct invocation semantics, not just file placement
 - `/design-review` skill — audit a `docs/solutions/` design doc against the project's conventions
 - `@security-reviewer` subagent — dedicated security-focused review pass
 
-Contributions welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md). Issues labeled [`good first issue`](https://github.com/addit-digital/claude-config/issues?q=label%3A%22good+first+issue%22) are a good entry point.
+Contributions welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md). Issues labeled [`good first issue`](https://github.com/addit-digital/addit-harness/issues?q=label%3A%22good+first+issue%22) are a good entry point.
 
 ## Extending
 
