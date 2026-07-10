@@ -509,3 +509,11 @@ gh release create addit-harness--v0.1.0 --notes "..."
 `claude plugin tag` creates a `addit-harness--v<version>` tag (not a bare
 `vX.Y.Z`) and refuses a dirty working tree or a duplicate tag unless
 `--force`; pass `--dry-run` to preview first.
+
+**Versioning is manual, not tag-derived.** `plugin.json`'s `version` field is
+the source of truth — `claude plugin tag` reads it and creates a matching
+git tag (and errors if `plugin.json` and the marketplace entry disagree); it
+does not go the other direction and infer a version from existing tags. So
+step 1 above (bump `version` by hand) always comes first — there's no
+`npm version`-style auto-bump or git-tag-derived versioning in the Claude
+Code plugin tooling today.

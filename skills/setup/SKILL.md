@@ -14,25 +14,41 @@ live once the plugin is installed, nothing to do. This skill places the rest:
 carry natively (no plugin-level memory file, no path-scoped auto-load rules,
 no plugin-carried permissions/model).
 
+## Choosing a scope — ask, don't silently default
+
+`--scope` changes where files land in a way that's annoying to undo cleanly
+(global touches every Claude Code session on the machine; project touches
+just the current repo). Don't guess:
+
+- If the user already passed `--scope` as an argument to this skill, use it
+  as given — no need to ask.
+- If they didn't, and the conversation doesn't already make the intent
+  obvious (e.g. "just try it here" / "in this repo only" → project; "on my
+  machine" or no project context at all → global), **ask** which they want
+  before running anything. Offer `global` as the default recommendation
+  since it matches `install.sh`'s existing behavior, but let them choose:
+  - `global`: places everything under `~/.claude/` — applies to every Claude
+    Code session on the machine.
+  - `project`: places `CLAUDE.md`, `AGENTS.md`, `rules/`, `references/` bare
+    at the current project root, and `settings.json` at
+    `./.claude/settings.json` — matches Claude Code's own memory-file
+    convention (project memory at root, project settings nested under
+    `.claude/`) and only applies inside this one project.
+- Mention while asking that the plugin itself can independently be scoped
+  too (`/plugin install addit-harness@addit --scope local` keeps
+  agents/skills confined to this repo as well) — see the README's *Install*
+  section for both mechanisms together.
+
 ## What to run
 
-Run the bundled script with the Bash tool, passing through any arguments the
-user gave this skill:
+Once the scope is settled, run the bundled script with the Bash tool:
 
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/skills/setup/scripts/setup.sh" [--scope global|project] [--link]
+bash "${CLAUDE_PLUGIN_ROOT}/skills/setup/scripts/setup.sh" --scope <global|project> [--link]
 ```
 
-- `--scope global` (default): places everything under `~/.claude/` — applies
-  to every Claude Code session on the machine, same as `install.sh` today.
-- `--scope project`: places `CLAUDE.md`, `AGENTS.md`, `rules/`, `references/`
-  bare at the current project root, and `settings.json` at
-  `./.claude/settings.json` — matches Claude Code's own memory-file
-  convention (project memory at root, project settings nested under
-  `.claude/`) and only applies inside this one project. Use this when the
-  user doesn't want the harness's conventions loaded globally.
-- `--link`: symlink instead of copy, so edits to `rules/`/`settings.json`
-  track the plugin's own git checkout. Default is copy.
+`--link` symlinks instead of copying, so edits to `rules/`/`settings.json`
+track the plugin's own git checkout. Default is copy.
 
 The script backs up anything it would overwrite (matching `install.sh`'s
 existing behavior) and prints a summary of what it placed and where.
@@ -44,13 +60,3 @@ existing behavior) and prints a summary of what it placed and where.
 - To switch scope later (e.g. tried `--scope project`, now want it
   everywhere), re-run with `--scope global` — it's additive, doesn't remove
   the project-scoped files.
-
-## If asked which scope to use
-
-Default to `--scope global` unless the user says they only want this in the
-current project, are just trying it out, or are working in a shared/team repo
-where they don't want to affect their other work. In that case, `--scope
-project` and mention that the plugin itself can independently be scoped too
-(`/plugin install addit-harness@addit --scope local` keeps the agents/skills
-confined to this repo as well — see the README's *Install* section for both
-mechanisms together).

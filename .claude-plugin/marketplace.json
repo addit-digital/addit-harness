@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "addit-harness",
-      "description": "Full digital product development kit for Claude Code: plan→verify→commit engineering loop, legal/UX/architecture/implementation subagents (Go, Java, TypeScript), and code review — curated, not hand-rolled.",
+      "description": "Turns Claude Code into a full product-development toolkit: an opinionated plan → verify → commit engineering workflow, specialized subagents for legal compliance, UX design, architecture, and Go/Java/TypeScript implementation, and a code reviewer that enforces your language conventions automatically. Curated and adapted from established open-source sources, not hand-rolled from scratch.",
       "author": {
         "name": "Nicat Asgerzade"
       },
