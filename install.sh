@@ -1,49 +1,102 @@
 #!/usr/bin/env bash
 #
-# install.sh — install this Claude Code config into ~/.claude
-#
-# Maps each item in this repo to its required location under ~/.claude, backing
-# up anything it would overwrite. Merges per-item: it never replaces the whole
-# ~/.claude directory, so your projects/, history, and existing hooks are safe.
+# install.sh — sync this repo's config into whichever coding agents you have
+# installed. Auto-detects by default: checks each tool's CLI on PATH or home
+# directory, and syncs config for every one it finds. No tool is privileged
+# as "the" default target — Claude Code is one entry among several, defined
+# (like the rest) in tools.config.json.
 #
 # Usage:
-#   ./install.sh            # copy files (default)
-#   ./install.sh --link     # symlink files back to this repo (edits track git)
-#   ./install.sh --plugins  # also register marketplaces + install official plugins
+#   ./install.sh              # auto-detect: sync every supported tool found
+#   ./install.sh --target X   # force one tool: claude|cursor|kiro|codex|copilot
+#   ./install.sh --link       # symlink instead of copy (edits track git)
+#   ./install.sh --plugins    # claude only: register marketplaces + install official plugins
 #   ./install.sh --help
+#
+# copilot is project-scoped (lives in a repo's .github/, not a home
+# directory) and is not covered by auto-detect — force it explicitly from
+# inside the target project. Not yet implemented (see docs/plans/).
+#
+# MCP is intentionally NOT synced for any tool. mcp.example.json is a
+# disabled, human-curated catalogue (see its own "_README" entry) meant for
+# picking one entry, filling in credentials by hand, and pasting it into the
+# tool's real MCP config yourself — see the printed notes below for where
+# each tool expects that paste.
 #
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CLAUDE_DIR="${CLAUDE_HOME:-$HOME/.claude}"
+CONFIG="$REPO_DIR/tools.config.json"
+KNOWN_TOOLS=(claude cursor kiro codex copilot)
+AUTO_DETECT_TOOLS=(claude cursor kiro codex)
+
 MODE="copy"
 DO_PLUGINS=0
+FORCE_TARGET=""
 STAMP="$(date +%Y%m%d-%H%M%S)"
-BACKUP_DIR="$CLAUDE_DIR/.install-backups/$STAMP"
 
-for arg in "$@"; do
-  case "$arg" in
+while [[ $# -gt 0 ]]; do
+  case "$1" in
     --link) MODE="link" ;;
     --plugins) DO_PLUGINS=1 ;;
+    --target)
+      shift
+      FORCE_TARGET="${1:-}"
+      [[ -z "$FORCE_TARGET" ]] && { echo "--target requires a value" >&2; exit 1; }
+      ;;
     --help|-h)
       grep '^#' "$0" | sed 's/^# \{0,1\}//; 1d'
       exit 0 ;;
-    *) echo "Unknown option: $arg" >&2; exit 1 ;;
+    *) echo "Unknown option: $1" >&2; exit 1 ;;
   esac
+  shift
 done
+
+if [[ -n "$FORCE_TARGET" ]]; then
+  known=0
+  for t in "${KNOWN_TOOLS[@]}"; do [[ "$t" == "$FORCE_TARGET" ]] && known=1; done
+  [[ "$known" == "1" ]] || { echo "Unknown --target: $FORCE_TARGET (known: ${KNOWN_TOOLS[*]})" >&2; exit 1; }
+fi
 
 info() { printf '  %s\n' "$1"; }
 
-# Place one file: $1 = source path, $2 = destination path.
-place_file() {
-  local src="$1" dest="$2"
+tool_home() {
+  local tool="$1" var_name
+  var_name="$(echo "$tool" | tr '[:lower:]' '[:upper:]')_HOME"
+  if [[ -n "${!var_name:-}" ]]; then
+    echo "${!var_name}"
+    return
+  fi
+  python3 -c "
+import json, sys
+print(json.load(open('$CONFIG'))[sys.argv[1]]['home'])
+" "$tool" | sed "s|^~|$HOME|"
+}
+
+is_detected() {
+  local tool="$1" bin dir
+  bin="$(python3 -c "
+import json, sys
+print(json.load(open('$CONFIG'))[sys.argv[1]].get('detect', {}).get('bin', ''))
+" "$tool")"
+  dir="$(python3 -c "
+import json, sys
+print(json.load(open('$CONFIG'))[sys.argv[1]].get('detect', {}).get('dir', ''))
+" "$tool")"
+  dir="${dir/#\~/$HOME}"
+  if [[ -n "$bin" ]] && command -v "$bin" >/dev/null 2>&1; then return 0; fi
+  if [[ -n "$dir" && -d "$dir" ]]; then return 0; fi
+  return 1
+}
+
+# Place a single Claude-Code-only file (settings.json has no cross-tool
+# equivalent, so it stays outside sync_tools.py's generic interpreter).
+backup_and_place() {
+  local src="$1" dest="$2" backup_dir="$3" home="$4"
   mkdir -p "$(dirname "$dest")"
-  # If a real (non-symlink) file is in the way, back it up once, into
-  # BACKUP_DIR (mirroring its path under CLAUDE_DIR) rather than cluttering
-  # the destination directory with a sibling .bak file.
   if [[ -e "$dest" && ! -L "$dest" ]]; then
-    local rel="${dest#"$CLAUDE_DIR"/}"
-    local backup_dest="$BACKUP_DIR/$rel"
+    local rel="${dest#"$home"/}"
+    local backup_dest="$backup_dir/$rel"
     mkdir -p "$(dirname "$backup_dest")"
     cp -p "$dest" "$backup_dest"
     info "backed up existing $dest -> $backup_dest"
@@ -56,44 +109,8 @@ place_file() {
   fi
 }
 
-# Place every file under a source dir into the matching dir under ~/.claude.
-place_dir() {
-  local src_dir="$1" dest_dir="$2"
-  local f rel
-  while IFS= read -r -d '' f; do
-    rel="${f#"$src_dir"/}"
-    place_file "$f" "$dest_dir/$rel"
-  done < <(find "$src_dir" -type f -print0)
-}
-
-echo "Installing Claude Code config -> $CLAUDE_DIR  (mode: $MODE)"
-mkdir -p "$CLAUDE_DIR"
-
-# Single files
-place_file "$REPO_DIR/CLAUDE.md"     "$CLAUDE_DIR/CLAUDE.md"
-place_file "$REPO_DIR/settings.json" "$CLAUDE_DIR/settings.json"
-
-# Directories (merge per-file)
-place_dir  "$REPO_DIR/rules"      "$CLAUDE_DIR/rules"
-place_dir  "$REPO_DIR/references" "$CLAUDE_DIR/references"
-place_dir  "$REPO_DIR/agents"     "$CLAUDE_DIR/agents"
-place_dir  "$REPO_DIR/skills"     "$CLAUDE_DIR/skills"
-
-echo "Files installed."
-echo
-echo "Notes:"
-if [[ -d "$BACKUP_DIR" ]]; then
-  info "Existing files that were overwritten are backed up under $BACKUP_DIR."
-fi
-info "settings.json was replaced (old one backed up). If you had custom"
-info "permissions/hooks, merge them back from $BACKUP_DIR/settings.json."
-info "MCP is intentionally NOT installed. To enable Atlassian/DB later, copy an"
-info "entry from mcp.example.json into $CLAUDE_DIR/.mcp.json and put secrets in"
-info "$CLAUDE_DIR/mcp.local.json (gitignored). See README 'Enabling MCP'."
-info "templates/CLAUDE.project.md stays in the repo — copy it per project."
-
-if [[ "$DO_PLUGINS" == "1" ]]; then
-  echo
+maybe_install_plugins() {
+  [[ "$DO_PLUGINS" == "1" ]] || return 0
   if command -v claude >/dev/null 2>&1; then
     echo "Registering marketplaces + installing official plugins..."
     claude plugin marketplace add anthropics/skills || true
@@ -105,14 +122,76 @@ if [[ "$DO_PLUGINS" == "1" ]]; then
     info "Done. Run /plugin inside Claude Code to verify."
   else
     info "'claude' CLI not found on PATH — skipping plugin install."
-    info "settings.json already lists the plugins in enabledPlugins; they will"
-    info "be offered when you next start Claude Code."
   fi
-else
-  echo
-  info "Plugins not installed (run with --plugins to register them now)."
-  info "They are also declared in settings.json:enabledPlugins."
+}
+
+sync_tool() {
+  local tool="$1" home backup_dir
+  home="$(tool_home "$tool")"
+  backup_dir="$home/.install-backups/$STAMP"
+  mkdir -p "$home"
+
+  echo "Syncing $tool -> $home"
+  local extra_args=()
+  [[ "$MODE" == "link" ]] && extra_args+=(--link)
+  python3 "$REPO_DIR/sync_tools.py" "$tool" \
+    --repo "$REPO_DIR" --home "$home" --config "$CONFIG" \
+    --backup-dir "$backup_dir" "${extra_args[@]+"${extra_args[@]}"}"
+
+  if [[ "$tool" == "claude" ]]; then
+    backup_and_place "$REPO_DIR/settings.json" "$home/settings.json" "$backup_dir" "$home"
+    maybe_install_plugins
+  fi
+}
+
+echo "claude-config: syncing coding-agent config (mode: $MODE)"
+echo
+
+if [[ "$FORCE_TARGET" == "copilot" ]]; then
+  info "copilot is project-scoped (.github/ inside a repo, not a home directory)"
+  info "and is not implemented yet — see docs/plans/2026-07-10-multi-tool-agent-config.md"
+  exit 0
 fi
 
+TARGETS=()
+if [[ -n "$FORCE_TARGET" ]]; then
+  TARGETS=("$FORCE_TARGET")
+else
+  for t in "${AUTO_DETECT_TOOLS[@]}"; do
+    if is_detected "$t"; then
+      TARGETS+=("$t")
+    else
+      info "$t: not detected — skipping (pass --target $t to force)"
+    fi
+  done
+  if [[ ${#TARGETS[@]} -eq 0 ]]; then
+    echo
+    echo "No supported coding agents detected on this machine."
+    echo "Install one of: claude, cursor, kiro, codex — or force with --target <tool>."
+    exit 0
+  fi
+fi
+
+echo
+for t in "${TARGETS[@]}"; do
+  sync_tool "$t"
+  echo
+done
+
+echo "Synced: ${TARGETS[*]}"
+echo
+echo "Notes:"
+info "Backups of anything overwritten live under <tool-home>/.install-backups/$STAMP/."
+info "MCP is intentionally NOT synced — mcp.example.json is a disabled catalogue for"
+info "manual copy-paste (fill in credentials yourself, don't commit secrets):"
+info "  claude -> ~/.claude/.mcp.json (secrets in ~/.claude/mcp.local.json, gitignored)"
+info "  cursor -> ~/.cursor/mcp.json"
+info "  kiro   -> ~/.kiro/settings/mcp.json"
+info "  codex  -> ~/.codex/config.toml under [mcp_servers.<name>] (TOML, not JSON)"
+info "  copilot-> repo Settings -> Copilot -> MCP servers (no repo file)"
+info "templates/CLAUDE.project.md stays in the repo — copy it per project."
+if [[ -z "$FORCE_TARGET" && "$DO_PLUGINS" == "0" ]]; then
+  info "Claude plugins not installed (run with --plugins to register them now)."
+fi
 echo
 echo "Done."

@@ -1,0 +1,109 @@
+{
+  "claude": {
+    "home": "~/.claude",
+    "detect": { "bin": "claude", "dir": "~/.claude" },
+    "baseline": {
+      "dest": "CLAUDE.md",
+      "mode": "claude-import",
+      "note": "repo-root CLAUDE.md is already a 2-line @import pointer — placed as-is"
+    },
+    "rules":      { "dest": "rules", "shape": "passthrough" },
+    "references": { "dest": "references", "shape": "passthrough" },
+    "agents":     { "dest": "agents", "shape": "passthrough" },
+    "skills":     { "dest": "skills", "shape": "passthrough" },
+    "mcp":        { "dest": ".mcp.json", "manual": true, "note": "not synced — see mcp.example.json's own _README" }
+  },
+  "cursor": {
+    "home": "~/.cursor",
+    "detect": { "bin": "cursor", "dir": "~/.cursor" },
+    "baseline": {
+      "dest": "rules/global.mdc",
+      "mode": "concat",
+      "include": ["AGENTS.md", "rules/engineering-loop.md"],
+      "frontmatter": { "alwaysApply": true }
+    },
+    "rules": {
+      "dest": "rules",
+      "ext": "mdc",
+      "frontmatterMap": { "paths": "globs" },
+      "joinArrays": true
+    },
+    "references": { "dest": "references", "shape": "passthrough" },
+    "agents":     { "skip": true, "reason": "Cursor 2.4+ reads ~/.claude/agents/*.md natively" },
+    "skills":     { "dest": "commands", "stripFrontmatter": true },
+    "mcp":        { "dest": "mcp.json", "manual": true, "note": "not synced — see mcp.example.json's own _README" }
+  },
+  "kiro": {
+    "home": "~/.kiro",
+    "detect": { "bin": "kiro", "dir": "~/.kiro" },
+    "baseline": {
+      "dest": "steering/global.md",
+      "mode": "concat",
+      "include": ["AGENTS.md", "rules/engineering-loop.md"],
+      "frontmatter": { "inclusion": "always" }
+    },
+    "rules": {
+      "dest": "steering",
+      "frontmatterMap": { "paths": "fileMatchPattern" },
+      "frontmatter": { "inclusion": "fileMatch" }
+    },
+    "references": { "dest": "references", "shape": "passthrough" },
+    "agents": {
+      "dest": "agents",
+      "toolMap": {
+        "Read": "read", "Glob": "read", "Grep": "read",
+        "Write": "write", "Edit": "write", "Bash": "shell",
+        "WebFetch": "web", "WebSearch": "web",
+        "Task": "subagent",
+        "mcp__plugin_figma_figma__*": "@figma"
+      },
+      "dropUnmapped": ["Skill"]
+    },
+    "skills": { "dest": "steering", "frontmatter": { "inclusion": "manual" } },
+    "mcp":    { "dest": "settings/mcp.json", "manual": true, "note": "not synced — see mcp.example.json's own _README" }
+  },
+  "codex": {
+    "home": "~/.codex",
+    "detect": { "bin": "codex", "dir": "~/.codex" },
+    "baseline": {
+      "dest": "AGENTS.md",
+      "mode": "concat",
+      "include": ["AGENTS.md", "rules/*.md"]
+    },
+    "references": { "dest": "references", "shape": "passthrough" },
+    "agents": {
+      "dest": "agents",
+      "format": "toml",
+      "bodyField": "developer_instructions",
+      "sandboxRule": {
+        "anyOf": ["Write", "Edit", "Bash"],
+        "then": "workspace-write",
+        "else": "read-only"
+      }
+    },
+    "skills": { "dest": "prompts", "note": "deprecated mechanism, still functional" },
+    "mcp":    { "dest": "config.toml", "format": "toml", "manual": true, "note": "not synced — see mcp.example.json's own _README; paste under [mcp_servers.<name>]" }
+  },
+  "copilot": {
+    "scope": "project",
+    "detect": { "cwdHas": ".github" },
+    "baseline": {
+      "dest": ".github/copilot-instructions.md",
+      "mode": "concat",
+      "include": ["AGENTS.md", "rules/engineering-loop.md"]
+    },
+    "rules": {
+      "dest": ".github/instructions",
+      "ext": "instructions.md",
+      "frontmatterMap": { "paths": "applyTo" },
+      "inlineReferences": true
+    },
+    "agents": {
+      "dest": ".github/agents",
+      "ext": "agent.md",
+      "frontmatterAdd": { "target": "github-copilot" }
+    },
+    "skills": { "dest": ".github/prompts", "ext": "prompt.md" },
+    "mcp":    { "manual": true, "note": "no repo file — paste mcpServers JSON via repo Settings -> Copilot -> MCP servers" }
+  }
+}
