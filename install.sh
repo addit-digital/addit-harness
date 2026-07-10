@@ -97,6 +97,15 @@ print(json.load(open('$CONFIG'))[sys.argv[1]].get('detect', {}).get('dir', ''))
 
 # Place a single Claude-Code-only file (settings.json has no cross-tool
 # equivalent, so it stays outside sync_tools.py's generic interpreter).
+#
+# settings.json isn't purely static: Claude Code itself writes into
+# enabledPlugins/extraKnownMarketplaces whenever the user runs
+# `claude plugin install`/`marketplace add` (e.g. installing addit-harness
+# itself, or any plugin install.sh doesn't manage). A blind overwrite here
+# would silently wipe that live plugin state on every re-run, so those two
+# keys are merged (existing entries preserved, template entries win on
+# conflict) instead of replaced outright. In --link mode the dest becomes a
+# symlink to the repo file, so there's no live state to merge.
 backup_and_place() {
   local src="$1" dest="$2" backup_dir="$3" home="$4"
   mkdir -p "$(dirname "$dest")"
@@ -107,12 +116,31 @@ backup_and_place() {
     cp -p "$dest" "$backup_dest"
     info "backed up existing $dest -> $backup_dest"
   fi
-  rm -f "$dest"
   if [[ "$MODE" == "link" ]]; then
+    rm -f "$dest"
     ln -s "$src" "$dest"
-  else
-    cp "$src" "$dest"
+    return
   fi
+  python3 - "$src" "$dest" <<'PY'
+import json
+import sys
+
+src_path, dest_path = sys.argv[1], sys.argv[2]
+template = json.load(open(src_path))
+try:
+    with open(dest_path) as f:
+        existing = json.load(f)
+except FileNotFoundError:
+    existing = {}
+
+merged = dict(template)
+for key in ("enabledPlugins", "extraKnownMarketplaces"):
+    merged[key] = {**existing.get(key, {}), **template.get(key, {})}
+
+with open(dest_path, "w") as f:
+    json.dump(merged, f, indent=2)
+    f.write("\n")
+PY
 }
 
 maybe_install_plugins() {
