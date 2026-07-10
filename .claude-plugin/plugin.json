@@ -1,0 +1,12 @@
+{
+  "name": "addit-harness",
+  "version": "0.1.0",
+  "description": "Full digital product development kit for Claude Code: plan→verify→commit engineering loop, legal/UX/architecture/implementation subagents (Go, Java, TypeScript), and code review — curated, not hand-rolled.",
+  "author": {
+    "name": "Nicat Asgerzade"
+  },
+  "homepage": "https://github.com/addit-digital/addit-harness",
+  "repository": "https://github.com/addit-digital/addit-harness",
+  "license": "MIT",
+  "keywords": ["engineering-loop", "subagents", "code-review", "saas", "go", "java", "typescript"]
+}

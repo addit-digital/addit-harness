@@ -1,0 +1,19 @@
+{
+  "name": "addit",
+  "description": "Self-hosted marketplace for addit-harness — a full digital product development kit for Claude Code.",
+  "owner": {
+    "name": "Nicat Asgerzade"
+  },
+  "plugins": [
+    {
+      "name": "addit-harness",
+      "description": "Full digital product development kit for Claude Code: plan→verify→commit engineering loop, legal/UX/architecture/implementation subagents (Go, Java, TypeScript), and code review — curated, not hand-rolled.",
+      "author": {
+        "name": "Nicat Asgerzade"
+      },
+      "category": "development",
+      "source": "./",
+      "homepage": "https://github.com/addit-digital/addit-harness"
+    }
+  ]
+}

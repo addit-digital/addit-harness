@@ -2,12 +2,18 @@
 #
 # install.sh — sync this repo's config into whichever coding agents you have
 # installed. Auto-detects by default: checks each tool's CLI on PATH or home
-# directory, and syncs config for every one it finds. No tool is privileged
-# as "the" default target — Claude Code is one entry among several, defined
-# (like the rest) in tools.config.json.
+# directory, and syncs config for every one it finds.
+#
+# Claude Code is no longer synced by this script by default — it has its own,
+# better install path: a native plugin (agents/skills/references, tracked by
+# git automatically) plus the /addit-harness:setup skill (rules/settings.json,
+# which plugins can't carry). See the README's Install section, or
+# docs/plans/2026-07-10-claude-code-plugin-packaging.md for why. `--target
+# claude` still works below as an explicit legacy path for anyone who'd
+# rather not use plugins.
 #
 # Usage:
-#   ./install.sh              # auto-detect: sync every supported tool found
+#   ./install.sh              # auto-detect: sync every supported tool found (claude excluded)
 #   ./install.sh --target X   # force one tool: claude|cursor|kiro|codex|copilot
 #   ./install.sh --link       # symlink instead of copy (edits track git)
 #   ./install.sh --plugins    # claude only: register marketplaces + install official plugins
@@ -28,7 +34,7 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG="$REPO_DIR/tools.config.json"
 KNOWN_TOOLS=(claude cursor kiro codex copilot)
-AUTO_DETECT_TOOLS=(claude cursor kiro codex)
+AUTO_DETECT_TOOLS=(cursor kiro codex)
 
 MODE="copy"
 DO_PLUGINS=0
@@ -157,6 +163,13 @@ TARGETS=()
 if [[ -n "$FORCE_TARGET" ]]; then
   TARGETS=("$FORCE_TARGET")
 else
+  if is_detected claude; then
+    info "claude: detected, but not synced by this script — install the plugin instead:"
+    info "  /plugin marketplace add addit-digital/addit-harness"
+    info "  /plugin install addit-harness@addit"
+    info "  /addit-harness:setup"
+    info "(pass --target claude to use this script for Claude Code anyway)"
+  fi
   for t in "${AUTO_DETECT_TOOLS[@]}"; do
     if is_detected "$t"; then
       TARGETS+=("$t")
@@ -166,8 +179,9 @@ else
   done
   if [[ ${#TARGETS[@]} -eq 0 ]]; then
     echo
-    echo "No supported coding agents detected on this machine."
-    echo "Install one of: claude, cursor, kiro, codex — or force with --target <tool>."
+    echo "No supported coding agents detected on this machine (besides Claude Code,"
+    echo "which uses the plugin path above)."
+    echo "Install one of: cursor, kiro, codex — or force with --target <tool>."
     exit 0
   fi
 fi

@@ -63,8 +63,9 @@ Before writing code, load this setup's curated conventions and follow them. They
 are the source of truth, not your priors:
 
 1. You're touching TypeScript/React/Next/RN (`.ts`/`.tsx`).
-2. Read the always-on `~/.claude/rules/typescript.md` (thin pointer) **and** the
-   guide(s) under `~/.claude/references/typescript/` — start at that directory's
+2. Read the always-on `rules/typescript.md` (thin pointer, under `~/.claude/rules/`
+   or the current project's `rules/` depending on install scope) **and** the
+   guide(s) under `${CLAUDE_PLUGIN_ROOT}/references/typescript/` — start at that directory's
    `README.md`, then the guide it points to.
 3. Write code that satisfies those conventions. If you must deviate, say why.
 4. **For any UI/visual work**, also load `.claude/design-conventions.md` from the

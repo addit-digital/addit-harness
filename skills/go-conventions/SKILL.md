@@ -2,7 +2,7 @@
 name: go-conventions
 description: Scan the current Go repo and write .claude/go-conventions.md — a project-specific convention file that rules/go.md loads on every session instead of re-scanning the codebase from scratch. Use when starting work in a new Go repo, when conventions have drifted, or when --refresh is passed to merge in new patterns.
 user-invocable: true
-argument-hint: [--refresh]
+argument-hint: "[--refresh]"
 ---
 
 # /go-conventions — generate per-project Go conventions
@@ -86,7 +86,7 @@ existing content that is still valid. Never overwrite hand-edits — look for
 # Go conventions — {module-name}
 
 Derived from codebase scan on {date}. Maintained by `/go-conventions --refresh`.
-Global baseline: `~/.claude/references/go/app-erp-conventions.md`.
+Global baseline: `${CLAUDE_PLUGIN_ROOT}/references/go/app-erp-conventions.md`.
 
 > **Stack:** Go {version} · {key libs}
 ```
@@ -114,7 +114,7 @@ Do **not** commit the file unless the user asks.
 ## Notes
 
 - This skill writes to the *target project* repo, not to the addit-harness repo.
-- The file it generates is a supplement to `~/.claude/references/go/app-erp-conventions.md`,
+- The file it generates is a supplement to `${CLAUDE_PLUGIN_ROOT}/references/go/app-erp-conventions.md`,
   not a replacement. Put only the *delta* — what differs from or extends the global baseline.
 - If the project is a perfect match for the baseline (same stack, same patterns), say so
   and write a minimal file noting the match rather than duplicating all baseline content.

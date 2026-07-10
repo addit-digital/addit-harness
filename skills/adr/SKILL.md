@@ -2,7 +2,7 @@
 name: adr
 description: Use when the user makes or records a significant architectural or technical decision — choosing a framework, database, protocol, pattern, or trade-off ("we decided to use X instead of Y because..."), or explicitly asks to write an ADR. Captures the decision as a structured MADR-format Architecture Decision Record in docs/adr/.
 user-invocable: true
-argument-hint: [short decision title] [--full | --minimal]
+argument-hint: "[short decision title] [--full | --minimal]"
 ---
 
 # Architecture Decision Record (ADR) — MADR format
