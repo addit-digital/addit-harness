@@ -70,7 +70,19 @@ unrelated file that happens to share the name.
 ## When to re-run
 
 - After the plugin auto-updates (new `rules/`/`references/`/`settings.json`
-  content), re-run with the same `--scope` to pick up the changes.
+  content), re-run with the same `--scope` to pick up the changes. You don't
+  have to remember this yourself: the plugin ships a `SessionStart` hook
+  (`hooks/check-setup-version.sh`) that hashes just the files this script
+  copies (`CLAUDE.md`, `AGENTS.md`, `rules/`, `references/`,
+  `settings.json`) and compares it against a marker this script writes on
+  each run (`~/.claude/.addit-harness-setup-version` for global,
+  `.claude/.addit-harness-setup-version` for project). It's deliberately
+  content-based, not plugin-version-based: most releases only touch
+  `agents/`/`skills/`/`hooks/`, which the plugin loader already serves live
+  and need no re-sync — a version-only check would nag on every release
+  regardless of whether it touched anything this skill actually copies. It
+  also stays silent for a scope you've never run setup for — it only nags
+  about a sync you've already opted into.
 - To switch scope later (e.g. tried `--scope project`, now want it
   everywhere), re-run with `--scope global` — it's additive, doesn't remove
   the project-scoped files.

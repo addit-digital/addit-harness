@@ -117,6 +117,7 @@ merge any custom permissions/hooks back from the backup).
 | `skills/go-conventions/` | `/go-conventions [--refresh]` — scan a Go repo and write `.claude/go-conventions.md` (project-specific layer on top of the global baseline) | Authored |
 | `skills/design-conventions/` | `/design-conventions [--refresh]` — scan a TS/React project's existing UI layer and write `.claude/design-conventions.md` (visual design language: tokens, type/spacing/color scales, component lib, layout rhythm, state patterns). For greenfield projects, `@frontend-architect` generates this file instead. | Authored |
 | `skills/setup/` | `/addit-harness:setup [--scope global\|project] [--link]` — places `CLAUDE.md`/`AGENTS.md`/`rules/`/`references/`/`settings.json` for Claude Code (the parts the plugin can't carry natively) | Authored |
+| `hooks/` | `SessionStart` hook — reminds the user to re-run `/addit-harness:setup` once the plugin's version has drifted past what was last synced (tracked via a version marker `setup.sh` writes per scope) | Authored |
 | `settings.json` | Default model + permissions + official plugins (`enabledPlugins`) — Claude Code only, placed by `/addit-harness:setup` or `install.sh --target claude` | Authored |
 | `mcp.example.json` | Disabled Atlassian/DB scaffolding (opt-in) | Reference config |
 | `templates/CLAUDE.project.md` | Per-repo memory template | Authored |
