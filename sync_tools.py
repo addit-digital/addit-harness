@@ -247,14 +247,8 @@ def remap_tools(tools_csv, tool_map, drop_unmapped):
     return out
 
 
-# agents/SOURCES.md is provenance documentation, not an agent definition —
-# harmless to copy verbatim (claude target does, unchanged), but must not be
-# parsed as one when generating role-specific output for other tools.
-NON_AGENT_FILES = {"SOURCES.md"}
-
-
 def list_agent_files(src_dir):
-    return sorted(f for f in src_dir.glob("*.md") if f.name not in NON_AGENT_FILES)
+    return sorted(src_dir.glob("*.md"))
 
 
 def sync_agents_kiro(repo, home, cfg, backup_dir):

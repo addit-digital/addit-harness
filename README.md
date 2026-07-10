@@ -110,7 +110,8 @@ merge any custom permissions/hooks back from the backup).
 | `rules/engineering-loop.md` | Always-on plan→verify→commit model + anti-patterns; sets diagram-rich (mermaid) plan/design-doc standards | Authored |
 | `rules/{java,go,typescript}.md` | **Thin auto-loaded pointers** (Tier 1) — route to the references | Authored (routing only, no convention text) |
 | `references/{go,java,typescript}/` | **Convention guides + linked authorities, read on-demand** (Tier 2) | Go: codebase-derived from app-erp; Java/TS: vendored from recognized sources — see each `README.md` |
-| `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, frontend-architect, ux-designer, figma-designer, feature-investigator, backend-developer, frontend-developer, saas-legal-advisor, cloud-architect, devops-engineer | **Vendored + pinned** (except `backend-architect`/`frontend-architect`/`ux-designer`/`figma-designer`/`backend-developer`/`frontend-developer`/`saas-legal-advisor`, authored) — see `agents/SOURCES.md` |
+| `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, frontend-architect, ux-designer, figma-designer, feature-investigator, backend-developer, frontend-developer, saas-legal-advisor, cloud-architect, devops-engineer | **Vendored + pinned** (except `backend-architect`/`frontend-architect`/`ux-designer`/`figma-designer`/`backend-developer`/`frontend-developer`/`saas-legal-advisor`, authored) — see `AGENTS_SOURCES.md` |
+| `AGENTS_SOURCES.md` | Provenance table for vendored agents (source repo, commit SHA, changes) — kept at repo root, not inside `agents/`, since the Claude Code plugin auto-discovers every `.md` file in `agents/` as an agent | Authored |
 | `skills/adr/` | `/adr` — record Architecture Decision Records (**MADR 4.0**) | Adopts MADR (see `skills/SOURCES.md`) |
 | `skills/save-plan/` | `/save-plan` — persist an **implementation plan** to `docs/plans/` (or `--temp`) so mermaid renders in an IDE/GitHub. Architecture designs → `docs/solutions/`; review reports → `docs/architecture-reports/` (written directly by the relevant agent) | Authored |
 | `skills/go-conventions/` | `/go-conventions [--refresh]` — scan a Go repo and write `.claude/go-conventions.md` (project-specific layer on top of the global baseline) | Authored |
@@ -124,8 +125,8 @@ Three ways assets are delivered:
 - **Adopted (declarative):** official plugins enabled via `settings.json` — track
   their marketplace, safe to auto-update.
 - **Vendored (pinned):** subagents *and* Java/TS convention guides, copied in at a
-  fixed commit for reproducibility (provenance + license in `*/SOURCES.md` and
-  each `references/*/README.md`).
+  fixed commit for reproducibility (provenance + license in `AGENTS_SOURCES.md`,
+  `skills/SOURCES.md`, and each `references/*/README.md`).
 - **Authored (routing/process only):** `CLAUDE.md`, `rules/engineering-loop.md`,
   thin Tier-1 pointer rules, and the Go conventions file (codebase-derived).
 
@@ -481,7 +482,7 @@ Contributions welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md). Issues label
 - **Add a language rule:** drop a lean `rules/<lang>.md` with `paths:` frontmatter
   (Tier 1) and, if it needs depth, a `references/<lang>.md` it points to (Tier 2).
 - **Vendor another subagent:** copy the `.md` into `agents/`, add a row with its
-  source + commit SHA to `agents/SOURCES.md`.
+  source + commit SHA to `AGENTS_SOURCES.md`.
 - **Add a command/skill:** cherry-pick from
   [qdhenry/Claude-Command-Suite](https://github.com/qdhenry/Claude-Command-Suite)
   into `skills/`, record it in `skills/SOURCES.md`.
@@ -502,13 +503,18 @@ version something to point at:
 # 1. bump the version in .claude-plugin/plugin.json
 # 2. tag + push (validates plugin.json and the marketplace entry agree)
 claude plugin tag --push -m "addit-harness %s"
-# 3. publish release notes
-gh release create addit-harness--v0.1.0 --notes "..."
+# 3. publish release notes, using the tag claude plugin tag just created
+gh release create addit-harness--v<version> --notes "..."
 ```
 
 `claude plugin tag` creates a `addit-harness--v<version>` tag (not a bare
 `vX.Y.Z`) and refuses a dirty working tree or a duplicate tag unless
 `--force`; pass `--dry-run` to preview first.
+
+> `v0.1.0`, the first release, was tagged manually (`git tag 0.1.0`) before
+> this convention was settled — it predates `claude plugin tag` being used
+> here. It still installs and works fine; from `v0.2.0` on, use `claude
+> plugin tag` so every subsequent tag is validated and consistently named.
 
 **Versioning is manual, not tag-derived.** `plugin.json`'s `version` field is
 the source of truth — `claude plugin tag` reads it and creates a matching
