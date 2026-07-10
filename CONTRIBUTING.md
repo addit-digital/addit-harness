@@ -8,7 +8,7 @@ Contributions are welcome — bug reports, new subagents, language rules, and sk
 Drop a lean `rules/<lang>.md` with `paths:` frontmatter (Tier 1). If it needs depth, add a `references/<lang>.md` it points to (Tier 2). See `rules/go.md` as an example of a thin Tier-1 pointer.
 
 **Vendor another subagent**
-Copy the `.md` into `agents/`, add a row with its source URL + commit SHA to `agents/SOURCES.md`. Subagents should declare a `model:` in their frontmatter.
+Copy the `.md` into `agents/`, add a row with its source URL + commit SHA to `AGENTS_SOURCES.md`. Subagents should declare a `model:` in their frontmatter.
 
 **Add a skill**
 Cherry-pick from community sources into `skills/`, record it in `skills/SOURCES.md` with provenance (URL, commit, license).
