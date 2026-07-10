@@ -289,11 +289,12 @@ Integration with other agents:
 Before reporting, verify the change follows this setup's vendored language
 conventions:
 1. Detect the language(s) in the diff (`.go`, `.java`, `.ts`/`.tsx`).
-2. Read the matching guide(s) under `~/.claude/references/<lang>/` (start at the
+2. Read the matching guide(s) under `${CLAUDE_PLUGIN_ROOT}/references/<lang>/` (start at the
    `README.md`, then the vendored guide it points to).
 3. Explicitly check the code against those conventions and the always-on
-   `~/.claude/rules/<lang>.md`. Report any violation as a finding with
-   `file:line` and the specific rule it breaks.
+   `rules/<lang>.md` (thin pointer, under `~/.claude/rules/` or the current
+   project's `rules/` depending on install scope). Report any violation as a
+   finding with `file:line` and the specific rule it breaks.
 Treat unaddressed convention violations as review blockers alongside correctness
 and security issues.
 

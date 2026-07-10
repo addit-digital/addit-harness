@@ -2,7 +2,7 @@
 name: design-conventions
 description: Scan the current TS/React project's existing UI layer and write .claude/design-conventions.md — a project-specific visual design convention file that rules/typescript.md loads before UI work. Use when starting UI work in an existing project, when design conventions have drifted, or when --refresh is passed to merge in new patterns.
 user-invocable: true
-argument-hint: [--refresh]
+argument-hint: "[--refresh]"
 ---
 
 # /design-conventions — generate per-project visual design conventions

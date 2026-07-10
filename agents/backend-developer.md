@@ -56,10 +56,11 @@ Before writing code in a language, load this setup's curated conventions and
 follow them. They are the source of truth, not your priors:
 
 1. Detect the language(s) you're touching (`.go`, `.java`, `.ts`).
-2. Read the always-on `~/.claude/rules/<lang>.md` (thin pointer) **and** the
-   matching guide(s) under `~/.claude/references/<lang>/` — start at that
+2. Read the always-on `rules/<lang>.md` (thin pointer, under `~/.claude/rules/`
+   or the current project's `rules/` depending on install scope) **and** the
+   matching guide(s) under `${CLAUDE_PLUGIN_ROOT}/references/<lang>/` — start at that
    directory's `README.md`, then the guide it points to. For `.ts` backend
-   files, that means `~/.claude/references/typescript/backend/` (Bun
+   files, that means `${CLAUDE_PLUGIN_ROOT}/references/typescript/backend/` (Bun
    conventions + Hono/Elysia authorities) — **not** `references/typescript/react/`,
    which is `@frontend-developer`'s territory.
 3. For Go, also read the per-project `.claude/go-conventions.md` (or

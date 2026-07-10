@@ -50,6 +50,35 @@ a pile of bespoke skills. It deliberately reuses Claude Code's built-ins
 
 ## Install
 
+### Claude Code
+
+No clone, no shell script — install the plugin from inside Claude Code:
+
+```
+/plugin marketplace add addit-digital/addit-harness
+/plugin install addit-harness@addit
+/addit-harness:setup
+```
+
+- The plugin (`agents/`, `skills/`) tracks this repo via git automatically —
+  no re-run needed to pick up updates.
+- `/addit-harness:setup` places the parts a plugin can't carry natively
+  (`CLAUDE.md`, `AGENTS.md`, `rules/`, `references/`, `settings.json`) — run
+  it once after installing, and again after an update to re-sync. Add
+  `--scope project` to confine it to the current project instead of
+  `~/.claude` (default), or `--link` to symlink instead of copy.
+- The plugin itself can also be scoped: `/plugin install
+  addit-harness@addit --scope local` keeps it to just the current repo;
+  `--scope project` shares it with collaborators via that repo's
+  `.claude/settings.json`; default `--scope user` is global.
+- Plugin-provided agents are namespaced — invoke them as
+  `@addit-harness:code-reviewer`, not bare `@code-reviewer`.
+- Prefer the old copy-based install instead? `./install.sh --target claude`
+  still works (see below) — it's no longer run automatically by
+  `./install.sh` with no arguments.
+
+### Cursor / Kiro / Codex CLI
+
 ```bash
 git clone <this-repo> ~/src/addit-harness && cd ~/src/addit-harness
 ./install.sh              # auto-detect: sync every supported agent found on this machine
@@ -58,15 +87,16 @@ git clone <this-repo> ~/src/addit-harness && cd ~/src/addit-harness
 ./install.sh --plugins    # claude only: also register marketplaces + install official plugins
 ```
 
-`install.sh` checks each tool's CLI on `PATH` or home directory (`~/.claude`,
-`~/.cursor`, `~/.kiro`, `~/.codex`) and syncs config into whichever it finds —
-no tool is a privileged default, Claude Code included. It merges per-file into
-each tool's home, never clobbering the whole directory, so `projects/`,
-history, and existing hooks are preserved. Re-running backs up anything it
-replaces to `<tool-home>/.install-backups/<timestamp>/`.
+`install.sh` checks each tool's CLI on `PATH` or home directory (`~/.cursor`,
+`~/.kiro`, `~/.codex`) and syncs config into whichever it finds. It merges
+per-file into each tool's home, never clobbering the whole directory, so
+`projects/`, history, and existing hooks are preserved. Re-running backs up
+anything it replaces to `<tool-home>/.install-backups/<timestamp>/`.
 
-> If you already had a `~/.claude/settings.json`, it's backed up and replaced —
-> merge any custom permissions/hooks back from the backup.
+Claude Code has its own plugin-based install above and is no longer synced by
+a plain `./install.sh` run; `--target claude` still works if you'd rather use
+the copy-based path (backs up and replaces `~/.claude/settings.json` too —
+merge any custom permissions/hooks back from the backup).
 
 ## What's in here
 
@@ -74,7 +104,8 @@ replaces to `<tool-home>/.install-backups/<timestamp>/`.
 |------|------|------------------|
 | `AGENTS.md` | Canonical, tool-neutral global memory: operating model + hard rules. Every tool's baseline is generated from this file (see *Other coding agents*) | Authored; follows [Anthropic memory](https://code.claude.com/docs/en/memory) & [best-practices](https://www.anthropic.com/engineering/claude-code-best-practices) |
 | `CLAUDE.md` | 2-line `@import` pointer (`@AGENTS.md`, `@rules/engineering-loop.md`) — Claude Code specifically requires this literal filename | Authored |
-| `tools.config.json` | Declarative per-tool mapping: where each artifact goes for claude/cursor/kiro/codex/copilot, and the few real content transforms (Kiro tool tags, Codex TOML) | Authored |
+| `.claude-plugin/plugin.json` + `marketplace.json` | Self-hosted Claude Code plugin (`addit-harness@addit`) — `agents/` and `skills/` auto-discovered from here | Authored |
+| `tools.config.json` | Declarative per-tool mapping: where each artifact goes for cursor/kiro/codex/copilot (Claude Code uses the plugin above instead), and the few real content transforms (Kiro tool tags, Codex TOML) | Authored |
 | `sync_tools.py` | Interpreter for `tools.config.json`, called once per tool by `install.sh` | Authored |
 | `rules/engineering-loop.md` | Always-on plan→verify→commit model + anti-patterns; sets diagram-rich (mermaid) plan/design-doc standards | Authored |
 | `rules/{java,go,typescript}.md` | **Thin auto-loaded pointers** (Tier 1) — route to the references | Authored (routing only, no convention text) |
@@ -84,7 +115,8 @@ replaces to `<tool-home>/.install-backups/<timestamp>/`.
 | `skills/save-plan/` | `/save-plan` — persist an **implementation plan** to `docs/plans/` (or `--temp`) so mermaid renders in an IDE/GitHub. Architecture designs → `docs/solutions/`; review reports → `docs/architecture-reports/` (written directly by the relevant agent) | Authored |
 | `skills/go-conventions/` | `/go-conventions [--refresh]` — scan a Go repo and write `.claude/go-conventions.md` (project-specific layer on top of the global baseline) | Authored |
 | `skills/design-conventions/` | `/design-conventions [--refresh]` — scan a TS/React project's existing UI layer and write `.claude/design-conventions.md` (visual design language: tokens, type/spacing/color scales, component lib, layout rhythm, state patterns). For greenfield projects, `@frontend-architect` generates this file instead. | Authored |
-| `settings.json` | Default model + permissions + official plugins (`enabledPlugins`) | Authored |
+| `skills/setup/` | `/addit-harness:setup [--scope global\|project] [--link]` — places `CLAUDE.md`/`AGENTS.md`/`rules/`/`references/`/`settings.json` for Claude Code (the parts the plugin can't carry natively) | Authored |
+| `settings.json` | Default model + permissions + official plugins (`enabledPlugins`) — Claude Code only, placed by `/addit-harness:setup` or `install.sh --target claude` | Authored |
 | `mcp.example.json` | Disabled Atlassian/DB scaffolding (opt-in) | Reference config |
 | `templates/CLAUDE.project.md` | Per-repo memory template | Authored |
 
@@ -125,10 +157,13 @@ whichever conventions apply.
 ## Other coding agents
 
 `AGENTS.md` is the single canonical source — every tool's config is generated
-from it (plus `rules/`, `references/`, `agents/`) by `sync_tools.py`, driven by
-the declarative mapping in `tools.config.json`. Claude Code is one entry in
-that mapping, not a privileged default: `install.sh` treats it exactly like
-the others.
+from it (plus `rules/`, `references/`, `agents/`). For Cursor/Kiro/Codex CLI
+that generation is `sync_tools.py`, driven by the declarative mapping in
+`tools.config.json` (Claude Code is still one entry in that mapping too, kept
+for the `install.sh --target claude` legacy path). Claude Code's primary path
+is different — the same source files ship as a native plugin instead (see
+*Install* above), not because it's a privileged default, but because it's the
+one tool with a real plugin/marketplace system built to carry them.
 
 Most of what gets synced is **placement**, not transformation — same content,
 different path and frontmatter key names. Two tools need a real content
@@ -137,8 +172,8 @@ differs from Claude's exact tool names:
 
 | Tool | Baseline (`AGENTS.md` + engineering loop) | Language conventions | Subagents (`agents/*.md`) |
 |------|------|------|------|
-| **Claude Code** | `~/.claude/CLAUDE.md` (`@import`) | `~/.claude/rules/*.md` (auto-load via `paths:`) | `~/.claude/agents/*.md` — passthrough |
-| **Cursor** | `~/.cursor/rules/global.mdc` (`alwaysApply`) | `~/.cursor/rules/*.mdc` (`globs`) | Nothing to do — Cursor 2.4+ reads `~/.claude/agents/*.md` natively |
+| **Claude Code** | Plugin: `agents/`/`skills/` auto-discovered. `/addit-harness:setup`: `~/.claude/CLAUDE.md` (`@import`) | `/addit-harness:setup`: `~/.claude/rules/*.md` (auto-load via `paths:`) | Plugin, auto-discovered — invoke as `@addit-harness:<name>` |
+| **Cursor** | `~/.cursor/rules/global.mdc` (`alwaysApply`) | `~/.cursor/rules/*.mdc` (`globs`) | Cursor 2.4+ reads `~/.claude/agents/*.md` natively — **only if that directory is populated.** Plugin-only Claude Code installs no longer write there; run `install.sh --target claude` (or its own future Cursor plugin, see Roadmap) if you want Cursor to pick these up too |
 | **Kiro** | `~/.kiro/steering/global.md` (`inclusion: always`) | `~/.kiro/steering/*.md` (`inclusion: fileMatch`) | `~/.kiro/agents/*.md` — tool names remapped to Kiro's category tags (`read`/`write`/`shell`/`web`/...) |
 | **Codex CLI** | `~/.codex/AGENTS.md` (native filename, no rename needed) | folded into the same `AGENTS.md` | `~/.codex/agents/*.toml` — converted to TOML; tool-restriction becomes a derived `sandbox_mode` (`read-only` vs `workspace-write`), since Codex has no per-tool allowlist |
 | **GitHub Copilot** | *(planned — see Roadmap)* | | |
@@ -423,6 +458,13 @@ Both Atlassian and database MCP are intentionally **off** for now. To enable:
 
 See [open issues](https://github.com/addit-digital/addit-harness/issues?q=label%3Aroadmap) for planned work. Candidates:
 
+- **Native plugin packaging for Cursor, Kiro, and Codex CLI** — all three have
+  since shipped their own plugin/marketplace systems (Cursor plugins,
+  Kiro Powers, Codex CLI plugins), analogous to what Claude Code now has
+  above. Each has its own manifest format and real gaps (Kiro Powers can't
+  bundle custom agents; Codex CLI has an open team-rollout limitation), so
+  each is its own follow-up rather than one change — see
+  `docs/plans/2026-07-10-claude-code-plugin-packaging.md`'s *Out of scope*.
 - **GitHub Copilot support** — project-scoped bundle (`.github/copilot-instructions.md`,
   `.github/instructions/*.instructions.md`, `.github/agents/*.agent.md`), since
   Copilot has no machine-wide home directory to sync into like the other tools
@@ -449,3 +491,29 @@ Contributions welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md). Issues label
   `./CLAUDE.md` and fill it in. Codebase-specific facts belong there, not global.
 
 Each addition should name the concrete pain it removes.
+
+## Releasing the Claude Code plugin
+
+Tagged releases, not rolling — a plain `/plugin marketplace add` tracks the
+default branch, so cutting a release is what gives anyone who wants to pin a
+version something to point at:
+
+```bash
+# 1. bump the version in .claude-plugin/plugin.json
+# 2. tag + push (validates plugin.json and the marketplace entry agree)
+claude plugin tag --push -m "addit-harness %s"
+# 3. publish release notes
+gh release create addit-harness--v0.1.0 --notes "..."
+```
+
+`claude plugin tag` creates a `addit-harness--v<version>` tag (not a bare
+`vX.Y.Z`) and refuses a dirty working tree or a duplicate tag unless
+`--force`; pass `--dry-run` to preview first.
+
+**Versioning is manual, not tag-derived.** `plugin.json`'s `version` field is
+the source of truth — `claude plugin tag` reads it and creates a matching
+git tag (and errors if `plugin.json` and the marketplace entry disagree); it
+does not go the other direction and infer a version from existing tags. So
+step 1 above (bump `version` by hand) always comes first — there's no
+`npm version`-style auto-bump or git-tag-derived versioning in the Claude
+Code plugin tooling today.
