@@ -1,12 +1,12 @@
 {
   "name": "addit-harness",
   "version": "0.1.0",
-  "description": "Turns Claude Code into a full product-development toolkit: an opinionated plan → verify → commit engineering workflow, specialized subagents for legal compliance, UX design, architecture, and Go/Java/TypeScript implementation, and a code reviewer that enforces your language conventions automatically. Curated and adapted from established open-source sources, not hand-rolled from scratch.",
+  "description": "Turns Claude Code into a full product-development toolkit: an opinionated plan → verify → commit engineering workflow, specialized subagents for legal compliance, UX design, backend/frontend/cloud architecture, Go/Java/TypeScript implementation, and DevOps/infrastructure (Terraform, Kubernetes, Docker, AWS/Azure/GCP), plus a code reviewer that enforces your language conventions automatically. Curated and adapted from established open-source sources, not hand-rolled from scratch.",
   "author": {
     "name": "Nicat Asgerzade"
   },
   "homepage": "https://github.com/addit-digital/addit-harness",
   "repository": "https://github.com/addit-digital/addit-harness",
   "license": "MIT",
-  "keywords": ["engineering-loop", "subagents", "code-review", "saas", "go", "java", "typescript", "plan-verify-commit", "ux-design", "architecture", "legal-compliance", "react", "nextjs", "spring", "bun", "code-quality", "developer-productivity"]
+  "keywords": ["engineering-loop", "subagents", "code-review", "saas", "go", "java", "typescript", "plan-verify-commit", "ux-design", "architecture", "legal-compliance", "react", "nextjs", "spring", "bun", "code-quality", "developer-productivity", "cloud", "devops", "infrastructure", "terraform", "kubernetes", "docker", "aws", "azure", "gcp"]
 }
