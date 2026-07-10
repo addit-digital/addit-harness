@@ -144,7 +144,7 @@ sync_tool() {
   fi
 }
 
-echo "claude-config: syncing coding-agent config (mode: $MODE)"
+echo "addit-harness: syncing coding-agent config (mode: $MODE)"
 echo
 
 if [[ "$FORCE_TARGET" == "copilot" ]]; then

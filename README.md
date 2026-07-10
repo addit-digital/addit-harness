@@ -1,4 +1,4 @@
-# claude-config
+# addit-harness
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Claude Code](https://img.shields.io/badge/Claude_Code-compatible-orange)
@@ -9,7 +9,7 @@
 ![Java](https://img.shields.io/badge/Java-ED8B00?logo=openjdk&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
 
-A coding agent's out-of-the-box config is a blank slate. This repo turns it into a **full digital product development kit** — covering every layer from idea to ship: legal compliance, UX design, architecture, implementation in Go · Java · TypeScript, and code review, all wired into a plan→verify→commit engineering loop. One-line install, auto-detecting whichever agent(s) you have. Philosophy: curate established assets and adapt them — don't hand-roll what already exists.
+A coding agent's out-of-the-box config is a blank slate. **addit-harness** is the config harness that turns it into a **full digital product development kit** — covering every layer from idea to ship: legal compliance, UX design, architecture, implementation in Go · Java · TypeScript, and code review, all wired into a plan→verify→commit engineering loop. One-line install, auto-detecting whichever agent(s) you have. Philosophy: curate established assets and adapt them — don't hand-roll what already exists.
 
 ---
 
@@ -51,7 +51,7 @@ a pile of bespoke skills. It deliberately reuses Claude Code's built-ins
 ## Install
 
 ```bash
-git clone <this-repo> ~/src/claude-config && cd ~/src/claude-config
+git clone <this-repo> ~/src/addit-harness && cd ~/src/addit-harness
 ./install.sh              # auto-detect: sync every supported agent found on this machine
 ./install.sh --target X   # force one: claude|cursor|kiro|codex (copilot: see Roadmap)
 ./install.sh --link       # symlink instead of copy, so edits track git
@@ -421,7 +421,7 @@ Both Atlassian and database MCP are intentionally **off** for now. To enable:
 
 ## Roadmap
 
-See [open issues](https://github.com/addit-digital/claude-config/issues?q=label%3Aroadmap) for planned work. Candidates:
+See [open issues](https://github.com/addit-digital/addit-harness/issues?q=label%3Aroadmap) for planned work. Candidates:
 
 - **GitHub Copilot support** — project-scoped bundle (`.github/copilot-instructions.md`,
   `.github/instructions/*.instructions.md`, `.github/agents/*.agent.md`), since
@@ -432,7 +432,7 @@ See [open issues](https://github.com/addit-digital/claude-config/issues?q=label%
 - `/design-review` skill — audit a `docs/solutions/` design doc against the project's conventions
 - `@security-reviewer` subagent — dedicated security-focused review pass
 
-Contributions welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md). Issues labeled [`good first issue`](https://github.com/addit-digital/claude-config/issues?q=label%3A%22good+first+issue%22) are a good entry point.
+Contributions welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md). Issues labeled [`good first issue`](https://github.com/addit-digital/addit-harness/issues?q=label%3A%22good+first+issue%22) are a good entry point.
 
 ## Extending
 
