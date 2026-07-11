@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "addit-harness",
-      "description": "Turns Claude Code into a full product-development toolkit: an opinionated plan → verify → commit engineering workflow, specialized subagents for legal compliance, UX design, backend/frontend/cloud architecture, Go/Java/TypeScript implementation, and DevOps/infrastructure (Terraform, Kubernetes, Docker, AWS/Azure/GCP), plus a code reviewer that enforces your language conventions automatically. Curated and adapted from established open-source sources, not hand-rolled from scratch.",
+      "description": "Turns Claude Code into a full product-development toolkit: an opinionated plan → verify → commit engineering workflow, specialized subagents for legal compliance, UX design, backend/frontend/cloud architecture, Go/Java/TypeScript implementation, and DevOps/infrastructure (Terraform, Kubernetes, Docker, AWS/Azure/GCP), plus a code reviewer that enforces your language conventions automatically. Subagents are namespaced — invoke as @addit-harness:code-reviewer, not @code-reviewer. Curated and adapted from established open-source sources, not hand-rolled from scratch.",
       "author": {
         "name": "Nicat Asgerzade"
       },
