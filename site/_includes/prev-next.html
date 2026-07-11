@@ -1,0 +1,27 @@
+{% assign docs = site.docs | where_exp: "p", "p.nav_exclude != true" | sort: "nav_order" %}
+{% assign current_index = 0 %}
+{% for doc in docs %}
+  {% if doc.url == page.url %}
+    {% assign current_index = forloop.index0 %}
+  {% endif %}
+{% endfor %}
+<nav class="docs-prev-next" aria-label="Docs pages">
+  {% assign prev_index = current_index | minus: 1 %}
+  {% if prev_index >= 0 %}
+    {% assign prev_doc = docs[prev_index] %}
+    <a class="docs-prev-next-link prev" href="{{ prev_doc.url | relative_url }}">
+      <span class="docs-prev-next-label">← Previous</span>
+      <span class="docs-prev-next-title">{{ prev_doc.title }}</span>
+    </a>
+  {% else %}
+    <span class="docs-prev-next-spacer" aria-hidden="true"></span>
+  {% endif %}
+  {% assign next_index = current_index | plus: 1 %}
+  {% if next_index < docs.size %}
+    {% assign next_doc = docs[next_index] %}
+    <a class="docs-prev-next-link next" href="{{ next_doc.url | relative_url }}">
+      <span class="docs-prev-next-label">Next →</span>
+      <span class="docs-prev-next-title">{{ next_doc.title }}</span>
+    </a>
+  {% endif %}
+</nav>

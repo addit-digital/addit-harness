@@ -10,3 +10,10 @@
 
 # Local docs — plans, solutions, and reports are project-local artifacts, not global config
 docs/
+
+# Jekyll site build artifacts (site/) — generated, not source
+site/_site/
+site/.jekyll-cache/
+site/vendor/
+site/.bundle/
+site/_config_version.yml

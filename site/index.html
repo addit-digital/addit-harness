@@ -1,0 +1,250 @@
+---
+layout: default
+title: Wire your agent into a full product team
+description: >-
+  addit-harness installs an opinionated plan → verify → commit loop, twelve
+  specialized subagents, and auto-loaded language conventions into Claude
+  Code, Cursor, Codex CLI, or Kiro — curated from established sources, not
+  hand-rolled.
+---
+<main id="main">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">Claude Code Plugin</span>
+        <h1>Wire your agent into a full <em>product&nbsp;team</em></h1>
+        <p class="lede">
+          A coding agent's default config is a blank slate. <code>addit-harness</code> installs
+          an opinionated plan → verify → commit loop, twelve specialized subagents, and
+          auto-loaded language conventions — curated from established sources, not hand-rolled.
+        </p>
+        <div class="cta-row">
+          <a href="{{ '/#install' | relative_url }}" class="btn btn-primary">Install the plugin →</a>
+          <a href="{{ '/docs/getting-started/' | relative_url }}" class="btn btn-ghost">Read the docs</a>
+        </div>
+        <p class="cta-note">MIT licensed · Go · Java · TypeScript · zero config to start</p>
+      </div>
+
+      <div>
+        <h2 class="install-heading" id="install">Install</h2>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <span class="lights"><span></span><span></span><span></span></span>
+            claude code
+          </div>
+          <div class="terminal-body">
+            <div class="ln">
+              <span class="prompt" aria-hidden="true">›</span>
+              <span class="cmd">/plugin marketplace add addit-digital/addit-harness</span>
+              {% include copy-button.html text="/plugin marketplace add addit-digital/addit-harness" %}
+            </div>
+            <div class="ln">
+              <span class="prompt" aria-hidden="true">›</span>
+              <span class="cmd">/plugin install addit-harness@addit</span>
+              {% include copy-button.html text="/plugin install addit-harness@addit" %}
+            </div>
+            <div class="ln">
+              <span class="prompt" aria-hidden="true">›</span>
+              <span class="cmd">/addit-harness:setup</span>
+              {% include copy-button.html text="/addit-harness:setup" %}
+            </div>
+            <div class="out">syncing agents/ · skills/ · rules/ · settings.json</div>
+
+            <div class="verify">
+              <p class="verify-label">Verify it worked</p>
+              <div class="ln">
+                <span class="prompt" aria-hidden="true">›</span>
+                <span class="cmd">/help</span>
+                {% include copy-button.html text="/help" %}
+              </div>
+              <div class="out verify-ok">✓ @addit-harness:code-reviewer and friends listed under Agents</div>
+            </div>
+          </div>
+          <div class="terminal-foot">
+            <span>3 commands, no clone required</span>
+            <span><b>● ready</b></span>
+          </div>
+        </div>
+
+        <div class="loop-wrap">
+          <svg viewBox="0 0 420 190" width="100%" role="img" aria-label="Plan, verify, commit loop diagram">
+            <path class="loop-path" d="M 70 40 C 140 10, 260 10, 330 40" marker-end="url(#arrow)"></path>
+            <path class="loop-path" d="M 355 65 C 375 100, 340 140, 275 155" marker-end="url(#arrow)"></path>
+            <path class="loop-path" d="M 235 160 C 150 172, 80 150, 55 105" marker-end="url(#arrow)"></path>
+            <defs>
+              <marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+                <path d="M0,0 L8,4 L0,8 Z" fill="var(--line-strong)"></path>
+              </marker>
+            </defs>
+            <g>
+              <circle cx="50" cy="55" r="26" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5"></circle>
+              <text x="50" y="59" text-anchor="middle" class="loop-node-label">PLAN</text>
+            </g>
+            <g>
+              <circle cx="365" cy="55" r="26" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="1.5"></circle>
+              <text x="365" y="59" text-anchor="middle" class="loop-node-label">VERIFY</text>
+            </g>
+            <g>
+              <circle cx="245" cy="163" r="26" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="1.5"></circle>
+              <text x="245" y="167" text-anchor="middle" class="loop-node-label">COMMIT</text>
+            </g>
+            <text x="210" y="20" text-anchor="middle" class="loop-label">THE ENGINEERING LOOP — ALWAYS ON</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="compat" aria-labelledby="compat-label">
+    <div class="wrap">
+      <div class="tag compat-label" id="compat-label">One config · four agents</div>
+      <div class="compat">
+        <div class="compat-item primary">
+          <div class="compat-pin"></div>
+          <div class="compat-name">Claude Code</div>
+          <div class="compat-role">native plugin · this listing</div>
+        </div>
+        <div class="compat-item">
+          <div class="compat-pin"></div>
+          <div class="compat-name"><a href="{{ '/docs/other-agents/#cursor' | relative_url }}">Cursor</a></div>
+          <div class="compat-role">rules sync</div>
+        </div>
+        <div class="compat-item">
+          <div class="compat-pin"></div>
+          <div class="compat-name"><a href="{{ '/docs/other-agents/#codex-cli' | relative_url }}">Codex CLI</a></div>
+          <div class="compat-role">AGENTS.md sync</div>
+        </div>
+        <div class="compat-item">
+          <div class="compat-pin"></div>
+          <div class="compat-name"><a href="{{ '/docs/other-agents/#kiro' | relative_url }}">Kiro</a></div>
+          <div class="compat-role">steering sync</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="tag">Before / After</div>
+          <h2>Blank slate vs. harnessed</h2>
+        </div>
+        <p class="section-desc">Same agent. The difference is what fires automatically, every session, on every machine.</p>
+      </div>
+      <div class="compare">
+        <table class="compare-table">
+          <thead>
+            <tr><th>Layer</th><th>Blank slate</th><th>With addit-harness</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Engineering process</td><td class="bad" data-label="Blank slate">Ad-hoc, re-decided every session</td><td class="good" data-label="With addit-harness">Plan → verify → commit loop baked in</td></tr>
+            <tr><td>Legal compliance</td><td class="bad" data-label="Blank slate">Manual check, or skipped before shipping</td><td class="good" data-label="With addit-harness">@saas-legal-advisor assesses every feature's legal impact</td></tr>
+            <tr><td>Language conventions</td><td class="bad" data-label="Blank slate">Re-pasted into context every session</td><td class="good" data-label="With addit-harness">Auto-loaded per file type — Go, Java, TypeScript</td></tr>
+            <tr><td>Code review</td><td class="bad" data-label="Blank slate">"Hey Claude, can you review this?"</td><td class="good" data-label="With addit-harness">@code-reviewer enforces conventions with file:line citations</td></tr>
+            <tr><td>UX &amp; design</td><td class="bad" data-label="Blank slate">Describe it and hope</td><td class="good" data-label="With addit-harness">@ux-designer → @figma-designer → @frontend-architect pipeline</td></tr>
+            <tr><td>New machine</td><td class="bad" data-label="Blank slate">Redo everything by hand</td><td class="good" data-label="With addit-harness">Three commands</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="tag">What's wired in</div>
+          <h2>Six connectors, one harness</h2>
+        </div>
+        <p class="section-desc">Every layer of the build — idea to ship — has a specialized agent behind it.</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature">
+          <span class="feature-index">01 · LOOP</span>
+          <h3>Plan → verify → commit</h3>
+          <p>Non-trivial work gets a written plan, small verifiable units, and real verification before it's called done — never an unverified "done."</p>
+        </div>
+        <div class="feature">
+          <span class="feature-index">02 · AGENTS</span>
+          <h3>12 specialized subagents</h3>
+          <p>Legal compliance, UX design, backend/frontend/cloud architecture, Go/Java/TS implementation, and DevOps — each scoped, each with its own model tier.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-index">03 · CONVENTIONS</span>
+          <h3>Tiered language rules</h3>
+          <p>Go, Java, and TypeScript conventions auto-load per file type — thin pointers at all times, deep references pulled in only for substantial work.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-index">04 · REVIEW</span>
+          <h3>Convention-aware review</h3>
+          <p>@code-reviewer checks correctness, security, and adherence to your vendored conventions — with file:line citations, not vague notes.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-index">05 · CURATED</span>
+          <h3>Vendored, not vibes</h3>
+          <p>Assets are adopted from established sources and pinned at a commit — provenance tracked in AGENTS_SOURCES.md. A thin curation layer, not bespoke skills.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-index">06 · PORTABLE</span>
+          <h3>One source, four agents</h3>
+          <p>AGENTS.md is the canonical memory — Claude Code, Cursor, Codex CLI, and Kiro all sync from the same source of truth.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how-it-works">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="tag">How it works</div>
+          <h2>One feature, six handoffs</h2>
+        </div>
+        <p class="section-desc">A concrete build, start to ship — the subagents from "What's wired in," in the order they actually fire.</p>
+      </div>
+      <div class="pipeline">
+        <div class="pipeline-step">
+          <span class="pipeline-step-index">01</span>
+          <p class="pipeline-step-name">Investigate</p>
+          <p class="pipeline-step-who">@feature-investigator</p>
+        </div>
+        <div class="pipeline-step">
+          <span class="pipeline-step-index">02</span>
+          <p class="pipeline-step-name">Legal + UX</p>
+          <p class="pipeline-step-who">@saas-legal-advisor · @ux-designer</p>
+        </div>
+        <div class="pipeline-step">
+          <span class="pipeline-step-index">03</span>
+          <p class="pipeline-step-name">Architecture</p>
+          <p class="pipeline-step-who">@frontend-architect</p>
+        </div>
+        <div class="pipeline-step">
+          <span class="pipeline-step-index">04</span>
+          <p class="pipeline-step-name">Build</p>
+          <p class="pipeline-step-who">@backend-developer · @frontend-developer</p>
+        </div>
+        <div class="pipeline-step">
+          <span class="pipeline-step-index">05</span>
+          <p class="pipeline-step-name">Review</p>
+          <p class="pipeline-step-who">@code-reviewer</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="final-cta">
+    <div class="wrap">
+      <div class="tag" style="justify-content:center;">Get started</div>
+      <h2>Three commands. Every session, wired.</h2>
+      <p class="section-desc">Install from the Claude Code plugin marketplace — no clone, no shell script.</p>
+      <div class="cta-row">
+        <a href="{{ '/#install' | relative_url }}" class="btn btn-primary">Install the plugin →</a>
+        <a href="https://github.com/{{ site.repository }}" class="btn btn-ghost">
+          <svg class="icon-gh" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"></path></svg>
+          View on GitHub
+        </a>
+      </div>
+    </div>
+  </section>
+</main>

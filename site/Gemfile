@@ -1,0 +1,14 @@
+source "https://rubygems.org"
+
+# Matches the GitHub Pages build environment so local `bundle exec jekyll
+# build/serve` behaves the same as the CI build in deploy-docs.yml.
+gem "github-pages", group: :jekyll_plugins
+
+gem "webrick", "~> 1.8" # required for `jekyll serve` on Ruby >= 3
+
+# No longer bundled with Ruby by default (>= 3.4) but still required by the
+# `github-pages`-pinned Jekyll 3.9 toolchain.
+gem "csv"
+gem "base64"
+gem "logger"
+gem "bigdecimal"

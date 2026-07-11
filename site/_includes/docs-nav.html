@@ -1,0 +1,23 @@
+{% assign groups = "Start,Reference,Guides,Project" | split: "," %}
+{% assign docs = site.docs | where_exp: "p", "p.nav_exclude != true" | sort: "nav_order" %}
+<nav aria-label="Documentation" class="docs-nav">
+  {% for group in groups %}
+    {% assign group_docs = docs | where: "nav_group", group %}
+    {% if group_docs.size > 0 %}
+      <div class="docs-nav-group">
+        <p class="docs-nav-heading">{{ group }}</p>
+        <ul>
+          {% for doc in group_docs %}
+            <li>
+              {% if doc.url == page.url %}
+                <a href="{{ doc.url | relative_url }}" aria-current="page">{{ doc.title }}</a>
+              {% else %}
+                <a href="{{ doc.url | relative_url }}">{{ doc.title }}</a>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+  {% endfor %}
+</nav>
