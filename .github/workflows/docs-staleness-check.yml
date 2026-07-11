@@ -1,0 +1,52 @@
+name: Docs staleness check
+
+# Non-blocking nudge: if a PR bumps plugin.json's version but doesn't touch
+# the docs, remind the author to consider updating them too. See
+# docs/plans/2026-07-11-harness-website.md, Phase 3.
+on:
+  pull_request:
+    paths:
+      - ".claude-plugin/plugin.json"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check version bump vs docs update
+        id: check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          version_changed=false
+          if git diff "$BASE_SHA" "$HEAD_SHA" -- .claude-plugin/plugin.json | grep -qE '^\+\s*"version":'; then
+            version_changed=true
+          fi
+
+          docs_changed=false
+          if git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- site/_docs/ | grep -q .; then
+            docs_changed=true
+          fi
+
+          echo "version_changed=$version_changed" >> "$GITHUB_OUTPUT"
+          echo "docs_changed=$docs_changed" >> "$GITHUB_OUTPUT"
+
+      - name: Comment reminder
+        if: steps.check.outputs.version_changed == 'true' && steps.check.outputs.docs_changed == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr comment "$PR_NUMBER" --body "$(cat <<'EOF'
+          This PR bumps `plugin.json`'s version but doesn't touch `site/_docs/`. If this release changes user-facing behavior, consider updating the docs too — non-blocking reminder.
+          EOF
+          )"

@@ -1,0 +1,82 @@
+name: Release
+
+# Manual trigger only — the version-bump *decision* stays a human choice
+# (existing "versioning is manual, not tag-derived" philosophy). This is a
+# CI-runnable path for the same steps documented in
+# site/_docs/extending.md#releasing-the-claude-code-plugin; `claude plugin
+# tag --push` run locally still works exactly as before. See
+# docs/plans/2026-07-11-harness-website.md, Phase 5.
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump size"
+        required: true
+        default: "patch"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump plugin.json version
+        id: bump
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          current="$(jq -r '.version' .claude-plugin/plugin.json)"
+
+          IFS='.' read -r major minor patch <<< "$current"
+          case "$BUMP" in
+            major) major=$((major + 1)); minor=0; patch=0 ;;
+            minor) minor=$((minor + 1)); patch=0 ;;
+            patch) patch=$((patch + 1)) ;;
+            *) echo "::error::unknown bump type: $BUMP"; exit 1 ;;
+          esac
+          next="$major.$minor.$patch"
+
+          tmp="$(mktemp)"
+          jq --arg v "$next" '.version = $v' .claude-plugin/plugin.json > "$tmp"
+          mv "$tmp" .claude-plugin/plugin.json
+
+          echo "version=$next" >> "$GITHUB_OUTPUT"
+          echo "tag=addit-harness--v$next" >> "$GITHUB_OUTPUT"
+
+      - name: Commit version bump
+        env:
+          NEW_VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          git add .claude-plugin/plugin.json
+          git commit -m "chore: bump plugin version to v$NEW_VERSION"
+          git push origin HEAD:main
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Tag the release
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: claude plugin tag --push -m "addit-harness %s"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.bump.outputs.tag }}
+        run: gh release create "$RELEASE_TAG" --generate-notes

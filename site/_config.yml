@@ -1,0 +1,58 @@
+title: addit-harness
+tagline: Wire your coding agent into a full product team
+description: >-
+  addit-harness turns Claude Code, Cursor, Codex CLI, or Kiro into a full
+  product-development toolkit — an opinionated plan → verify → commit
+  engineering loop, specialized subagents, and auto-loaded language
+  conventions, curated from established sources.
+url: "https://tools.addit.digital"
+baseurl: "/harness"
+repository: addit-digital/addit-harness
+
+# Overridden by deploy-docs.yml at build time (injects the released tag);
+# falls back to this default for local builds/preview.
+version: "dev"
+
+# Explicitly disables the github-pages gem's default theme
+# (jekyll-theme-primer, which it otherwise applies silently) — this is a
+# custom-built layout/CSS site per the plan, not a theme-based one.
+theme: null
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+sass:
+  style: compressed
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+collections:
+  docs:
+    output: true
+    permalink: /docs/:path/
+
+defaults:
+  - scope:
+      path: ""
+      type: docs
+    values:
+      layout: docs
+  - scope:
+      path: ""
+    values:
+      layout: default
+      # jekyll-seo-tag (pinned old version via the github-pages gem) only
+      # reads image from page front matter, not a site-level default — so
+      # inject it here rather than a dead top-level `image:` config key.
+      image: /assets/img/og-card.png
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - vendor
+  - node_modules

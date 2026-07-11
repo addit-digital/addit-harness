@@ -32,6 +32,33 @@ hand-roll what already exists. The repo is a thin **curation + config layer**, n
 a pile of bespoke skills. It deliberately reuses Claude Code's built-ins
 (`/code-review`, `/simplify`, `/verify`, `/run`, `/init`, `deep-research`).
 
+## Documentation
+
+The condensed, browsable version of this README lives at
+**[tools.addit.digital/harness/docs/](https://tools.addit.digital/harness/docs/getting-started/)**
+— grouped sidebar, on-page tables of contents, and per-tool install pages.
+Prefer browsing in-repo instead? Start at
+[`site/_docs/README.md`](site/_docs/README.md).
+
+## Contents
+
+- [Why this config?](#why-this-config)
+- [Install](#install)
+  - [Claude Code](#claude-code)
+  - [Cursor / Kiro / Codex CLI](#cursor--kiro--codex-cli)
+- [What's in here](#whats-in-here)
+  - [Language conventions — two tiers + per-project layer](#language-conventions--two-tiers--per-project-layer)
+- [Other coding agents](#other-coding-agents)
+  - [Iterating & giving feedback on plans or code](#iterating--giving-feedback-on-plans-or-code)
+  - [Official plugins (declared in `settings.json`)](#official-plugins-declared-in-settingsjson)
+  - [Subagents](#subagents)
+- [Use cases](#use-cases)
+- [Model & cost](#model--cost)
+- [Enabling MCP (later)](#enabling-mcp-later)
+- [Roadmap](#roadmap)
+- [Extending](#extending)
+- [Releasing the Claude Code plugin](#releasing-the-claude-code-plugin)
+
 ## Why this config?
 
 **Without it:** Claude Code starts as a blank slate — no engineering loop, no conventions, no subagents. You either wing it session to session or spend hours wiring up memory, rules, and delegation yourself, then rebuild it on every machine.

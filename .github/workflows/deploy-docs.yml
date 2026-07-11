@@ -1,0 +1,93 @@
+name: Deploy docs
+
+# Triggers on a tagged release (the tag `release.yml` pushes) and on manual
+# dispatch, since a real tag push can't be safely test-triggered mid-build-out.
+# addit-harness never enables its own GitHub Pages — this workflow builds the
+# site and publishes it into the addit-digital/addit-tools-web hub repo's `harness/`
+# subfolder instead. See docs/plans/2026-07-11-harness-website.md, Phase 3.
+on:
+  push:
+    tags:
+      - "addit-harness--v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to inject as site.version (manual test runs only)"
+        required: false
+        default: "dev"
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine version
+        id: version
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+          DISPATCH_VERSION: ${{ inputs.version }}
+        run: |
+          if [ "$REF_TYPE" = "tag" ]; then
+            echo "version=$REF_NAME" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=$DISPATCH_VERSION" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Pinned to 3.1 — the github-pages gem pins Jekyll 3.9 / Liquid 4.0.3,
+      # which still call Ruby's removed-in-3.2 taint/trust APIs internally.
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@d45b1a4e94b71acab930e56e79c6aa188764e7f9 # v1.316.0
+        with:
+          ruby-version: "3.1"
+          bundler-cache: true
+          working-directory: site
+
+      - name: Fetch GitHub releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api "repos/${{ github.repository }}/releases" > site/_data/releases.json
+
+      - name: Inject version into config
+        env:
+          SITE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          echo "version: \"$SITE_VERSION\"" > site/_config_version.yml
+
+      - name: Build site
+        working-directory: site
+        run: bundle exec jekyll build --baseurl /harness --config _config.yml,_config_version.yml
+
+      # baseurl lint (frontend-architecture review §5) — catches any internal
+      # href/src/CSS url() that isn't relative_url-safe before it ships and
+      # silently 404s once mounted under /harness/.
+      - name: Lint for root-absolute internal paths
+        working-directory: site
+        run: |
+          if grep -rnP '(href|src)="/(?!harness/)' _site || grep -rnP 'url\(\s*/(?!harness/)' _site; then
+            echo "::error::root-absolute internal path found — will 404 under /harness/"
+            exit 1
+          fi
+          echo "no root-absolute internal paths found"
+
+      - name: Publish to addit-digital/addit-tools-web (harness/)
+        uses: peaceiris/actions-gh-pages@1ef5a1b1df4c63fe21a2242edbee6cac921ece01 # v4.1.0
+        with:
+          deploy_key: ${{ secrets.TOOLS_HUB_DEPLOY_KEY }}
+          external_repository: addit-digital/addit-tools-web
+          publish_branch: gh-pages
+          publish_dir: site/_site
+          destination_dir: harness
+          # The hub repo's gh-pages branch also carries hand-authored root
+          # files (index.html, CNAME, 404.html, robots.txt — Phase 4) outside
+          # this destination_dir. Without keep_files, this action wipes the
+          # whole branch before publishing and would delete them.
+          keep_files: true
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_message: "deploy addit-harness docs ${{ steps.version.outputs.version }}"

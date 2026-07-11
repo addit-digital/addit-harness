@@ -1,0 +1,7 @@
+<!--
+  Copy-to-clipboard button for a single command line.
+  Usage: include copy-button.html, passing text="<the exact command>"
+  (documented in prose, not as a live tag — Liquid parses tags inside HTML
+  comments too, and a literal example here would self-include infinitely).
+-->
+<button type="button" class="copy-btn" data-copy="{{ include.text }}" aria-label="Copy command to clipboard">Copy</button>
