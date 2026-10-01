@@ -7,6 +7,8 @@ only on [GitHub Releases](https://github.com/addit-digital/addit-harness/release
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-10-01
+
 ### Fixed
 
 - `/dev-flow` triage failed on larger tasks. The `task-triager` agent ran on `haiku`; after
