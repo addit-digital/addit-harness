@@ -27,6 +27,7 @@
   {% include footer.html %}
 
   <script src="{{ '/assets/js/copy.js' | relative_url }}" defer></script>
+  {% if page.layout == 'docs' %}<script src="{{ '/assets/js/docs-toc.js' | relative_url }}" defer></script>{% endif %}
   {% if content contains 'language-mermaid' %}
   {% comment %}
     SRI-pinned to the exact mermaid@10.9.1 UMD build — recompute the hash

@@ -10,7 +10,7 @@ layout: default
       </details>
     </aside>
 
-    <div class="docs-content">
+    <div class="docs-content{% if page.url == '/docs/' %} docs-index{% endif %}">
       {% include breadcrumb.html %}
 
       <article class="docs-article">

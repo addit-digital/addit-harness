@@ -1,6 +1,9 @@
 {% assign groups = "Start,Reference,Guides,Project" | split: "," %}
 {% assign docs = site.docs | where_exp: "p", "p.nav_exclude != true" | sort: "nav_order" %}
 <nav aria-label="Documentation" class="docs-nav">
+  <p class="docs-nav-all">
+    <a href="{{ '/docs/' | relative_url }}"{% if page.url == '/docs/' %} aria-current="page"{% endif %}>All docs</a>
+  </p>
   {% for group in groups %}
     {% assign group_docs = docs | where: "nav_group", group %}
     {% if group_docs.size > 0 %}
