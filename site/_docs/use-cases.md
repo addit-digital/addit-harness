@@ -46,7 +46,7 @@ flowchart LR
 2. `@saas-legal-advisor` *(if the feature touches user data, payments,
    third-party integrations, or account types)* → runs in parallel with UX
    design; produces an impact table (Critical/Important/Advisory) and drafts
-   updated legal clauses. Saves the assessment to `docs/legal/`. Legal doc
+   updated legal clauses. Saves the assessment to docs/work/<slug>/legal/assessment.md. Legal doc
    updates ship before or with the feature — not after.
 3. `@ux-designer` → user flows, journey map, IA, wireframes, state matrix,
    and interaction specs. Reads `.claude/design-conventions.md`; flags
@@ -103,7 +103,7 @@ Before a feature that touches user data, payments, or third-party services
 ships, invoke `@saas-legal-advisor` with the feature description or PR diff.
 It produces an impact table (Critical / Important / Advisory) mapping each
 change to the specific legal document and clause affected, then drafts the
-updated clause(s). Output saves to `docs/legal/<date>-<slug>.md` — update the
+updated clause(s). Assessment → docs/work/<slug>/legal/assessment.md; standing docs updated in docs/legal/<document-kind>.md — update the
 live documents before or alongside the feature, never after.
 
 ```

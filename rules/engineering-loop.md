@@ -41,9 +41,7 @@ Always-on. The mental model for every non-trivial task.
 ### Doc taxonomy — where each artifact lives
 
 One folder per unit of work — feature, bug fix, improvement, or enhancement —
-at `docs/work/<slug>/` (`<slug>` is `<YYYY-MM-DD>-<short-name>` by default, or
-`<ticket-id>-<short-name>` when the project uses an issue tracker), holding
-everything produced for it in per-type subfolders:
+at `docs/work/<slug>/`, holding everything produced for it in per-type subfolders:
 
 | Subfolder | Holds | Produced by |
 |--------|-------|-------------|
@@ -51,15 +49,18 @@ everything produced for it in per-type subfolders:
 | `solutions/` | **Architecture solution/design docs** — no to-do list, pure design | `@backend-architect`, `@frontend-architect`, or main Claude for design-only output |
 | `architecture-reports/` | **Architecture review reports** | `@architect-reviewer` |
 | `qa-reports/` | **QA/regression verification reports**, evidence-backed | `@qa-engineer` |
+| `legal/` | **Per-change legal analysis** (`legal/assessment.md`) | `@saas-legal-advisor` |
 
-Subfolders, not flat files, deliberately: a whole category (e.g. `plans/`, which
-tends to be skimmed past once approved) can be glob-excluded or ignored at the
-directory level instead of pattern-matched by filename. Files: `plans/plan.md`,
-`solutions/solution-<track>.md`, `architecture-reports/report.md`, and
-`qa-reports/report.md` — the two report kinds round-suffixed (`report-r2.md`,
-etc.) on a repeat round, never overwriting an earlier round's report; create the
+Subfolders, not flat files: a whole category (e.g. `plans/`) can be ignored by
+directory. Files: `plans/plan.md`, `solutions/solution-<track>.md`,
+`architecture-reports/report.md`, `qa-reports/report.md` — reports
+round-suffixed (`report-r2.md`) on a repeat round; create the
 `docs/work/<slug>/` folder + a row in `docs/work/README.md` on first use; don't
 commit/push unless asked.
+
+**Plugin conventions win.** Write work artifacts only to `docs/work/<slug>/<type>/`, ADRs to `docs/adr/`, standing legal docs to `docs/legal/<document-kind>.md` — even if the repo has its own plans/ADR/legal folders (read those as input). A project `CLAUDE.md` adds facts; it does not move these folders.
+**Slug.** `$(date +%F)-<short-name>`, or `<ticket-id>-<short-name>` for ticket work.
+**Never overwrite work-item artifacts.** A slug is the same work item only if this session created or was given it; otherwise, if `docs/work/<slug>/` exists, append `-2`, `-3`…. Standing docs (`docs/legal/`, `docs/adr/README.md`, `docs/work/README.md`, `.claude/design-conventions.md`) are edited in place; git is the history.
 
 ## Anti-patterns to avoid
 - **Mega-prompt**: cramming many unrelated goals into one turn. Split them.

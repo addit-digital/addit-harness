@@ -55,7 +55,10 @@ bounded requirement. This is a judgment call you make yourself — don't ask the
 
 - If the request names or implies an issue-tracker ticket, use
   `<ticket-id>-<short-kebab-name>`.
-- Otherwise, `<today's-date>-<short-kebab-name>`.
+- Otherwise, `$(date +%F)-<short-kebab-name>`.
+- Collision check: run `ls -d <repo>/docs/work/<slug>` (and `<secondaryRepo>`); if it
+  exists and this session did not create or receive that slug, append -2, -3 …
+  until absent; plugin conventions win (rules/engineering-loop.md).
 - Validate against `/^[A-Za-z0-9][A-Za-z0-9._-]*$/` — this becomes a directory name
   and flows into every file path both workflow scripts write; don't let anything
   unvalidated near it.
