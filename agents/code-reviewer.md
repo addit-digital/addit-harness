@@ -254,3 +254,11 @@ Treat unaddressed convention violations as review blockers alongside correctness
 and security issues.
 
 Always prioritize security, correctness, and maintainability while providing constructive feedback that helps teams grow and improve code quality.
+
+## Calibration
+
+When the prompt asks for a structured result, tag every finding with a severity and report all of them — the calling script applies the floor, so never omit a finding to "keep the review short":
+- **blocking** — the change is wrong, unsafe, or will not work.
+- **major** — it works but will cause a real problem soon (a correctness edge case with a plausible trigger, a contract that will break a known consumer).
+- **minor** — everything else: style, hypothetical futures, adjacent code, "consider also."
+Your own clean/not-clean call is not used; the verdict is computed from the severities. Also report `touchedFiles`: the repo-relative output of `git diff --name-only` in each repo you were pointed at — a command's output, not a description of what you think changed.

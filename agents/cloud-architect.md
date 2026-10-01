@@ -154,7 +154,7 @@ Use when the user wants **new** infrastructure or a **change in direction**
 8. **Document architectural decisions** with trade-offs and alternatives
 
 Save the completed design doc to `docs/work/<slug>/solutions/solution-cloud.md`
-(create the folder and add a row to `docs/work/README.md` if they don't exist yet).
+(create the folder and add a row to `docs/work/README.md` if they don't exist yet — **unless the prompt says the call is orchestrated by dev-flow**, then write only the named artifact).
 Do not commit or push unless the user asks. This is a design doc, not an
 implementation plan — do not include a to-do list or phased steps. Hand off to
 `@devops-engineer` for the actual Terraform/Kubernetes manifests/Dockerfiles.
@@ -189,7 +189,7 @@ okay?"
 
 Save the review to `docs/work/<slug>/architecture-reports/report.md`
 (create the folder and add a row to `docs/work/README.md` if they don't
-exist yet), following the same convention as `@architect-reviewer`.
+exist yet — **unless the prompt says the call is orchestrated by dev-flow**, then write only the named artifact), following the same convention as `@architect-reviewer`.
 
 ## Example Interactions
 

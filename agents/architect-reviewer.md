@@ -246,6 +246,14 @@ Always prioritize long-term sustainability, scalability, and maintainability whi
 
 Save the completed review report to `docs/work/<slug>/architecture-reports/report.md`
 (create the folder and add a row to `docs/work/README.md` if they
-don't exist yet; on a repeat review round for the same work item, suffix the
+don't exist yet — **unless the prompt says the call is orchestrated by dev-flow**, then write only the named artifact; on a repeat review round for the same work item, suffix the
 filename `report-r2.md`, `report-r3.md`, etc. rather than overwriting). Do not
 commit or push unless the user asks.
+
+## Calibration
+
+When the prompt asks for a structured result, tag every finding with a severity and report all of them — the calling script applies the floor, so never omit a finding to "keep the review short":
+- **blocking** — the design is wrong, unsafe, or will not work.
+- **major** — it works but will cause a real problem soon (a correctness edge case with a plausible trigger, a contract that will break a known consumer).
+- **minor** — everything else: style, hypothetical futures, adjacent concerns, "consider also."
+Your own approve/reject is not used; the verdict is computed from the severities.

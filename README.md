@@ -140,15 +140,15 @@ merge any custom permissions/hooks back from the backup).
 | `rules/engineering-loop.md` | Always-on plan→verify→commit model + anti-patterns; sets diagram-rich (mermaid) plan/design-doc standards | Authored |
 | `rules/{java,go,typescript}.md` | **Thin auto-loaded pointers** (Tier 1) — route to the references | Authored (routing only, no convention text) |
 | `references/{go,java,typescript}/` | **Convention guides + linked authorities, read on-demand** (Tier 2) | Go: codebase-derived from app-erp; Java/TS: vendored from recognized sources — see each `README.md` |
-| `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, frontend-architect, ux-designer, figma-designer, product-owner, backend-developer, frontend-developer, saas-legal-advisor, cloud-architect, devops-engineer, qa-engineer | **Vendored + pinned** (except `backend-architect`/`frontend-architect`/`ux-designer`/`figma-designer`/`backend-developer`/`frontend-developer`/`saas-legal-advisor`/`qa-engineer`, authored) — see `AGENTS_SOURCES.md` |
+| `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, frontend-architect, ux-designer, figma-designer, product-owner, backend-developer, frontend-developer, saas-legal-advisor, cloud-architect, devops-engineer, qa-engineer, task-triager | **Vendored + pinned** (except `backend-architect`/`frontend-architect`/`ux-designer`/`figma-designer`/`backend-developer`/`frontend-developer`/`saas-legal-advisor`/`qa-engineer`/`task-triager`, authored) — see `AGENTS_SOURCES.md` |
 | `AGENTS_SOURCES.md` | Provenance table for vendored agents (source repo, commit SHA, changes) — kept at repo root, not inside `agents/`, since the Claude Code plugin auto-discovers every `.md` file in `agents/` as an agent | Authored |
 | `skills/adr/` | `/adr` — record Architecture Decision Records (**MADR 4.0**) | Adopts MADR (see `skills/SOURCES.md`) |
 | `skills/save-plan/` | `/save-plan` — persist an **implementation plan** to `docs/work/<slug>/plans/` (or `--temp`) so mermaid renders in an IDE/GitHub. Architecture designs → `docs/work/<slug>/solutions/`; review reports → `docs/work/<slug>/architecture-reports/` (written directly by the relevant agent) | Authored |
 | `skills/go-conventions/` | `/go-conventions [--refresh]` — scan a Go repo and write `.claude/go-conventions.md` (project-specific layer on top of the global baseline) | Authored |
 | `skills/design-conventions/` | `/design-conventions [--refresh]` — scan a TS/React project's existing UI layer and write `.claude/design-conventions.md` (visual design language: tokens, type/spacing/color scales, component lib, layout rhythm, state patterns). For greenfield projects, `@frontend-architect` generates this file instead. | Authored |
 | `skills/setup/` | `/addit-harness:setup [--scope global\|project] [--link]` — places `CLAUDE.md`/`AGENTS.md`/`rules/`/`references/`/`settings.json` for Claude Code (the parts the plugin can't carry natively) | Authored |
-| `skills/dev-flow/` + `workflows/*.js` | `/dev-flow [what to build or fix]` — deterministic SDLC orchestration: investigate → design ⇄ `architect-reviewer` loop → **your approval gate** → implement → `qa-engineer` verifies → review ⇄ fix loop → re-verify. The loops run as `Workflow` scripts (`workflows/dev-flow-design.js`, `workflows/dev-flow-implement.js`); the skill holds the one human gate a script can't pause for. See [How dev-flow works](#how-dev-flow-works) for the phase-by-phase mechanics and loop-termination logic. **Claude Code plugin install only** — relies on `${CLAUDE_PLUGIN_ROOT}` and the `Workflow` tool, neither of which exist under the legacy copy-based `install.sh --target claude` path or on Cursor/Kiro/Codex CLI; not synced by `install.sh` | Authored |
-| `hooks/` | `SessionStart` hook — reminds the user to re-run `/addit-harness:setup` once the plugin's version has drifted past what was last synced (tracked via a version marker `setup.sh` writes per scope) | Authored |
+| `skills/dev-flow/` + `workflows/*.js` | `/dev-flow [what to build or fix] [--tier light|standard|deep]` — deterministic SDLC orchestration: triage (facts by `task-triager`, tier scored in JS) → tier gate → investigate → design ⇄ `architect-reviewer` loop → **your approval gate** → implement → review ⇄ fix loop → `qa-engineer` verifies once (re-verifies only after a QA-driven fix). The loops run as `Workflow` scripts (`workflows/dev-flow-triage.js`, `workflows/dev-flow-design.js`, `workflows/dev-flow-implement.js`), each tier-parameterised; the skill holds the one human gate a script can't pause for. See [How dev-flow works](#how-dev-flow-works) for the phase-by-phase mechanics and loop-termination logic. **Claude Code plugin install only** — relies on `${CLAUDE_PLUGIN_ROOT}` and the `Workflow` tool, neither of which exist under the legacy copy-based `install.sh --target claude` path or on Cursor/Kiro/Codex CLI; not synced by `install.sh` | Authored |
+| `hooks/` | `SessionStart` hook — reminds the user to re-run `/addit-harness:setup` once the plugin's version has drifted past what was last synced (tracked via a version marker `setup.sh` writes per scope); `PreToolUse` hook on `Workflow` — blocks `dev-flow-implement` unless the approved plan's marker and hash check out (all other workflows untouched) | Authored |
 | `settings.json` | Default model + permissions + official plugins (`enabledPlugins`) — Claude Code only, placed by `/addit-harness:setup` or `install.sh --target claude` | Authored |
 | `mcp.example.json` | Disabled Atlassian/DB scaffolding (opt-in) | Reference config |
 | `templates/CLAUDE.project.md` | Per-repo memory template | Authored |
@@ -199,20 +199,56 @@ before implementation starts. So the design splits along that seam:
 
 - **`skills/dev-flow/SKILL.md`** (thin) — resolves the request, holds the one
   human approval gate, and is the only place that talks to you.
-- **`workflows/dev-flow-design.js`** and **`workflows/dev-flow-implement.js`**
+- **`workflows/dev-flow-triage.js`**, **`workflows/dev-flow-design.js`** and
+  **`workflows/dev-flow-implement.js`**
   — real JavaScript run by the `Workflow` tool, no human interaction inside.
 
 ```mermaid
 flowchart TD
     A[New request] --> S1["skills/dev-flow: resolve track, needsUX, repo(s)"]
-    S1 --> WA["Workflow A: dev-flow-design.js"]
+    S1 --> W0["Workflow 0: dev-flow-triage.js\n(one read-only agent, tier scored in JS)"]
+    W0 --> TG{{"Tier gate: ok / deeper / lighter"}}
+    TG --> WA["Workflow A: dev-flow-design.js (tier)"]
     WA --> G{{"Human approves the plan\n(the one gate a script can't hold)"}}
-    G --> WB["Workflow B: dev-flow-implement.js"]
+    G --> WB["Workflow B: dev-flow-implement.js (tier)"]
+    WB -. "scope breach at light" .-> TG
     WB --> C[Human commits]
 ```
 
-**Workflow A — investigate, design, plan.** Investigate only runs if the
-request's scope is genuinely unclear (`@product-owner` frames the problem
+**Tiers.** Before any design work, `dev-flow-triage.js` asks `@task-triager` (read-only,
+facts only, never a verdict) which files the change touches and which risk surfaces it
+hits; a deterministic score plus raise-only safety floors turns that into `light`,
+`standard` or `deep`, and you can say `deeper` / `lighter` at the tier gate or pass
+`--tier`. Both workflows take the tier:
+
+| | `light` | `standard` | `deep` |
+|---|---|---|---|
+| Investigate | never | only if triage confidence is low | always |
+| UX loop | never (UX pass skipped) | if `needsUX`, up to 3 rounds | if `needsUX`, up to 3 rounds |
+| Design | one pass writes a change brief to `plan.md`, one review, no loop | loop, up to 3 rounds | loop, up to 3 rounds |
+| Separate Plan phase | folded into the brief | yes, plus a review | yes, plus a review |
+| Review floor (what blocks) | `blocking` only | `blocking` + `major` | everything |
+| Reviewers per pass | `code-reviewer` only | `code-reviewer` + `pr-review-toolkit` | same |
+| Architect / reviewer effort | medium / low | high / medium | high / high |
+| Post-QA fix re-review | none (disclosed in the report) | one scoped `code-reviewer` call | same |
+| Scope-breach escalation | halts and re-gates at `standard` | logged only | logged only |
+
+Worst-case agent calls per tier:
+
+| Tier | Design A (`both`, +UX) | Implement B (`both`) | Whole run incl. triage | One track, +UX |
+|---|---|---|---|---|
+| `light` | 4 (no UX) | 13 | 18 | 12 (no UX) |
+| `standard` | 21 | 22 | 44 | 37 |
+| `deep` | 21 | 22 | 44 | 37 |
+
+The worst-case figures are hard caps, and the mock suite (`tests/workflows/`) asserts that
+adversarial runs (reviewers never clean, design never approved, QA always failing) hit each
+cell exactly and never trip the call-ceiling backstop; a typical run makes far fewer calls.
+`standard` and `deep` share caps because deep differs in floors, effort and investigation, not
+call count (a later phase adds deep-tier design fan-out and raises its caps).
+
+**Workflow A — investigate, design, plan.** Investigate runs per tier (always at
+deep, at standard only if triage was unsure; `@product-owner` frames the problem
 first); UX only runs if the work needs a fresh pass (`@ux-designer` ⇄
 `@figma-designer` ⇄ fidelity-check, looping until approved); Design runs one
 architect per track (`@backend-architect` and/or `@frontend-architect`, in
@@ -231,27 +267,42 @@ isn't a pause *inside* a `Workflow` run, since there's no such thing.
 survives between them is just the plan file already written to
 `docs/work/<slug>/plans/plan.md` — approving days later, even in a new
 session, is "read that file, call `Workflow B`." No special resume mechanism.
+After you approve, the skill appends an approval marker to `plan.md`, invokes
+`/addit-harness:adr` for each decision the plan lists under `## ADR candidates`,
+and hashes the file; a `PreToolUse` hook (`hooks/gate-dev-flow-implement.sh`)
+refuses to start `Workflow B` unless the plan exists, carries the marker, and
+matches that hash. The gate stops accidents (a direct
+`/addit-harness:dev-flow-implement`, a stale slug, a plan edited after approval);
+it does not stop a model that ignores its instructions and writes the marker
+itself — your approval in the conversation remains the real gate.
 
-**Workflow B — implement, verify, review, re-verify.**
+**Workflow B — implement, review, verify once.**
 
 ```mermaid
 flowchart LR
-    IM["Implement\nbackend/frontend-developer\n(sequential if same repo, else parallel)"] --> QA1["QA\n@qa-engineer verifies, evidence-backed"]
-    QA1 --> RV["Review\ncode-reviewer + optional pr-review-toolkit bundle"]
-    RV --> FX["Fix loop\nrouted per track, until clean or capped"]
-    FX --> QA2["QA re-run\n@qa-engineer re-verifies — gates the final result"]
+    IM["Implement\nbackend/frontend-developer\n(sequential if same repo, else parallel)"] --> RV["Review\ncode-reviewer (+ pr-review-toolkit at standard/deep)"]
+    RV --> FX["Fix loop\nseverity-filtered, until clean or capped"]
+    FX --> QA["QA once\n@qa-engineer, evidence-backed"]
+    QA -- "failed" --> QF["One fix cycle\n(+ scoped re-review at standard/deep)"] --> QR["QA re-verify\nthe 2nd and last run"]
 ```
 
 Two tracks in the *same* repo implement sequentially, never in parallel, to
 avoid concurrent writes to one branch; genuinely separate repos run in
-parallel. `@qa-engineer` verifies with an evidence-backed report (a real exit
-code, screenshot, or log — never a bare "looks good"), then `@code-reviewer`
-(always present) plus, when installed, the `pr-review-toolkit` bundle review;
-findings route to the track they're tagged for; the fix loop repeats until
-clean or capped. **The QA re-run after the fix loop is what actually gates
-the final pass/fail** — not the pre-fix QA pass — and it runs even if the fix
-loop never reached clean, so the report reflects real final state either
-way. You still run `git commit` yourself.
+parallel. `@code-reviewer` (always present) plus, at standard/deep and when
+installed, the `pr-review-toolkit` bundle review; every finding is tagged
+`blocking`, `major` or `minor` and the script (not the reviewer) applies the
+tier's floor to decide the verdict; findings route to the track they're tagged
+for; the fix loop repeats until clean or capped, then a final verdict-only
+`@code-reviewer` pass judges the code as it stands after the last fix.
+`@qa-engineer` then verifies **once**, with an evidence-backed report (a real
+exit code, screenshot, or log — never a bare "looks good"); QA runs even if the
+review loop never reached clean, so the report reflects real final state. A QA
+failure is blocking at every tier: it gets one fix cycle (a scoped
+`@code-reviewer` pass over that fix at standard/deep, none at light, said so in the
+report) and one re-verification, never a third run. At `light`, the first review
+also checks the touched files against the plan; a change that lands on a risk
+surface or crosses a file-count band halts the run for a re-gate at `standard`.
+You still run `git commit` yourself.
 
 **How the loops know when to stop.** Every loop combines four signals:
 convergence (the real success condition), a hard round cap (a backstop so
@@ -369,8 +420,8 @@ Concrete workflows showing which configs fire together.
 **Build a new feature**
 
 `/dev-flow` automates this exact walkthrough end-to-end — investigate → design ⇄
-`@architect-reviewer` loop → your approval gate → implement → `@qa-engineer`
-verifies → `@code-reviewer` ⇄ fix loop → re-verify — as deterministic `Workflow`
+`@architect-reviewer` loop → your approval gate → implement →
+`@code-reviewer` ⇄ fix loop → `@qa-engineer` verifies — as deterministic `Workflow`
 scripts instead of hand-driving each step below yourself. The steps below still
 apply if you'd rather drive them by hand, or when the request doesn't fit the
 software-development-lifecycle shape `/dev-flow` is scoped to (e.g. legal-only or

@@ -43,7 +43,10 @@ addit-harness has no backend of any kind. It does not:
 
 There is no account to create and no data for us to hold, because we operate no
 system that receives data from the plugin. Its hooks and setup scripts read and
-write only local files on your own machine and make no network requests.
+write only local files on your own machine and make no network requests. The
+`dev-flow-implement` gate hook reads the work item's `plan.md` and hashes it locally
+with `shasum` to confirm the plan you approved is the plan being implemented; it
+sends nothing anywhere.
 
 ## How your data is actually processed when you use the plugin
 

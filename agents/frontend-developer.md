@@ -71,8 +71,8 @@ are the source of truth, not your priors:
 4. **For any UI/visual work**, also load `.claude/design-conventions.md` from the
    project root (priority source for the project's visual language). If absent and
    the project has existing UI, derive the design language from the codebase
-   (Tailwind config, token files, existing screens) and optionally run
-   `/design-conventions` to capture it. If greenfield with no conventions file,
+   (Tailwind config, token files, existing screens) and tell the
+   user to run `/addit-harness:design-conventions` to capture it (you cannot invoke skills). If greenfield with no conventions file,
    ask `@frontend-architect` to generate it before implementing. Your taste and
    generic design priors are not the source of truth.
 

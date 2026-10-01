@@ -26,6 +26,7 @@ Model tiers are covered in full on [Model & cost](../model-cost/).
 - [frontend-developer](#frontend-developer)
 - [devops-engineer](#devops-engineer)
 - [qa-engineer](#qa-engineer)
+- [task-triager](#task-triager)
 </div>
 
 ## code-reviewer
@@ -120,6 +121,13 @@ the target repo), runs them, and reports with mandatory evidence per claim. Not
 unit/integration tests (stays with the developer agents); web verification
 requires `claude-in-chrome` connected. `sonnet` tier — execution against a given
 scenario, not designing one.
+
+## task-triager
+
+Answers a fixed fact questionnaire about a change request (which files, which risk
+surfaces, what checks exist) for `dev-flow`'s triage step. Read-only (`Read`,
+`Glob`, `Grep`) and never returns a verdict — a deterministic script scores the
+facts into a tier. `haiku` tier.
 
 ## Next
 
