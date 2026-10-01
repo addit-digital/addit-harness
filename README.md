@@ -574,7 +574,8 @@ Sonnet ≈ daily-driver coding, Opus/Fable ≈ hardest reasoning at top cost.
 An optional hook keeps a metadata-only usage log on your own machine so you can
 see which agents, skills and dev-flow steps you actually use. It is off unless
 you turn on the `telemetry_local` option in `/config`; while it is off, the
-plugin writes nothing.
+plugin writes no telemetry. (The only file it creates regardless is an empty
+one-time welcome marker, `onboarding/welcome-v1`, in the plugin data folder.)
 
 - **Records:** which addit-harness components ran and how they ended, counts and
   sizes, gate verdicts, and pseudonymous salted hashes of your project folder

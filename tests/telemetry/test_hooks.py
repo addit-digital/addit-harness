@@ -28,7 +28,8 @@ class HookSandbox(unittest.TestCase):
 
     def run_hook(self, script, payload, opt="true", **extra):
         env = {"PATH": os.environ["PATH"], "HOME": str(self.home), "CLAUDE_PLUGIN_ROOT": str(REPO),
-               "CLAUDE_PLUGIN_DATA": str(self.data), "CLAUDE_PROJECT_DIR": str(self.proj)}
+               "CLAUDE_PLUGIN_DATA": str(self.data), "CLAUDE_PROJECT_DIR": str(self.proj),
+               "CLAUDE_CODE_ENTRYPOINT": "sdk-cli"}  # headless: keeps the first-run welcome (tests/onboarding) out of these assertions
         if opt is not None:
             env["CLAUDE_PLUGIN_OPTION_TELEMETRY_LOCAL"] = opt
         env.update(extra)

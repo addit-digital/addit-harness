@@ -382,6 +382,7 @@ fi
 
 echo
 echo "Done."
+info "Next: /addit-harness:dev-flow <what to build> for non-trivial work; /addit-harness:tips for the short guide; local telemetry stays off unless you enable it in /config."
 info "Backups of anything overwritten live under $BACKUP_ROOT/ (if anything was backed up)."
 if [[ "$SCOPE" == "global" ]]; then
   info "Re-run /addit-harness:setup after the plugin auto-updates to re-sync these files."

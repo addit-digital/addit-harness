@@ -14,6 +14,10 @@
 #
 # Silent if setup was never run for a given scope (no marker) — that's an
 # opt-in the user hasn't made, not our place to nag about.
+#
+# Also shows a one-line welcome (systemMessage only — never model context) the
+# first time per install, in an interactive terminal session: a local marker in
+# ${CLAUDE_PLUGIN_DATA}/onboarding/ makes it once, no network, fails open.
 set -uo pipefail  # no -e: this must never abort a session start over a stray failure
 
 IN="$(cat)"  # the payload only supplies session ids to the optional local telemetry
@@ -75,17 +79,37 @@ if [[ -z "$STATE" ]]; then
 fi
 tel setup "$STATE"
 
-if [[ ${#MESSAGES[@]} -eq 0 ]]; then
+# Welcome: once per install, interactive sessions only. CLAUDE_CODE_ENTRYPOINT is `cli` in a terminal and
+# `sdk-cli` under `claude -p`; unset means unknown, which shows. The marker is created exclusively (noclobber)
+# BEFORE printing, so a lost race or an unwritable data dir prints nothing instead of repeating every session.
+WELCOME=""
+welcome_due() {
+  case "$IN" in *'"source":"startup"'*|*'"source": "startup"'*) ;; *) return 1;; esac
+  [[ "${CLAUDE_CODE_ENTRYPOINT:-cli}" == cli ]] || return 1
+  local dir="${CLAUDE_PLUGIN_DATA:-}"
+  [[ -n "$dir" && ! -e "$dir/onboarding/welcome-v1" ]] || return 1
+  mkdir -p "$dir/onboarding" 2>/dev/null || return 1
+  ( set -o noclobber; : > "$dir/onboarding/welcome-v1" ) 2>/dev/null
+}
+if welcome_due; then
+  case "$STATE" in
+    ok|drift) WELCOME="addit-harness ready. For anything bigger than a small fix: /addit-harness:dev-flow <what to build>. All tips: /addit-harness:tips";;
+    *) WELCOME="addit-harness installed. Run /addit-harness:setup once, then /addit-harness:dev-flow <what to build>. Tips: /addit-harness:tips";;
+  esac
+fi
+
+if [[ ${#MESSAGES[@]} -eq 0 && -z "$WELCOME" ]]; then
   exit 0
 fi
 
-NOTICE="$(printf '%s\n' "${MESSAGES[@]}")"
+NOTICE=""
+[[ ${#MESSAGES[@]} -gt 0 ]] && NOTICE="$(printf '%s\n' "${MESSAGES[@]}")"
 python3 -c "
 import json, sys
-notice = sys.stdin.read()
-print(json.dumps({
-    'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': notice},
-    'systemMessage': notice,
-}))
-" <<< "$NOTICE"
+welcome, notice = sys.argv[1], sys.stdin.read()
+out = {'systemMessage': '\n'.join(p for p in (welcome, notice.rstrip('\n')) if p)}
+if notice.strip():
+    out['hookSpecificOutput'] = {'hookEventName': 'SessionStart', 'additionalContext': notice}
+print(json.dumps(out))
+" "$WELCOME" <<< "$NOTICE"
 exit 0
