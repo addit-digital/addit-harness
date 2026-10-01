@@ -1,5 +1,6 @@
 ---
 title: Enabling MCP
+description: How to enable the optional MCP servers in mcp.example.json, from Figma and Atlassian to databases and cloud providers.
 nav_order: 7
 nav_group: Reference
 ---

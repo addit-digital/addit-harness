@@ -1,5 +1,6 @@
 ---
 title: Roadmap
+description: Planned work for addit-harness and how to contribute.
 nav_order: 11
 nav_group: Project
 ---

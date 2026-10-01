@@ -35,12 +35,14 @@ Prefer browsing in-repo instead? Start at
 
 ## Contents
 
+- [What's new](#whats-new)
 - [Why this config?](#why-this-config)
 - [Install](#install)
   - [Claude Code](#claude-code)
   - [Migrating from `install.sh`](#migrating-from-installsh)
 - [What's in here](#whats-in-here)
   - [Language conventions — two tiers + per-project layer](#language-conventions--two-tiers--per-project-layer)
+- [The engineering loop and the doc protocol](#the-engineering-loop-and-the-doc-protocol)
 - [How dev-flow works](#how-dev-flow-works)
 - [Using it](#using-it)
   - [Iterating & giving feedback on plans or code](#iterating--giving-feedback-on-plans-or-code)
@@ -53,6 +55,28 @@ Prefer browsing in-repo instead? Start at
 - [Roadmap](#roadmap)
 - [Extending](#extending)
 - [Releasing the Claude Code plugin](#releasing-the-claude-code-plugin)
+
+## What's new
+
+Not yet released; the full list is the `Unreleased` section of
+[`CHANGELOG.md`](CHANGELOG.md), summarized on the
+[What's new](https://tools.addit.digital/harness/docs/whats-new/) page.
+
+- **Breaking:** `install.sh` is gone (Claude Code only, see
+  [Migrating from `install.sh`](#migrating-from-installsh)), and
+  `@addit-harness:feature-investigator` is now `@addit-harness:product-owner`.
+- `/dev-flow` triages each request into `light`, `standard` or `deep`, runs an
+  intake brief, enforces plan approval with a hook, and runs QA once.
+- Architects follow a solution method (at least 3 candidates, prior art,
+  pre-mortem); every agent has an explicit `tools:` list.
+- Frontend contract FC-1..FC-10; Go and Java conventions as cited topic files.
+- One doc protocol for plans, designs and reports; setup merges `settings.json`.
+- Optional local telemetry, off by default, with an offline export.
+- `/dev-flow` progress in `/workflows`: tier, review rounds, blocking counts, gate
+  verdicts and halt reasons, plus a six-step lifecycle task list (setup now turns
+  the task tools on with `CLAUDE_CODE_ENABLE_TODO_TOOLS=1`).
+- First run: a one-time welcome line, `/addit-harness:tips`, and a next-steps line
+  at the end of setup.
 
 ## Why this config?
 
@@ -100,8 +124,18 @@ No clone, no shell script — install the plugin from inside Claude Code:
 - Add `--plugins` to also install the official plugins declared in
   `settings.json` now (`/addit-harness:setup --plugins`). Setup merges
   `settings.json` into yours instead of replacing it: your hooks,
-  `statusLine`, `env` and plugin choices survive, and a backup of the previous
-  file goes to `~/.claude/.install-backups/<timestamp>/`.
+  `statusLine`, `env` and plugin choices survive, your `permissions` rules are
+  unioned with the template's, `env` is merged key by key with your values
+  winning, `model` is set to the template's `opusplan`, and a backup of the
+  previous file goes to `~/.claude/.install-backups/<timestamp>/`.
+- The template's `env` sets `CLAUDE_CODE_ENABLE_TODO_TOOLS=1` (unless you set
+  that variable yourself) because Claude Code's task tools are off by default on
+  newer models; `/dev-flow` uses them for its lifecycle task list. The per-turn
+  context this adds has not been measured.
+- The first interactive session after install shows a one-line welcome, once
+  (an empty marker, `onboarding/welcome-v1`, in the plugin data folder keeps it
+  from repeating). It is a hook message for you, not model context. Setup ends
+  with a next-steps line, and `/addit-harness:tips` prints five short tips.
 
 ### Migrating from `install.sh`
 
@@ -127,8 +161,9 @@ keeps working but is frozen; to keep updating it, pin commit `ebea6f3` or tag
 | `CLAUDE.md` | 2-line `@import` pointer (`@AGENTS.md`, `@rules/engineering-loop.md`) — Claude Code specifically requires this literal filename | Authored |
 | `.claude-plugin/plugin.json` + `marketplace.json` | Self-hosted Claude Code plugin (`addit-harness@addit`) — `agents/` and `skills/` auto-discovered from here | Authored |
 | `rules/engineering-loop.md` | Always-on plan→verify→commit model + anti-patterns; sets diagram-rich (mermaid) plan/design-doc standards | Authored |
-| `rules/{java,go,typescript}.md` | **Thin auto-loaded pointers** (Tier 1) — route to the references | Authored (routing only, no convention text) |
+| `rules/{java,go,typescript,typescript-frontend}.md` | **Auto-loaded per file type** (Tier 1): the Go and Java contracts (G-1..G-10, J-1..J-14) and topic index, TS routing, and the Frontend Implementation Contract (FC-1..FC-10) | Authored |
 | `references/{go,java,typescript}/` | **Convention guides + linked authorities, read on-demand** (Tier 2) | Go and Java: topic files with rule ids and cited sources; TS: vendored from recognized sources. See each `README.md` |
+| `references/doc-protocol.md`, `references/solution-method.md` | How plans, designs, briefs and reports are written; the design method every architect follows | Authored |
 | `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, frontend-architect, ux-designer, figma-designer, product-owner, backend-developer, frontend-developer, saas-legal-advisor, cloud-architect, devops-engineer, qa-engineer, task-triager | **Vendored + pinned** (except `backend-architect`/`frontend-architect`/`ux-designer`/`figma-designer`/`backend-developer`/`frontend-developer`/`saas-legal-advisor`/`qa-engineer`/`task-triager`, authored) — see `AGENTS_SOURCES.md` |
 | `AGENTS_SOURCES.md` | Provenance table for vendored agents (source repo, commit SHA, changes) — kept at repo root, not inside `agents/`, since the Claude Code plugin auto-discovers every `.md` file in `agents/` as an agent | Authored |
 | `skills/adr/` | `/adr` — record Architecture Decision Records (**MADR 4.0**) | Adopts MADR (see `skills/SOURCES.md`) |
@@ -136,31 +171,38 @@ keeps working but is frozen; to keep updating it, pin commit `ebea6f3` or tag
 | `skills/go-conventions/` | `/go-conventions [--refresh]` — scan a Go repo and write `.claude/go-conventions.md` (project-specific layer on top of the global baseline) | Authored |
 | `skills/design-conventions/` | `/design-conventions [--refresh]` — scan a TS/React project's existing UI layer and write `.claude/design-conventions.md` (visual design language: tokens, type/spacing/color scales, component lib, layout rhythm, state patterns). For greenfield projects, `@frontend-architect` generates this file instead. | Authored |
 | `skills/setup/` | `/addit-harness:setup [--scope global\|project] [--link] [--plugins]` — places `CLAUDE.md`/`AGENTS.md`/`rules/`/`references/`/`settings.json` for Claude Code (the parts the plugin can't carry natively) | Authored |
+| `skills/tips/` + `commands/tips.md` | `/addit-harness:tips` — user-invoked only: prints five short tips (when to use `/dev-flow`, plan approval, where documents land, calling the specialist agents, the local telemetry option) | Authored |
 | `skills/telemetry-export/` + `commands/telemetry-export.md` | `/addit-harness:telemetry-export [--days N]` — user-invoked only: builds `data.json` and an offline `report.html` (no network, no external assets) from the local telemetry log under `export/<timestamp>/` in the plugin data folder. Only if you answer yes when asked, it publishes aggregated KPIs (no per-session rows, ids or hashes) as a private Artifact on claude.ai, which uploads them to Anthropic's hosted service under your account | Authored |
 | `skills/dev-flow/` + `workflows/*.js` | `/dev-flow [what to build or fix] [--tier light|standard|deep]` — deterministic SDLC orchestration: triage (facts by `task-triager`, tier scored in JS) → tier gate → investigate → design ⇄ `architect-reviewer` loop → **your approval gate** → implement → review ⇄ fix loop → `qa-engineer` verifies once (re-verifies only after a QA-driven fix). The loops run as `Workflow` scripts (`workflows/dev-flow-triage.js`, `workflows/dev-flow-design.js`, `workflows/dev-flow-implement.js`), each tier-parameterised; the skill holds the one human gate a script can't pause for. See [How dev-flow works](#how-dev-flow-works) for the phase-by-phase mechanics and loop-termination logic. Relies on `${CLAUDE_PLUGIN_ROOT}` and the `Workflow` tool | Authored |
-| `hooks/` | `SessionStart` hook — reminds the user to re-run `/addit-harness:setup` once the plugin's version has drifted past what was last synced (tracked via a version marker `setup.sh` writes per scope); `PreToolUse` hook on `Workflow` — blocks `dev-flow-implement` unless the approved plan's marker and hash check out (all other workflows untouched); `PostToolUse` advisory frontend check (non-blank line count on UI .ts/.tsx; ADDIT_FE_GATE=eslint opts into your project's ESLint, =0 disables; set in shell or settings.json "env"); an optional local telemetry hook (`hooks/telemetry.sh`/`telemetry.py`) that runs its script only when you turn on `telemetry_local` (see [Local telemetry](#local-telemetry-off-by-default)). None of the four makes a network request | Authored |
-| `settings.json` | Default model + permissions + official plugins (`enabledPlugins`) — placed by `/addit-harness:setup` | Authored |
+| `hooks/` | `SessionStart` hook — reminds the user to re-run `/addit-harness:setup` once the plugin's version has drifted past what was last synced (tracked via a version marker `setup.sh` writes per scope), and on the first interactive startup after install shows a one-time welcome line (a `systemMessage`, not model context; an empty marker `onboarding/welcome-v1` in the plugin data folder keeps it to once); `PreToolUse` hook on `Workflow` — blocks `dev-flow-implement` unless the approved plan's marker and hash check out (all other workflows untouched); `PostToolUse` advisory frontend check (non-blank line count on UI .ts/.tsx; ADDIT_FE_GATE=eslint opts into your project's ESLint, =0 disables; set in shell or settings.json "env"); an optional local telemetry hook (`hooks/telemetry.sh`/`telemetry.py`) that runs its script only when you turn on `telemetry_local` (see [Local telemetry](#local-telemetry-off-by-default)). None of the four makes a network request | Authored |
+| `settings.json` | Default model + permissions + official plugins (`enabledPlugins`) + `env` (`CLAUDE_CODE_ENABLE_TODO_TOOLS=1`, turns the task tools on) — placed by `/addit-harness:setup` | Authored |
 | `mcp.example.json` | Disabled Atlassian/DB scaffolding (opt-in) | Reference config |
 | `templates/CLAUDE.project.md` | Per-repo memory template | Authored |
+| `tests/workflows/`, `tests/telemetry/`, `tests/setup/`, `tests/onboarding/` | Mock runner + scenarios for the dev-flow workflow scripts, each run also checked against the progress-line contract (`log-contract.mjs`); stdlib unit tests for the telemetry writer and exporter, the `settings.json` merge, and the first-run welcome hook | Authored |
+| `CHANGELOG.md` | User-facing changes; each release's section becomes its GitHub release notes | Authored |
 
 Three ways assets are delivered:
 - **Adopted (declarative):** official plugins enabled via `settings.json` — track
   their marketplace, safe to auto-update.
-- **Vendored (pinned):** subagents *and* Java/TS convention guides, copied in at a
-  fixed commit for reproducibility (provenance + license in `AGENTS_SOURCES.md`,
-  `skills/SOURCES.md`, and each `references/*/README.md`).
-- **Authored (routing/process only):** `CLAUDE.md`, `rules/engineering-loop.md`,
-  thin Tier-1 pointer rules, and the Go conventions file (codebase-derived).
+- **Vendored (pinned):** some subagents *and* the TypeScript convention guides,
+  copied in at a fixed commit for reproducibility (provenance + license in
+  `AGENTS_SOURCES.md`, `skills/SOURCES.md`, and each `references/*/README.md`).
+- **Authored:** `CLAUDE.md`, `rules/engineering-loop.md`, the doc protocol and
+  solution method, the Tier-1 rules, and the Go and Java topic files (each rule
+  cites its source).
 
 ### Language conventions — two tiers + per-project layer
 
-- **Tier 1 — `rules/{java,go,typescript}.md`** carry `paths:` frontmatter and
-  auto-load when you touch that language. They contain **only a pointer** — no
-  convention text of their own.
-- **Tier 2 — `references/{go,java,typescript}/`** hold the convention guides + a
-  `README.md`. Not path-scoped; Claude reads them on demand for substantial work.
+- **Tier 1 — `rules/*.md`** carry `paths:` frontmatter and auto-load when you
+  touch that language: a short contract with rule ids (Go G-1..G-10, Java
+  J-1..J-14, frontend FC-1..FC-10) plus an index of topic files.
+- **Tier 2 — `references/{go,java,typescript}/`** hold the topic files + a
+  `README.md`. Not path-scoped; Claude reads the one or two topics that match the edit.
 - **Per-project — `.claude/go-conventions.md`** in any Go repo. Run
-  `/go-conventions` to generate it; `rules/go.md` loads it automatically.
+  `/go-conventions` to generate it; `rules/go.md` loads it automatically. It may
+  override a topic rule with `# OVERRIDE: G-<TOPIC>-n <reason>`, never G-1..G-8 or
+  G-10. Java has no per-project file: a project Checkstyle/PMD config sets J-12's
+  numbers and a project formatter replaces the formatting rules.
 - **Per-project — `.claude/design-conventions.md`** in any TS/React project. Run
   `/design-conventions` on an existing project to derive it; for greenfield,
   `@frontend-architect` generates it. `rules/typescript.md` instructs loading it
@@ -170,12 +212,45 @@ Three ways assets are delivered:
 |-------|-------------------|--------------------|
 | Go | `rules/go.md` contract (G-1..G-10) + 11 topic files in `references/go/` + per-project `.claude/go-conventions.md` | Effective Go, Go Code Review Comments, Google Go Style |
 | Java/Spring | `rules/java.md` contract (J-1..J-14) + 12 cited topic files in `references/java/` | Effective Java, Google Java Style, Spring docs |
-| TS / React / Next / RN | bulletproof-react docs (MIT) + sanjeed5 TS/React/Next/RN `.mdc` (CC0) | react.dev, Next.js docs, TypeScript Handbook, Total TypeScript |
+| TS / React / Next / RN | `rules/typescript-frontend.md` contract (FC-1..FC-10) + bulletproof-react docs (MIT) + sanjeed5 TS/React/Next/RN `.mdc` (CC0) | react.dev, Next.js docs, TypeScript Handbook, Total TypeScript |
 
-The Go and Java rules are split into cited topic files with rule ids. The Go
-topics follow the owner's own approach and use the Uber guide where it does not
-collide; both expand per-project (`/go-conventions` for Go). The **`code-reviewer` subagent checks adherence** to
-whichever conventions apply.
+The Go topics follow the owner's own approach and use the Uber guide where it
+does not collide. The frontend contract caps file and component size, nesting,
+props, complexity and hooks, and sets layering, feature boundaries and token
+use; a project's ESLint config or `CLAUDE.md` may tighten a limit, never loosen
+it. An advisory `PostToolUse` hook flags frontend files over 150 or 250
+non-blank lines after each edit (`ADDIT_FE_GATE=eslint` adds your project's
+ESLint, `=0` turns it off). The **`code-reviewer` subagent checks adherence** to
+whichever conventions apply, citing rule ids and measured values.
+
+## The engineering loop and the doc protocol
+
+`rules/engineering-loop.md` is always on: frame intent → curate context → plan →
+implement in small units → verify with tooling → commit → hand off. Every
+document the loop produces goes to one folder per work item, and plugin
+locations win over a project's own plans/ADR/legal folders:
+
+```mermaid
+flowchart TD
+    W["docs/work/{slug}/"] --> SP["specs/ brief.md"]
+    W --> SO["solutions/ solution-{track}.md"]
+    W --> PL["plans/ plan.md"]
+    W --> AR["architecture-reports/ report.md, report-r2.md"]
+    W --> QA["qa-reports/ report.md"]
+    W --> LG["legal/ assessment.md"]
+```
+
+The slug is `<YYYY-MM-DD>-<short-name>` or `<ticket-id>-<short-name>`; an existing
+folder from another work item gets a `-2` suffix, never an overwrite. Standing
+docs (`docs/adr/`, `docs/legal/`, the indexes) are edited in place.
+`references/doc-protocol.md` gives each document type a template, a length
+ceiling per tier (a `standard` plan at most 120 lines, a `deep` solution at most
+350), Observed/Inferred/Unknown labels on claims, edit-in-place revisions with a
+log of at most 5 lines, and one mermaid diagram per concept.
+`references/solution-method.md` makes every architect compare at least three
+structurally different candidates (one unconventional) with prior art and a
+pre-mortem, scoring your own proposal only at the comparison step. Full
+detail: [The engineering loop](https://tools.addit.digital/harness/docs/engineering-loop/).
 
 ## How dev-flow works
 
@@ -233,9 +308,16 @@ Worst-case agent calls per tier:
 
 The worst-case figures are hard caps, and the mock suite (`tests/workflows/`) asserts that
 adversarial runs (reviewers never clean, design never approved, QA always failing) hit each
-cell exactly and never trip the call-ceiling backstop; a typical run makes far fewer calls.
-`standard` and `deep` share caps because deep differs in floors, effort and investigation, not
-call count (a later phase adds deep-tier design fan-out and raises its caps).
+cell exactly and never trip the call-ceiling backstop. They are mock-asserted, not measured
+live, and exclude the skill's `@product-owner` intake calls; a typical run makes far fewer.
+The `standard`/`deep` design caps include scoring your proposed approach (one call per
+track) and, at `deep`, three parallel explorers plus one candidate switch.
+
+**Intake.** At `standard` and `deep`, `@product-owner` first asks only the questions that
+change the approach (one batch of at most four, the tier gate included; `deep` may ask one
+more batch), then writes a one-page brief to `docs/work/<slug>/specs/brief.md`. A solution
+proposed in your request is moved to `specs/owner-proposal.md`; the architects see it only
+as candidate "Owner" at the comparison step.
 
 **Workflow A — investigate, design, plan.** Investigate runs per tier (always at
 deep, at standard only if triage was unsure; `@product-owner` frames the problem
@@ -304,6 +386,19 @@ cap of 2, the circuit breaker can only ever compare on the very last allowed
 round, making it structurally unable to save any work — 3 is the minimum
 depth where "stop early" and "hit the cap anyway" are actually different
 outcomes.
+
+**Watching a run.** While a workflow runs, `/workflows` shows fixed-format
+progress lines: `dev-flow <workflow> start: tier=… track=…`,
+`<Loop> r<n>/<cap>: <k> blocking` per review round, `gate <name>: <verdict>`, and
+`HALT <haltedBy>: <reason>` (the reason can include an agent's error message or,
+for a scope breach, file paths). No request text or agent output is logged;
+`tests/workflows/log-contract.mjs` checks this on every mock scenario. With the
+task tools on, dev-flow also keeps six tasks (`Triage`, `Design + plan`,
+`Approve plan`, `Implement + review`, `QA`, `Commit`) current at each step;
+`Commit` stays pending because committing is yours. Unproven in a live terminal:
+that the model issues every task update, the task tools' per-turn context cost,
+and whether the task panel's one-line summary shows the latest log line. Details:
+[Watching a run](https://tools.addit.digital/harness/docs/dev-flow/#watching-a-run).
 
 **If the `Workflow` tool isn't available**, the skill checks whether it's
 actually callable before using it, rather than assuming from configuration —
@@ -552,8 +647,14 @@ prevented) and Sonnet's strong, cheaper execution against your rules.
 | `cloud-architect` | `opus` | Infra design + review — mistakes are costly and often hard to reverse |
 | `devops-engineer` | `sonnet` | Implementation/execution against a design — fast + cheap, same rationale as the other `*-developer` agents |
 | `qa-engineer` | `sonnet` | e2e/regression verification execution — running and reporting against a given scenario, not designing one |
+| `task-triager` | `haiku` | Fact-gathering for `/dev-flow` triage; read-only, never returns a verdict |
 
-Future mechanical agents (test-runners, formatters) should use `haiku`. Override
+Every agent declares an explicit `tools:` list, so it does not load every MCP
+server's tool schemas on its first turn. For the four architect and design
+agents this cut first-turn context from about 33k to about 17k tokens in a
+controlled probe; your saving depends on the MCP servers you have connected.
+
+Other mechanical agents (test-runners, formatters) should use `haiku` too. Override
 all subagents at once with `CLAUDE_CODE_SUBAGENT_MODEL`.
 
 **Manual levers to cut tokens:**
@@ -595,7 +696,11 @@ one-time welcome marker, `onboarding/welcome-v1`, in the plugin data folder.)
   Artifact tool; the plugin itself still opens no network connection. Without the
   Artifact tool, nothing is published and the local path is printed.
 
-Details and the exact list: the [privacy policy](https://tools.addit.digital/privacy/).
+- **Cost when on:** roughly 41 ms median and 55 ms at the 90th percentile per hook
+  event in local measurements. When off, a shell launcher exits before Python starts.
+
+How it works: [Local telemetry](https://tools.addit.digital/harness/docs/telemetry/).
+Details and the exact list: the [privacy policy](https://tools.addit.digital/harness/privacy/).
 
 ## Enabling MCP (later)
 
@@ -656,12 +761,21 @@ default branch, so cutting a release is what gives anyone who wants to pin a
 version something to point at:
 
 ```bash
-# 1. bump the version in .claude-plugin/plugin.json
+# 1. bump the version in .claude-plugin/plugin.json, and in CHANGELOG.md
+#    rename "## [Unreleased]" to "## [<version>] - <YYYY-MM-DD>" and add a
+#    new empty "## [Unreleased]" above it
 # 2. tag + push (validates plugin.json and the marketplace entry agree)
 claude plugin tag --push -m "addit-harness %s"
-# 3. publish release notes, using the tag claude plugin tag just created
-gh release create addit-harness--v<version> --notes "..."
+# 3. publish the matching CHANGELOG.md section as the release notes
+.github/scripts/changelog-section.sh <version> > notes.md
+gh release create addit-harness--v<version> --notes-file notes.md
 ```
+
+`.github/workflows/release.yml` (manual `workflow_dispatch`) runs the bump, tag
+and release in CI. It takes the release body from the `CHANGELOG.md` section for
+the new version, falls back to `[Unreleased]`, then to GitHub's generated notes,
+and never edits `CHANGELOG.md`. The docs changelog page renders the
+`[Unreleased]` section plus every GitHub release at deploy time.
 
 `claude plugin tag` creates a `addit-harness--v<version>` tag (not a bare
 `vX.Y.Z`) and refuses a dirty working tree or a duplicate tag unless

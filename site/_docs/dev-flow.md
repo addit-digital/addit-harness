@@ -1,11 +1,12 @@
 ---
 title: How dev-flow works
+description: How /dev-flow triages a request into light, standard or deep, runs design and review loops as Workflow scripts, holds a hook-enforced plan-approval gate, and verifies with QA once.
 nav_order: 4
 nav_group: Reference
 ---
 
 `/dev-flow` automates the design-gate and review-gate rounds of the [engineering
-loop](../concepts/#deterministic-orchestration-dev-flow) as real control flow —
+loop](../concepts/#deterministic-orchestration--dev-flow) as real control flow —
 not the model remembering to keep looping correctly on its own. This page is the
 mechanics: why it's built as a skill *plus* three `Workflow` scripts rather than
 either alone, what each phase actually does, and how the loops know when to stop.
@@ -27,9 +28,9 @@ implementation starts. So the design splits along that exact seam:
 flowchart TD
     A[New request] --> S1["skills/dev-flow: resolve track, needsUX, repo(s)"]
     S1 --> W0["Workflow 0: dev-flow-triage.js"]
-    W0 --> TG{{"Tier gate: ok / deeper / lighter"}}
+    W0 --> TG{"Tier gate: ok / deeper / lighter"}
     TG --> WA["Workflow A: dev-flow-design.js (tier)"]
-    WA --> G{{"Human approves the plan\n(the one gate a script can't hold)"}}
+    WA --> G{"Human approves the plan\n(the one gate a script can't hold)"}
     G --> WB["Workflow B: dev-flow-implement.js (tier)"]
     WB -. "scope breach at light" .-> TG
     WB --> C[Human commits]
@@ -64,9 +65,13 @@ If triage fails, the run is `standard`.
 | Post-QA fix re-review | none (disclosed in the report) | one scoped `code-reviewer` call | same |
 | Scope-breach escalation | halts and re-gates at `standard` | logged only | logged only |
 
-Worst-case agent calls (computed from the caps, then reproduced exactly by the mock
-suite with adversarial stubs: reviewers never clean, design never approved, QA always
-failing):
+Worst-case agent calls per tier. These are hard caps in the scripts
+(`POLICY.callCap` in each workflow); the mock suite reproduces each cell exactly with
+adversarial stubs (reviewers never clean, design never approved, QA always failing).
+They are mock-asserted, not measured on live runs, and they do not count the
+`@product-owner` intake calls the skill makes before Workflow A. The
+`standard`/`deep` design caps include the call that scores your proposed approach
+(one per track) and, at `deep`, the three explorers and one candidate switch:
 
 | Tier | Design A (`both`, +UX) | Implement B (`both`) | Whole run incl. triage | One track, +UX |
 |---|---|---|---|---|
@@ -74,11 +79,8 @@ failing):
 | `standard` | 23 | 22 | 46 | 38 |
 | `deep` | 27 | 22 | 50 | 42 |
 
-The worst-case figures are hard caps, and the mock suite (`tests/workflows/`) asserts that
-adversarial runs (reviewers never clean, design never approved, QA always failing) hit each
-cell exactly and never trip the call-ceiling backstop; a typical run makes far fewer calls.
-`standard` and `deep` share caps because deep differs in floors, effort and investigation, not
-call count (a later phase adds deep-tier design fan-out and raises its caps).
+A typical run makes far fewer calls. Implement caps are the same at `standard` and
+`deep`; the extra `deep` design calls are the parallel explorers described below.
 
 Two consequences to know. `light` hides `major` and `minor` findings by design — its
 single design review does not loop, so any `blocking` finding is surfaced at the plan
@@ -87,6 +89,29 @@ tier is a prediction: if the first review at `light` finds the change on a risk 
 the plan did not list (or in the next file-count band), Workflow B halts with
 `haltedBy: escalation` before QA, and the skill asks whether to keep, stash or discard
 the working tree and re-runs the gate preset to `standard` (one re-entry at most).
+
+## Intake — interview and brief
+
+Between the tier gate and Workflow A, the skill turns the request into a one-page
+brief, scaled by tier:
+
+- **`light`:** no interview and no brief; the request is used as written.
+- **`standard`:** `@product-owner` (in `mode=questions`) reads the request and the code
+  and returns only the questions whose answer changes the approach or the done
+  criteria, at most three, each with a recommended default. You get one batch of at
+  most four questions; the first slot is the tier gate itself. Zero questions is a
+  valid outcome. `@product-owner` then writes `docs/work/<slug>/specs/brief.md`
+  (`mode=brief`, at most 50 lines): your request quoted verbatim, goal, non-goals,
+  constraints, limits, done criteria, assumptions and unknowns. Problem only, never
+  a solution.
+- **`deep`:** the same, plus at most one more batch of four for gaps your answers
+  opened. If any default was applied, you confirm the brief before design starts.
+
+If your request already proposes a solution ("add a Redis cache"), the brief moves
+that text verbatim to `specs/owner-proposal.md` and leaves `[proposed approach moved
+out]` in its place. The architects do not see it while they generate candidates; it
+reaches the design only as candidate "Owner", scored like the others at the
+comparison step. In a headless run every default is applied, and the skill says so.
 
 ## Workflow A — investigate, design, plan
 
@@ -98,7 +123,8 @@ flowchart LR
 ```
 
 - **Investigate** — per tier: always at `deep`, at `standard` only if triage
-  confidence was low, never at `light`; `@product-owner` frames the problem first.
+  confidence was low, never at `light`; `@product-owner` frames the problem. A brief
+  from intake already covers this, so the workflow skips its own investigator.
 - **UX** — only runs if the work needs a fresh UX pass (new flow, new screen) and
   the tier is `standard` or `deep` — `@ux-designer` ⇄ `@figma-designer` ⇄
   fidelity-check, looping until approved.
@@ -107,8 +133,17 @@ flowchart LR
   `@architect-reviewer`, looping until approved. Each round's feedback is fed
   into the next round's prompt — a retry is a refinement, not a blind re-roll.
   Each architect call writes its solution doc itself (no separate writer call).
-  Reviewers tag every finding `blocking`, `major` or `minor`; the script, not the
-  reviewer, decides the verdict by applying the tier's floor. At `light` this is a
+  Each architect follows the [solution method](../engineering-loop/#the-solution-method):
+  at least three structurally different candidates (one unconventional), prior art,
+  a pre-mortem, and your proposed approach scored only at the comparison step. At
+  `deep`, three explorer calls run in parallel on the track that holds more of the
+  risky files, one per candidate lens (proven, minimal, unconventional); a
+  synthesizer then compares them with your idea and writes the solution.
+  `@architect-reviewer` reviews as a red team and may return a `betterAlternative`;
+  at `deep` that triggers one candidate switch (a re-synthesis around the reviewer's
+  pick) outside the round count. Reviewers tag every finding `blocking`, `major` or
+  `minor`; the script, not the reviewer, decides the verdict by applying the tier's
+  floor. At `light` this is a
   straight line: one architect call writes a short change brief to `plan.md`
   (two briefs and one writer call for `both`), one review, no solution doc.
 - **Plan** — (`standard`/`deep`) the architect writes the implementation plan from
@@ -129,10 +164,10 @@ later, even in a new session, is "read that file, call `Workflow B`." No special
 resume mechanism, no extra persistence layer.
 
 After you approve, the skill appends a `> dev-flow: approved by user on <date>`
-marker to `plan.md`, invokes `/addit-harness:adr` once for every line under the
-plan's `## ADR candidates` heading (the architect lists the decisions that are
-significant and hard to reverse; `none` is a valid answer), and hashes the final
-file. `Workflow B` is only allowed to start when a `PreToolUse` hook
+marker to `plan.md`, invokes `/addit-harness:adr` once for every
+`ADR: candidate "<title>"` line in the solution docs' `## Decision` (at `light`, in
+the plan's `## Approach`; `none` is skipped) so the ADR link replaces that line, and
+then hashes the final file (`planSha256`). `Workflow B` is only allowed to start when a `PreToolUse` hook
 (`hooks/gate-dev-flow-implement.sh`) confirms `plan.md` exists, carries that
 marker, and still hashes to the `planSha256` passed to the workflow; the script
 re-checks the hash format as a second layer. Every other `Workflow` call passes
@@ -180,6 +215,65 @@ flowchart LR
   failure is returned as `qaPassed: false`, never looped on.
 
 You still run `git commit` yourself — `dev-flow` never commits.
+
+## Watching a run
+
+Two built-in Claude Code surfaces show where a run is. Neither needs a status
+line or any extra setting beyond what setup places.
+
+**Progress lines in `/workflows`.** While a workflow runs, Claude Code's
+`/workflows` view shows the phase and the script's `log()` lines. The workflows
+write fixed-format lines for the run's state:
+
+| Line | When |
+|---|---|
+| `dev-flow <triage\|design\|implement> start: tier=<tier> track=<track>` | Once, at the start of each workflow. Triage logs `tier=pending` unless it was given a tier |
+| `Triage: tier=<tier> S=<n> R=<n> floors=<list\|none>` | After triage scores the request |
+| `<UX\|Design\|Plan\|Review\|QA fix> r<n>/<cap>: <k> blocking` | After each review round; `<k>` counts the findings at or above the tier's floor |
+| `gate <design_review\|code_review\|qa>: <verdict>` | When a gate is decided; the verdict is `pass`, `fail`, `blocked` (the run halted) or `skipped` |
+| `HALT <haltedBy>: <reason>` | When the run halts (`budget-cap`, `config-error`, `call-ceiling`, `implement-failed`, `escalation`) |
+
+These lines carry no request text, brief or agent output: only tier, track,
+round numbers, counts, gate names and verdicts. The reason after a `HALT` is
+short, but it can include an agent's error message or, for a scope-breach
+escalation, the file paths outside the plan. The skill points you at
+`/workflows` instead of narrating progress in the conversation.
+
+**The lifecycle task list.** Setup's `settings.json` template sets
+`CLAUDE_CODE_ENABLE_TODO_TOOLS=1`, because the task tools are off by default on
+newer models (a probe on `claude-sonnet-5-5` saw no `TaskCreate` without it and
+the full set with it). With the tools on, `/dev-flow` creates six tasks right
+after triage and moves them as the run passes each step:
+
+```mermaid
+flowchart LR
+    T["Triage (tier)"] --> D["Design + plan"]
+    D --> AP["Approve plan"]
+    AP --> IR["Implement + review"]
+    IR --> Q["QA"]
+    Q --> C["Commit<br/>(stays pending: you commit)"]
+```
+
+- `Triage` is done once you answer the tier gate; its subject gains the tier.
+- `Design + plan` is in progress while `Workflow A` runs, `Approve plan` while
+  the plan waits for you, `Implement + review` while `Workflow B` runs. `QA` is
+  marked done only if QA ran.
+- A halted run (or a plan you do not approve) leaves the current task in
+  progress with ` (halted: <haltedBy>)` added to its subject.
+- Task text is the six names plus the tier and the halt id: no request text,
+  code or paths.
+
+Without the task tools (setup not run, or the variable not set), the skill skips
+the list silently. The variable lives in your `settings.json` `env`, and setup
+merges `env` key by key with your values winning, so a value you set yourself is
+never overwritten (see [Getting started](../getting-started/#what-setup-does-to-your-settingsjson)).
+
+**Not yet proven in a live terminal:** whether the model always issues every
+task update at the right step (the list can go stale if it skips one), how much
+context the task tools add to each turn, and whether the one-line task-panel
+summary of a running workflow shows the latest `log()` line or only the phase.
+The progress lines themselves are checked by the mock suite (see
+[Testing the workflows](#testing-the-workflows)); the task list is not.
 
 ## When one agent fails
 
@@ -231,6 +325,30 @@ than assuming from configuration. If it isn't, `skills/dev-flow/SKILL.md`
 documents a full manual fallback: the identical phase order and loop logic,
 driven by direct sequential `@agent` calls instead of a script. Slower, same
 gates, same outcome.
+
+## Testing the workflows
+
+`tests/workflows/mock-run.mjs` runs a real workflow script with only the runtime
+calls (`agent`, `parallel`, `phase`, `log`, `budget`) stubbed, and fails if a script
+uses `Date.now()`, `new Date()` or `Math.random()`. Each file in
+`tests/workflows/scenarios/` scripts the agents' answers and asserts the result:
+
+```bash
+node tests/workflows/mock-run.mjs workflows/dev-flow-implement.js implement-bounds
+node tests/workflows/mock-run.mjs workflows/dev-flow-design.js design-fanout-bounds
+node tests/workflows/mock-run.mjs workflows/dev-flow-triage.js triage-table
+```
+
+Scenarios cover the worst-case caps, the severity floors, QA running once, the scope
+breach escalation, an empty developer result, reviewers that throw, a missing
+optional plugin, the `deep` fan-out (including a degraded one) and in-place
+revisions. Every scenario run is also checked against the progress-line
+contract (`tests/workflows/log-contract.mjs`): exactly one start line naming the
+right workflow, gate names and verdicts from the telemetry contract's enums, round
+numbers within their cap, a `HALT` line for every `haltedBy`, and no line that
+contains the request, the owner proposal or the brief path. The mocks prove
+control flow, call counts and log format, not the quality of what the agents
+write.
 
 ## Source
 

@@ -53,6 +53,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh api "repos/${{ github.repository }}/releases" > site/_data/releases.json
 
+      # The changelog page renders CHANGELOG.md's "## [Unreleased]" section above
+      # the release list; released sections reach the page through releases.json,
+      # since release.yml publishes each one as its release body.
+      - name: Extract unreleased changelog
+        run: |
+          .github/scripts/changelog-section.sh Unreleased \
+            | jq -Rs '{unreleased: .}' > site/_data/changelog.json
+
       - name: Inject version into config
         env:
           SITE_VERSION: ${{ steps.version.outputs.version }}

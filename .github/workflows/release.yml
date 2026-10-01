@@ -75,8 +75,24 @@ jobs:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: claude plugin tag --push -m "addit-harness %s"
 
+      # Release notes come from CHANGELOG.md: the "## [<version>]" section if the
+      # owner already renamed "## [Unreleased]" before dispatching, else the
+      # "## [Unreleased]" section, else GitHub's generated notes. This workflow
+      # never edits CHANGELOG.md.
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ steps.bump.outputs.tag }}
-        run: gh release create "$RELEASE_TAG" --generate-notes
+          NEW_VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          notes="$(mktemp)"
+          .github/scripts/changelog-section.sh "$NEW_VERSION" > "$notes"
+          if [ ! -s "$notes" ]; then
+            .github/scripts/changelog-section.sh Unreleased > "$notes"
+          fi
+          if [ -s "$notes" ]; then
+            gh release create "$RELEASE_TAG" --notes-file "$notes"
+          else
+            echo "::warning::no CHANGELOG.md section for $NEW_VERSION or Unreleased; using generated notes"
+            gh release create "$RELEASE_TAG" --generate-notes
+          fi

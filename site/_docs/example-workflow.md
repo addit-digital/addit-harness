@@ -16,7 +16,7 @@ flowchart LR
     A[Install + setup] --> B[Triage and tier]
     B --> C[Intake brief]
     C --> D[Design + plan]
-    D --> G{{You approve}}
+    D --> G{You approve}
     G --> E[Implement]
     E --> F[Review, then QA]
     F --> H[You commit]

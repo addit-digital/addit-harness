@@ -1,5 +1,6 @@
 ---
 title: Privacy Policy
+description: How the addit-harness plugin handles data. It sends nothing to us; an optional, off-by-default telemetry log stays on your machine.
 permalink: /privacy/
 nav_exclude: true
 ---

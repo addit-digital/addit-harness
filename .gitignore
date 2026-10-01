@@ -20,3 +20,9 @@ site/_config_version.yml
 
 # Python bytecode (tests/telemetry runs stdlib unittest)
 __pycache__/
+
+# Generated at deploy time from CHANGELOG.md (deploy-docs.yml)
+site/_data/changelog.json
+
+# agent worktrees
+.claude/worktrees/

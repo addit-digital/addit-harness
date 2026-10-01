@@ -1,13 +1,23 @@
 ---
 title: Changelog
+description: Unreleased changes from CHANGELOG.md and every published addit-harness release.
 nav_order: 12
 nav_group: Project
 ---
 
-Release notes come straight from
-[GitHub Releases](https://github.com/{{ site.repository }}/releases) — that's
-already a native, always-correct changelog, so this page renders it via
-Liquid instead of duplicating it into a second, driftable file.
+The source of truth is
+[`CHANGELOG.md`](https://github.com/{{ site.repository }}/blob/main/CHANGELOG.md)
+at the repo root. Each release publishes its section as the
+[GitHub Release](https://github.com/{{ site.repository }}/releases) notes, and
+this page renders the unreleased section followed by those releases, both
+pulled in at deploy time (see `.github/workflows/deploy-docs.yml`).
+
+{% if site.data.changelog and site.data.changelog.unreleased != "" %}
+<section class="changelog-unreleased">
+<h2 id="unreleased">Unreleased</h2>
+{{ site.data.changelog.unreleased | markdownify }}
+</section>
+{% endif %}
 
 {% if site.data.releases and site.data.releases.size > 0 %}
 <ul class="changelog-list">
@@ -23,8 +33,7 @@ Liquid instead of duplicating it into a second, driftable file.
   {% endfor %}
 </ul>
 {% else %}
-This page renders the release list at deploy time (see
-`.github/workflows/deploy-docs.yml`), so a local or unreleased build shows no
+This page renders the release list at deploy time, so a local build shows no
 entries yet. See the full history directly on
 [GitHub Releases](https://github.com/{{ site.repository }}/releases) in the
 meantime.

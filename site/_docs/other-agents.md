@@ -1,5 +1,6 @@
 ---
 title: Other coding agents
+description: addit-harness supports Claude Code only; Cursor, Kiro and Codex CLI support and install.sh were removed.
 nav_exclude: true
 sitemap: false
 ---
@@ -15,8 +16,9 @@ Install it as a Claude Code plugin:
 /addit-harness:setup
 ```
 
-See [Getting started](../getting-started/) for details.
+See [Getting started](../getting-started/) for details and
+[Migrating from `install.sh`](../getting-started/#migrating-from-installsh).
 
-Config you already synced into another tool keeps working but is frozen. To
-keep updating it, pin commit `ebea6f3` or tag `addit-harness--v0.3.0`, the last
-state that shipped `install.sh`.
+Config you already synced into another tool keeps working but no longer
+updates. To keep using the old installer, pin tag `addit-harness--v0.3.0`, the
+last release that shipped `install.sh`.
