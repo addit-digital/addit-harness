@@ -15,6 +15,7 @@ if (!['backend', 'frontend', 'both'].includes(A.track)) throw new Error(`Invalid
 
 const TIERS = ['light', 'standard', 'deep'] // the standard tier names; phases 7 and 12 use these
 const tier = TIERS.includes(A.tier) ? A.tier : (log(`tier '${A.tier}' unrecognised — standard`), 'standard')
+log(`dev-flow design start: tier=${tier} track=${A.track}`)
 const POLICY = {
   light:    { designRounds: 1, floor: 'blocking', ux: false, planPhase: false, archEffort: 'medium', revEffort: 'low',    callCap: 4 },
   standard: { designRounds: 3, floor: 'major',    ux: true,  planPhase: true,  archEffort: 'high',   revEffort: 'medium', callCap: 23 }, // +1 owner-idea call per track
@@ -134,6 +135,7 @@ if (A.needsUX && POLICY.ux) {
     )
     if (!review) { log(`UX round ${round + 1}: reviewer returned no result`); round++; continue }
     const blocking = qualifying(review.findings)
+    log(`UX r${round + 1}/${POLICY.designRounds}: ${blocking.length} blocking`)
     uxApproved = blocking.length === 0
     const key = sortedKey(blocking)
     if (lastKey && key === lastKey) { log('UX loop not converging (same findings again), aborting'); break }
@@ -189,6 +191,7 @@ if (tier === 'light') {
       round = 1
       designFindings = review.findings
       approved = qualifying(designFindings).length === 0
+      log(`Design r1/1: ${qualifying(designFindings).length} blocking`)
     }
   }
 } else {
@@ -263,6 +266,7 @@ if (tier === 'light') {
     }
     if (alt) designFindings = [...designFindings, { severity: 'major', description: `Better alternative: ${JSON.stringify(alt)}` }]
     const blocking = qualifying(designFindings)
+    log(`Design r${round + 1}/${POLICY.designRounds}: ${blocking.length} blocking`)
     approved = blocking.length === 0
     const key = sortedKey(blocking)
     if (lastKey && key === lastKey) { log('Design loop not converging (same findings again), aborting'); designBreaker = true; break }
@@ -272,6 +276,7 @@ if (tier === 'light') {
   }
 }
 
+const verdict = ok => haltedBy ? 'blocked' : ok ? 'pass' : 'fail' // telemetry-contract verdict enum
 const tracksCompleted = TRACKS.filter(t => completed.has(t.kind)).map(t => t.kind)
 if (POLICY.planPhase) {
   phase('Plan')
@@ -287,8 +292,10 @@ if (POLICY.planPhase) {
     planReview = plan ? await callAgent(ctx() + `Review the plan at ${PLAN_PATH}.` + SEVERITY_ASK, {
       agentType: 'addit-harness:architect-reviewer', phase: 'Plan', schema: REVIEW_SCHEMA, effort: POLICY.revEffort,
     }) : null
+    if (planReview) log(`Plan r1/1: ${qualifying(planReview.findings).length} blocking`)
   }
 }
+log(`gate design_review: ${verdict(approved)}`)
 // At light the single design review is the plan review: it read the same file.
 const planFindings = POLICY.planPhase ? (planReview?.findings ?? []) : designFindings
 const planApproved = POLICY.planPhase ? (planReview ? qualifying(planFindings).length === 0 : false) : (!!plan && approved)

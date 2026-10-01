@@ -126,6 +126,7 @@ const derive = (e, ctx) => {
   }
 }
 
+log(`dev-flow triage start: tier=${A.userTier ?? 'pending'} track=${A.track}`)
 phase('Triage')
 const evidence = await callAgent(
   UNTRUSTED + `Triage this change request against the repo at ${A.repo}. Answer the schema's questions with facts only — never a verdict, size, tier or recommendation. Request: ${A.request}`,
@@ -133,6 +134,7 @@ const evidence = await callAgent(
 )
 if (!evidence) log('Triage: task-triager returned no result — defaulting to standard')
 const derived = evidence ? derive(evidence, { track: A.track, needsUX: !!A.needsUX, userTier: A.userTier }) : null
+if (derived) log(`Triage: tier=${derived.tier} S=${derived.S} R=${derived.R} floors=${derived.overrides.join(',') || 'none'}`)
 if (derived?.rejectedPaths.length) log(`Triage: dropped invalid paths ${JSON.stringify(derived.rejectedPaths)}`)
 
 return {

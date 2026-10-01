@@ -12,6 +12,6 @@ export default {
   expect: out => {
     assert.equal(out.result.clean, true)
     assert.equal(out.result.haltedBy, null)
-    assert.deepEqual(out.logs, []) // absent optional reviewers are not an error
+    assert.ok(!out.logs.some(l => /agent failed/.test(l))) // absent optional reviewers are not an error
   },
 }

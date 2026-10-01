@@ -4,12 +4,13 @@
 // A scenario (tests/workflows/scenarios/<scenario>.mjs) default-exports
 // { args, respond(call, state), budget?, expect(out) }. respond() returns the
 // agent result (or null) and may throw to simulate an agent error. expect()
-// throws on a failed assertion. Prints { result, error, calls, callsByType, logs, phases }.
+// throws on a failed assertion. Every run is also checked against log-contract.mjs. Prints { result, error, calls, callsByType, logs, phases }.
 // A scenario may give argsList instead of args to run the script once per entry
 // (state.run is the entry index); expect() then receives { runs: [out, ...] }.
 import { readFileSync } from 'node:fs'
 import { basename, dirname, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { checkLogContract } from './log-contract.mjs'
 
 const [scriptPath, scenarioName] = process.argv.slice(2)
 if (!scriptPath || !scenarioName) {
@@ -60,5 +61,9 @@ const runs = []
 if (scenario.argsList) for (const [i, a] of scenario.argsList.entries()) runs.push(await runOnce(a, i)) // sequential: scenarios keep module state
 const out = scenario.argsList ? { runs } : await runOnce(scenario.args, 0)
 console.log(JSON.stringify(out, (k, v) => (k === 'callList' ? undefined : v), 2))
-try { scenario.expect(out); console.error(`PASS ${scenarioName}`) }
-catch (e) { console.error(`FAIL ${scenarioName}: ${e.message}`); process.exit(1) }
+const workflow = meta.name.replace(/^dev-flow-/, '')
+try {
+  if (scenario.argsList) out.runs.forEach((r, i) => checkLogContract(r, scenario.argsList[i], workflow)); else checkLogContract(out, scenario.args, workflow)
+  scenario.expect(out)
+  console.error(`PASS ${scenarioName}`)
+} catch (e) { console.error(`FAIL ${scenarioName}: ${e.message}`); process.exit(1) }

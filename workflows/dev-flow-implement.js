@@ -31,6 +31,7 @@ const ALL_REVIEWERS = [REQUIRED_REVIEW_AGENT, ...OPTIONAL_REVIEW_AGENTS]
 
 const TIERS = ['light', 'standard', 'deep'] // the standard tier names; phases 7 and 12 use these
 const tier = TIERS.includes(A.tier) ? A.tier : (log(`tier '${A.tier}' unrecognised — standard`), 'standard')
+log(`dev-flow implement start: tier=${tier} track=${A.track}`)
 const STANDARD = { reviewers: ALL_REVIEWERS, floor: 'major', revEffort: 'medium', postQaReReview: true, callCap: 22 }
 const POLICY = {
   light: { reviewers: [REQUIRED_REVIEW_AGENT], floor: 'blocking', revEffort: 'low', postQaReReview: false, callCap: 13 },
@@ -196,6 +197,7 @@ for (let round = 0; round <= REVIEW_MAX_ROUNDS && !haltedBy; round++) {
   if (!scopeChecked) checkScope(reviewed.touchedFiles)
   if (haltedBy) break
   const findings = reviewed.findings
+  log(`Review r${round + 1}/${REVIEW_MAX_ROUNDS + 1}: ${findings.length} blocking`)
   if (findings.length === 0) { clean = true; break }
   if (verdictOnly) break
   const key = sortedKey(findings)
@@ -204,6 +206,8 @@ for (let round = 0; round <= REVIEW_MAX_ROUNDS && !haltedBy; round++) {
   await fixRound(findings, `Review round ${round + 1}`, 'Review')
   fixRounds++
 }
+const verdict = ok => haltedBy ? 'blocked' : ok ? 'pass' : 'fail' // telemetry-contract verdict enum
+log(`gate code_review: ${verdict(clean)}`)
 if (!clean && !haltedBy) log(`Review loop did not reach clean after ${reviewRounds} review pass(es) — QA runs anyway so the report reflects real final state, but this is not a clean pass`)
 
 // QA runs once, after review. A failure gets one fix cycle (no severity floor: a change that provably does
@@ -225,7 +229,8 @@ if (!haltedBy) {
     { agentType: 'addit-harness:qa-engineer', phase: 'QA', schema: QA_SCHEMA }
   )
   if (!qa) log('QA phase: qa-engineer returned no result — treating as not passed')
-}
+  log(`gate qa: ${verdict(qa?.passed === true)}`)
+} else log('gate qa: skipped')
 if (qa?.passed === false && !haltedBy) {
   phase('QA fix')
   const qaFixes = qaFindings(qa)
@@ -238,6 +243,7 @@ if (qa?.passed === false && !haltedBy) {
     )
     postQaFixReviewed = !!rr
     postQaReviewBlocking = qualifying(rr?.findings).length
+    if (rr) log(`QA fix r1/1: ${postQaReviewBlocking} blocking`)
     if (!rr) log('QA fix: scoped re-review returned no result')
   } else {
     log('Post-QA fix was not code-reviewed (light tier)')
@@ -248,6 +254,7 @@ if (qa?.passed === false && !haltedBy) {
     { agentType: 'addit-harness:qa-engineer', phase: 'QA fix', schema: QA_SCHEMA }
   )
   if (!qa) log('QA fix: qa-engineer re-verification returned no result — treating as not passed')
+  log(`gate qa: ${verdict(qa?.passed === true)}`)
 }
 
 return {

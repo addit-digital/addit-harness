@@ -17,6 +17,11 @@ export default {
     assert.equal(out.result.qaRuns, 1)
     assert.equal(out.callsByType[`${R}code-reviewer`], 1)
     assert.deepEqual(out.phases, ['Implement', 'Review', 'QA'])
-    assert.deepEqual(out.logs, [])
+    assert.deepEqual(out.logs, [
+      'dev-flow implement start: tier=standard track=backend',
+      'Review r1/3: 0 blocking',
+      'gate code_review: pass',
+      'gate qa: pass',
+    ])
   },
 }
