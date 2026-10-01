@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>Harness Telemetry</title>
+<style>
+:root{--bg:#fff;--fg:#1f2328;--mut:#59636e;--card:#f6f8fa;--bd:#d1d9e0;--acc:#0969da;--ok:#1a7f37;--warn:#9a6700;--bad:#cf222e}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1117;--fg:#e6edf3;--mut:#9198a1;--card:#161b22;--bd:#3d444d;--acc:#4493f8;--ok:#3fb950;--warn:#d29922;--bad:#f85149}}
+:root[data-theme="dark"]{--bg:#0d1117;--fg:#e6edf3;--mut:#9198a1;--card:#161b22;--bd:#3d444d;--acc:#4493f8;--ok:#3fb950;--warn:#d29922;--bad:#f85149}
+body{margin:0;padding:16px;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,sans-serif}
+main{max-width:960px;margin:0 auto}h1{margin:0 0 4px}h2{font-size:16px;margin:0 0 8px}
+.mut,.na{color:var(--mut)}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:16px 0}
+.card,section{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:12px}section{margin:12px 0}
+.big{font-size:26px;font-weight:600}.bad{color:var(--bad);font-weight:600}svg{width:100%;height:auto;display:block}
+svg text{fill:var(--fg);font-size:12px}.bar{fill:var(--acc)}.ok{fill:var(--ok)}.warn{fill:var(--warn)}.err{fill:var(--bad)}
+table{border-collapse:collapse;margin:6px 0}td,th{border:1px solid var(--bd);padding:2px 8px;text-align:left}
+</style></head><body><main id="app"></main>
+<script type="application/json" id="d">__DATA__</script>
+<script>
+(function () {
+'use strict';
+var D = JSON.parse(document.getElementById('d').textContent), K = D.kpis || {};
+var NS = ['http:', '', 'www.w3.org', '2000', 'svg'].join('/'); // XML namespace id, not an address
+function el(t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; }
+function sv(t, a, x) { var e = document.createElementNS(NS, t); for (var k in a) e.setAttribute(k, a[k]); if (x != null) e.textContent = x; return e; }
+function add(p) { for (var i = 1; i < arguments.length; i++) p.appendChild(arguments[i]); return p; }
+function ok(k) { return k && k.status === 'ok'; }
+function pairs(o) { return Object.keys(o || {}).map(function (k) { return [k, o[k]]; }); }
+function table(head, rows) {
+  var t = el('table'), r = add(t.insertRow()), d = el('details');
+  head.forEach(function (h) { r.appendChild(el('th', 0, h)); });
+  rows.forEach(function (row) { var tr = t.insertRow(); row.forEach(function (c) { tr.insertCell().textContent = c; }); });
+  return add(d, el('summary', 0, 'Data table'), t);
+}
+function chart(title, desc, rows, cls) { // horizontal bars: rows = [[label, n, optional class]]
+  var W = 600, L = 190, max = Math.max.apply(null, rows.map(function (r) { return r[1]; }).concat(1)), n = 0;
+  var s = sv('svg', { viewBox: '0 0 ' + W + ' ' + (rows.length * 22 + 4), role: 'img' }), f = el('figure');
+  f.style.margin = '8px 0';
+  add(s, sv('title', {}, title), sv('desc', {}, desc));
+  rows.forEach(function (r) {
+    var y = n++ * 22 + 2, w = Math.max(1, (r[1] / max) * (W - L - 50));
+    add(s, sv('text', { x: 0, y: y + 14 }, r[0]), sv('rect', { x: L, y: y + 2, width: w, height: 14, 'class': r[2] || cls || 'bar' }),
+      sv('text', { x: L + w + 6, y: y + 14 }, String(r[1])));
+  });
+  return add(f, s, table(['Item', 'Value'], rows));
+}
+function panel(root, title, ids, fn) {
+  var s = add(el('section'), el('h2', 0, title)), k = K[ids[0]];
+  if (ok(k)) fn(s, k); else s.appendChild(el('p', 'na', 'n/a: ' + ((k && k.reason) || 'no data')));
+  root.appendChild(s);
+}
+function list(label, a) { return el('p', 'mut', label + ': ' + (a && a.length ? a.join(', ') : 'none')); }
+function text(k) { return el('p', 0, k.value + ' ' + k.unit + ' (n=' + k.n + ')'); }
+var app = document.getElementById('app'), w = D.window || {};
+add(app, el('h1', 0, 'Harness Telemetry'),
+  el('p', 'mut', w.from + ' to ' + w.to + ' (' + w.days + ' days) · ' + D.sessions_n + ' sessions · plugin ' + (D.plugin_versions || []).join(', ')),
+  el('p', 'mut', D.mode === 'artifact' ? 'Aggregated KPIs only, published at your request.' : 'Generated locally, nothing sent.'));
+if (D.invalid_lines) app.appendChild(el('p', 'mut', D.invalid_lines + ' ledger lines were skipped as invalid (for example written by an older plugin version).'));
+var cards = el('div', 'cards');
+['CE1', 'LE1', 'AR1', 'MH1', 'DOC1', 'SQ1', 'FC-1', 'DF1'].forEach(function (id) {
+  var k = K[id] || {}, c = add(el('div', 'card'), el('div', 'mut', '★ ' + id));
+  if (ok(k)) add(c, el('div', 'big', k.value + (k.unit.charAt(0) === '%' ? '%' : '')), el('div', 'mut', k.unit.replace(/^% /, '') + ' · n=' + k.n));
+  else add(c, el('div', 'big na', 'n/a'), el('div', 'mut', k.reason || 'no data'));
+  cards.appendChild(c);
+});
+app.appendChild(cards);
+panel(app, 'Agent adoption (AR1)', ['AR1'], function (s, k) {
+  var d = k.detail;
+  add(s, chart('Agent adoption', 'Sessions-wide agent starts by agent', pairs(d.used)), list('Never used', d.never_used));
+  add(s, chart('Skill and command use', 'Uses by skill', pairs(d.skills_used)), list('Skills never used', d.skills_never_used));
+});
+panel(app, 'Agent outcomes (AR2) and competitor share (AR3)', ['AR2'], function (s, k) {
+  var rows = [], cls = { completed: 'ok', empty: 'warn', interrupted: 'err' };
+  pairs(k.detail.by_agent).forEach(function (a) { pairs(a[1]).forEach(function (o) { rows.push([a[0] + ': ' + o[0], o[1], cls[o[0]]]); }); });
+  add(s, text(k), chart('Agent outcomes', 'Completed, empty and interrupted runs per agent', rows));
+  if (ok(K.AR3)) s.appendChild(text(K.AR3));
+});
+panel(app, 'Dev-flow funnel by tier (LE1, DF1)', ['LE1'], function (s, k) {
+  var rows = [];
+  pairs(k.detail.funnel_by_tier).forEach(function (t) { pairs(t[1]).forEach(function (st) { rows.push([t[0] + ' / ' + st[0].replace('_', ' '), st[1]]); }); });
+  add(s, text(k), chart('Dev-flow funnel', 'Design launched, plan approved, implement launched per tier', rows));
+  if (ok(K.DF1)) add(s, text(K.DF1), list('Tier mix', pairs(K.DF1.detail.tier_mix).map(function (p) { return p[0] + ' ' + p[1]; })));
+});
+panel(app, 'Gate verdicts (LE3)', ['LE3'], function (s, k) {
+  var rows = [];
+  pairs(k.detail.gates).forEach(function (g) { pairs(g[1]).forEach(function (v) { rows.push([g[0], v[0], v[1]]); }); });
+  var t = table(['Gate', 'Verdict', 'Count'], rows);
+  t.open = true;
+  [].forEach.call(t.querySelectorAll('td'), function (td) { if (td.textContent === 'bypassed') td.className = 'bad'; });
+  add(s, text(k), t);
+});
+panel(app, 'Always-on bytes per session (CE3)', ['CE3'], function (s, k) {
+  add(s, text(k));
+  if (k.detail) add(s, chart('Always-on bytes', 'Instruction bytes loaded at session start, per session',
+    k.detail.per_session.map(function (b, i) { return ['session ' + (i + 1), b]; })));
+});
+panel(app, 'Document lines vs ceiling (DOC1-3)', ['DOC1'], function (s, k) {
+  var rows = pairs(k.detail.by_kind).map(function (r) { return [r[0] + ' (ceiling ' + r[1].ceiling + ')', r[1].max_lines, r[1].over ? 'err' : 'ok']; });
+  add(s, text(k), chart('Longest document per kind', 'Lines against the deep ceiling', rows));
+  ['DOC2', 'DOC3'].forEach(function (id) { s.appendChild(ok(K[id]) ? text(K[id]) : el('p', 'na', id + ' n/a: ' + (K[id] || {}).reason)); });
+});
+panel(app, 'Architect method (SQ1)', ['SQ1'], function (s, k) {
+  add(s, text(k), el('p', 'mut', 'Median claim labels per solution: ' + k.detail.claim_labels_median));
+});
+panel(app, 'FC-1 line-cap compliance', ['FC-1'], function (s, k) {
+  add(s, text(k), chart('FC-1 findings', 'Line-cap findings by agent', pairs(k.detail.violations_by_agent)));
+});
+panel(app, 'Setup state and rule coverage (MH1, MH2)', ['MH1'], function (s, k) {
+  add(s, chart('Setup state', 'Sessions by setup state', pairs(k.detail)));
+  if (ok(K.MH2)) add(s, text(K.MH2), chart('Rule loads', 'Sessions that loaded each shipped rule', pairs(K.MH2.detail)));
+});
+})();
+</script></body></html>

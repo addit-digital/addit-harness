@@ -7,15 +7,7 @@ Always-on. The mental model for every non-trivial task.
    If the request is ambiguous in a way that changes the approach, ask first.
 2. **Curate context** — read the specific code that matters; don't guess. Reuse
    existing functions, patterns, and utilities before writing new ones.
-3. **Write the plan** — for non-trivial work, produce rich, scannable plan
-   documentation before coding (not a prose blob). Default sections:
-   **Context/problem**, **Approach** (chosen path + key trade-offs, not every
-   alternative), **Diagrams (mermaid)**, **phased steps with acceptance
-   criteria**, and **verification**. Include the mermaid diagrams that fit the
-   change: architecture/component (`graph`/`flowchart`), data/control flow, and a
-   `sequenceDiagram` for request/interaction flows; add a file-change map for
-   multi-file work. Skip diagrams only for trivial edits (typo / one-liner /
-   rename). See "Design documentation & viewing" below.
+3. **Write the plan** — for non-trivial work, write the plan before coding per `references/doc-protocol.md` (addit-harness plugin): the doc type's template, tier ceiling, Observed/Inferred/Unknown labels, edit in place on revision. One mermaid diagram per concept, current state; skip only for trivial edits (typo / one-liner / rename).
    After plan approval, persist it with `/save-plan` → `docs/work/<slug>/plans/`
    (the harness scratch file at `~/.claude/plans/` is ephemeral working state,
    not the home). Then create a tracked task list with TaskCreate from the plan's
@@ -29,9 +21,7 @@ Always-on. The mental model for every non-trivial task.
    steps so the session can be reset cheaply.
 
 ## Design documentation & viewing
-- Plans, ADRs (`/adr`), and PR descriptions are design documentation: include
-  relevant mermaid diagrams wherever you describe structure or flow — prose alone
-  isn't enough for non-trivial work.
+- Plans, solutions, ADRs and PR descriptions are design documentation: one mermaid diagram per concept, edited in place. Git holds history.
 - The CLI terminal **cannot render mermaid** (it shows raw code). So save a
   non-trivial plan to a markdown file with `/save-plan` (default
   `docs/work/<slug>/plans/`), then open it in an IDE preview (Cursor / VS Code,
@@ -41,25 +31,27 @@ Always-on. The mental model for every non-trivial task.
 ### Doc taxonomy — where each artifact lives
 
 One folder per unit of work — feature, bug fix, improvement, or enhancement —
-at `docs/work/<slug>/` (`<slug>` is `<YYYY-MM-DD>-<short-name>` by default, or
-`<ticket-id>-<short-name>` when the project uses an issue tracker), holding
-everything produced for it in per-type subfolders:
+at `docs/work/<slug>/`, holding everything produced for it in per-type subfolders:
 
 | Subfolder | Holds | Produced by |
 |--------|-------|-------------|
 | `plans/` | **Implementation plans** — phased steps, to-do lists, acceptance criteria | Main Claude via `/save-plan` |
 | `solutions/` | **Architecture solution/design docs** — no to-do list, pure design | `@backend-architect`, `@frontend-architect`, or main Claude for design-only output |
 | `architecture-reports/` | **Architecture review reports** | `@architect-reviewer` |
+| `specs/` | **Intake brief** `brief.md`; quarantined `owner-proposal.md` | `@product-owner` |
 | `qa-reports/` | **QA/regression verification reports**, evidence-backed | `@qa-engineer` |
+| `legal/` | **Per-change legal analysis** (`legal/assessment.md`) | `@saas-legal-advisor` |
 
-Subfolders, not flat files, deliberately: a whole category (e.g. `plans/`, which
-tends to be skimmed past once approved) can be glob-excluded or ignored at the
-directory level instead of pattern-matched by filename. Files: `plans/plan.md`,
-`solutions/solution-<track>.md`, `architecture-reports/report.md`, and
-`qa-reports/report.md` — the two report kinds round-suffixed (`report-r2.md`,
-etc.) on a repeat round, never overwriting an earlier round's report; create the
+Subfolders, not flat files: a whole category (e.g. `plans/`) can be ignored by
+directory. Files: `plans/plan.md`, `solutions/solution-<track>.md`,
+`architecture-reports/report.md`, `qa-reports/report.md` — reports
+round-suffixed (`report-r2.md`) on a repeat round; create the
 `docs/work/<slug>/` folder + a row in `docs/work/README.md` on first use; don't
 commit/push unless asked.
+
+**Plugin conventions win.** Write work artifacts only to `docs/work/<slug>/<type>/`, ADRs to `docs/adr/`, standing legal docs to `docs/legal/<document-kind>.md` — even if the repo has its own plans/ADR/legal folders (read those as input). A project `CLAUDE.md` adds facts; it does not move these folders.
+**Slug.** `$(date +%F)-<short-name>`, or `<ticket-id>-<short-name>` for ticket work.
+**Never overwrite work-item artifacts.** A slug is the same work item only if this session created or was given it; otherwise, if `docs/work/<slug>/` exists, append `-2`, `-3`…. Standing docs (`docs/legal/`, `docs/adr/README.md`, `docs/work/README.md`, `.claude/design-conventions.md`) are edited in place; git is the history.
 
 ## Anti-patterns to avoid
 - **Mega-prompt**: cramming many unrelated goals into one turn. Split them.

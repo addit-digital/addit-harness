@@ -1,14 +1,14 @@
 ---
 title: Enabling MCP
+description: How to enable the optional MCP servers in mcp.example.json, from Figma and Atlassian to databases and cloud providers.
 nav_order: 7
 nav_group: Reference
 ---
 
 Both Atlassian and database MCP are intentionally **off** by default.
 `mcp.example.json` is a disabled, human-curated catalogue by design — pick an
-entry, fill in credentials by hand, and paste it into the tool's real MCP
-config yourself. MCP is **not** auto-synced for any tool (`install.sh`'s
-footer prints the right target path per tool after every run).
+entry, fill in credentials by hand, and paste it into Claude Code's real MCP
+config yourself. MCP is never auto-enabled.
 
 <div class="docs-toc" markdown="1">
 **On this page**
@@ -31,7 +31,7 @@ footer prints the right target path per tool after every run).
 
 ## Figma (official plugin — recommended)
 
-Run `./install.sh --plugins` (already adds `figma@claude-plugins-official`).
+Run `claude plugin install figma@claude-plugins-official` (or `/addit-harness:setup --plugins`, which installs it with the other declared plugins).
 Open any Figma file → authorise Claude Code in the plugin panel → OAuth
 completes → `/mcp` confirms the Figma server is connected.
 

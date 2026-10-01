@@ -20,7 +20,7 @@ body:
     attributes:
       label: Steps to reproduce
       placeholder: |
-        1. Install with ./install.sh
+        1. Install with `/plugin install addit-harness@addit` + `/addit-harness:setup`
         2. Open a Go/Java/TS file
         3. ...
     validations:

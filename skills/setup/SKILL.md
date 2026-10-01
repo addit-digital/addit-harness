@@ -2,7 +2,7 @@
 name: setup
 description: Use once, right after installing the addit-harness Claude Code plugin, to place the parts a plugin can't carry natively (CLAUDE.md, AGENTS.md, path-scoped rules/, references/, settings.json) into ~/.claude or the current project. Also use to re-sync after a plugin update, or to switch between global and project scope.
 user-invocable: true
-argument-hint: "[--scope global|project] [--link]"
+argument-hint: "[--scope global|project] [--link] [--plugins]"
 ---
 
 # addit-harness setup
@@ -26,7 +26,7 @@ just the current repo). Don't guess:
   obvious (e.g. "just try it here" / "in this repo only" → project; "on my
   machine" or no project context at all → global), **ask** which they want
   before running anything. Offer `global` as the default recommendation
-  since it matches `install.sh`'s existing behavior, but let them choose:
+  since it is what most users want, but let them choose:
   - `global`: places everything under `~/.claude/` — applies to every Claude
     Code session on the machine.
   - `project`: places `CLAUDE.md`, `AGENTS.md`, `rules/`, `references/` bare
@@ -44,17 +44,36 @@ just the current repo). Don't guess:
 Once the scope is settled, run the bundled script with the Bash tool:
 
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/skills/setup/scripts/setup.sh" --scope <global|project> [--link]
+bash "${CLAUDE_PLUGIN_ROOT}/skills/setup/scripts/setup.sh" --scope <global|project> [--link] [--plugins]
 ```
 
 `--link` symlinks instead of copying, so edits to `rules/`/`settings.json`
 track the plugin's own git checkout. Default is copy.
 
-The script backs up anything it would overwrite (matching `install.sh`'s
-existing behavior) and prints a summary of what it placed and where.
+`--plugins` (opt-in) additionally runs `claude plugin marketplace add <source>`
+for each `extraKnownMarketplaces` entry and `claude plugin install <id>` for
+each `enabledPlugins` key set to `true`, read from the placed `settings.json`
+(no hardcoded list; plugins you disabled are skipped). It needs the `claude`
+CLI on `PATH` and skips with a message if it is missing. Whether Claude Code
+installs `enabledPlugins` by itself on first start is unverified, so use this
+flag when you want them installed now. If a nested install fails from inside a
+session, run the printed `claude plugin ...` commands in a normal shell.
+
+The script backs up anything it would overwrite to
+`~/.claude/.install-backups/<stamp>/` (global) or
+`.claude/.install-backups/<stamp>/` (project) and prints a summary of what it
+placed and where.
+
+`settings.json` is merged, not replaced: your `hooks`, `statusLine`, `env`
+and other keys the template lacks survive, and `enabledPlugins` /
+`extraKnownMarketplaces` / `env` are deep-merged with your existing values winning (a
+plugin you disabled stays disabled; an `env` value you set is never overwritten). Keys the template owns (`model`,
+`permissions`) are updated to the template's values, so a backup is taken
+first. Re-running is idempotent. With `--link`, `settings.json` is symlinked
+rather than merged.
 
 For `--scope global`, it also retires any leftover unprefixed `agents/`
-and `skills/` from a pre-plugin install (`install.sh --target claude`
+and `skills/` from a pre-plugin install (the pre-plugin copy installer, since removed,
 used to copy those straight into `~/.claude/agents` and `~/.claude/skills`
 unprefixed — the plugin now exposes the same content as
 `addit-harness:<name>`, so the old copies are stale duplicates). A legacy

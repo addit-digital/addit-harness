@@ -1,6 +1,6 @@
 ---
 name: go-conventions
-description: Scan the current Go repo and write .claude/go-conventions.md — a project-specific convention file that rules/go.md loads on every session instead of re-scanning the codebase from scratch. Use when starting work in a new Go repo, when conventions have drifted, or when --refresh is passed to merge in new patterns.
+description: Scan the current Go repo and write .claude/go-conventions.md — a project-specific convention file that rules/go.md reads whenever a .go file is read, instead of re-scanning the codebase from scratch. Use when starting work in a new Go repo, when conventions have drifted, or when --refresh is passed to merge in new patterns.
 user-invocable: true
 argument-hint: "[--refresh]"
 ---
@@ -9,7 +9,8 @@ argument-hint: "[--refresh]"
 
 Scans the current Go module and produces `.claude/go-conventions.md` — a
 lightweight, project-specific convention reference. `rules/go.md` reads this
-file first on every session, so conventions load cheaply without re-scanning.
+file whenever a `.go` file is read, so conventions load cheaply without
+re-scanning. It holds only the **delta** from the global baseline.
 
 ## When to run
 
@@ -52,25 +53,29 @@ Read these artifacts in priority order:
 
 From what you read, identify the established patterns for each section below.
 Only document what you *actually observed* — don't invent from general knowledge.
-If a section has no established pattern, omit it (leave a brief `# TODO:` note).
+If a section has no established pattern, omit it (omit it; the baseline applies).
 
-**Sections to cover:**
+**Sections to cover** (one per baseline topic, named by topic id; see
+`${CLAUDE_PLUGIN_ROOT}/references/go/README.md`). For each, write only where the
+repo differs from or extends the baseline default:
 
-1. **Project layout** — the actual top-level structure and what lives where
-2. **Package / module structure** — how domain packages are organized (which files,
-   naming pattern for constructors, interfaces vs structs)
-3. **Naming** — types, functions, constants, files, packages
-4. **Dependency injection** — constructor pattern (Builder? functional options? plain params?)
-5. **Model/DTO separation** — where domain entities live vs API types; how they're mapped
-6. **Error handling** — custom error types, wrapping, sentinel errors, propagation
-7. **Logging** — library, how to acquire a logger, log levels used
-8. **Data access** — DB driver, query patterns, pagination, soft delete, collection naming
-9. **HTTP layer** — router framework, handler signature, request binding, error response
-10. **Events / async** — if an event bus exists: how events are defined, published, subscribed
-11. **Context & auth** — how user/auth context flows through the system
-12. **Validation** — library, where validation happens, custom validators
-13. **Import order** — observed ordering convention
-14. **Key libraries** — for each direct dep, one-line usage note (e.g. "uuid.New() for IDs")
+1. **LAY** project layout and domain package files (LAY-1..3 are often overridden)
+2. **STY** naming, import order (STY-4)
+3. **DI** constructor pattern (Builder, functional options, plain params)
+4. **ERR** error type, sentinels, propagation (ERR-1, ERR-5)
+5. **CTX** how user/tenant identity flows through the context
+6. **CON** concurrency helpers in use
+7. **LOG** logging library and how a logger is acquired (LOG-2)
+8. **HTTP** router framework, route prefix, error rendering (HTTP-1, 2, 4, 6)
+9. **DATA** DB driver, pagination, soft delete, collection naming (DATA-2)
+10. **EVT** event bus, if one exists (EVT-*)
+11. **TEST** test style and CI commands
+12. **Key libraries**: one-line usage note per direct dependency
+
+Where the repo contradicts a baseline topic rule, record it as
+`# OVERRIDE: G-<TOPIC>-n <reason>`. Never write an override for G-1..G-8 or
+G-10: those are not overridable. If the repo contradicts one, report it to the
+user instead.
 
 ### 4. Write the file
 
@@ -86,7 +91,7 @@ existing content that is still valid. Never overwrite hand-edits — look for
 # Go conventions — {module-name}
 
 Derived from codebase scan on {date}. Maintained by `/go-conventions --refresh`.
-Global baseline: `${CLAUDE_PLUGIN_ROOT}/references/go/app-erp-conventions.md`.
+Global baseline: `${CLAUDE_PLUGIN_ROOT}/references/go/README.md` (topic files).
 
 > **Stack:** Go {version} · {key libs}
 ```
@@ -96,8 +101,8 @@ Then one section per category found. Each section:
 - Shows a short code example where the rule isn't obvious
 - Cites the example file/pattern it was derived from (e.g. `// see pkg/sales/service.go`)
 
-Keep each section tight — 5-15 lines max. This file is loaded every session;
-brevity matters more than completeness.
+Keep each section tight — 5-15 lines max. This file is read whenever a `.go` file
+is read; brevity matters more than completeness.
 
 ### 5. Report
 
@@ -114,7 +119,7 @@ Do **not** commit the file unless the user asks.
 ## Notes
 
 - This skill writes to the *target project* repo, not to the addit-harness repo.
-- The file it generates is a supplement to `${CLAUDE_PLUGIN_ROOT}/references/go/app-erp-conventions.md`,
+- The file it generates is a supplement to the topic files under `${CLAUDE_PLUGIN_ROOT}/references/go/`,
   not a replacement. Put only the *delta* — what differs from or extends the global baseline.
 - If the project is a perfect match for the baseline (same stack, same patterns), say so
   and write a minimal file noting the match rather than duplicating all baseline content.

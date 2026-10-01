@@ -1,6 +1,6 @@
 ---
 name: design-conventions
-description: Scan the current TS/React project's existing UI layer and write .claude/design-conventions.md — a project-specific visual design convention file that rules/typescript.md loads before UI work. Use when starting UI work in an existing project, when design conventions have drifted, or when --refresh is passed to merge in new patterns.
+description: Scan the current TS/React project's existing UI layer and write .claude/design-conventions.md — a project-specific visual design convention file that rules/typescript-frontend.md loads before UI work. Use when starting UI work in an existing project, when design conventions have drifted, or when --refresh is passed to merge in new patterns.
 user-invocable: true
 argument-hint: "[--refresh]"
 ---
@@ -9,7 +9,7 @@ argument-hint: "[--refresh]"
 
 Scans the current TypeScript/React project's UI layer and produces
 `.claude/design-conventions.md` — a lightweight, project-specific visual design
-convention reference. `rules/typescript.md` instructs loading this file first for
+convention reference. `rules/typescript-frontend.md` instructs loading this file first for
 any UI work, so the design language loads cheaply without re-scanning each session.
 
 ## Greenfield guard
@@ -124,7 +124,7 @@ Tell the user:
 - Any areas where you couldn't find an established pattern (and what to do)
 - How to view/edit it (it's plain markdown — open in any editor)
 - Suggest adding `@.claude/design-conventions.md` to the project's `CLAUDE.md` for
-  automatic inclusion (optional; `rules/typescript.md` reads it on demand without this)
+  automatic inclusion (optional; `rules/typescript-frontend.md` reads it on demand without this)
 
 Do **not** commit the file unless the user asks.
 

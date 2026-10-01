@@ -7,15 +7,15 @@
 # everything else (agents/, skills/) is already live via the plugin itself.
 #
 # Invoked by the /addit-harness:setup skill, which runs it with
-# CLAUDE_PLUGIN_ROOT set. Mirrors install.sh's backup_and_place so Claude
-# Code users get the same behavior as the Cursor/Kiro/Codex CLI install path.
+# CLAUDE_PLUGIN_ROOT set. Anything it would overwrite is backed up first.
 #
-# Usage: setup.sh [--scope global|project] [--link]
+# Usage: setup.sh [--scope global|project] [--link] [--plugins]
 set -euo pipefail
 
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:?CLAUDE_PLUGIN_ROOT not set — run this via the /addit-harness:setup skill, not directly}"
 SCOPE="global"
 MODE="copy"
+INSTALL_PLUGINS=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -25,6 +25,7 @@ while [[ $# -gt 0 ]]; do
       [[ -z "$SCOPE" ]] && { echo "--scope requires a value (global|project)" >&2; exit 1; }
       ;;
     --link) MODE="link" ;;
+    --plugins) INSTALL_PLUGINS=1 ;;
     *) echo "Unknown option: $1" >&2; exit 1 ;;
   esac
   shift
@@ -76,6 +77,93 @@ backup_and_place() {
   fi
 }
 
+# settings.json holds user state (hooks, statusLine, env, permissions, plugin
+# enable/disable choices) that a blind overwrite would destroy, so copy mode
+# merges instead: top-level keys the template owns (model, permissions, ...)
+# are updated, keys it lacks survive, and enabledPlugins /
+# extraKnownMarketplaces / env are deep-merged with the user's existing values
+# winning (a plugin they disabled stays disabled). Output is deterministic so
+# re-runs are byte-identical. Link mode symlinks, as for every other file.
+place_settings() {
+  local src="$1" dest="$2" tmp
+  if [[ "$MODE" == "link" || ! -e "$dest" ]]; then
+    backup_and_place "$src" "$dest"
+    return
+  fi
+  local backup_dest="$BACKUP_ROOT/$(basename "$dest")"
+  mkdir -p "$(dirname "$backup_dest")"
+  cp -p "$dest" "$backup_dest"
+  info "backed up existing $dest -> $backup_dest"
+  tmp="$(mktemp "$dest.XXXXXX")"
+  if ! python3 - "$src" "$dest" "$tmp" <<'PY'
+import json, sys
+src, dest, out = sys.argv[1:4]
+template = json.load(open(src))
+try:
+    existing = json.load(open(dest))
+except ValueError as e:
+    sys.exit(f"{dest} is not valid JSON ({e}); fix or remove it, then re-run")
+if not isinstance(existing, dict):
+    sys.exit(f"{dest} is not a JSON object; fix or remove it, then re-run")
+merged = {**existing, **template}
+for key in ("enabledPlugins", "extraKnownMarketplaces", "env"):
+    if isinstance(template.get(key), dict) and isinstance(existing.get(key), dict):
+        merged[key] = {**template[key], **existing[key]}
+    elif isinstance(template.get(key), dict) and key in existing:
+        print(f'warning: "{key}" in {dest} is not a JSON object; replaced with the template\'s (your original is in the backup)', file=sys.stderr)
+# permissions: keep the user's own rules — union the allow/deny/ask lists, existing entries first
+tp, ep = template.get("permissions"), existing.get("permissions")
+if isinstance(tp, dict) and isinstance(ep, dict):
+    perms = {**tp, **ep}
+    for k in set(tp) | set(ep):
+        a, b = tp.get(k), ep.get(k)
+        if isinstance(a, list) or isinstance(b, list):
+            perms[k] = list(dict.fromkeys((b if isinstance(b, list) else []) + (a if isinstance(a, list) else [])))
+    merged["permissions"] = perms
+with open(out, "w") as f:
+    json.dump(merged, f, indent=2)
+    f.write("\n")
+PY
+  then
+    rm -f "$tmp"
+    exit 1
+  fi
+  chmod 644 "$tmp"
+  rm -f "$dest"
+  mv "$tmp" "$dest"
+}
+
+# Opt-in: register every marketplace and install every plugin that the placed
+# settings.json declares (read from the file, no hardcoded list), because
+# whether Claude Code installs enabledPlugins on first start is unverified.
+# Failures are reported, not fatal: re-running is safe.
+install_declared_plugins() {
+  if ! command -v claude >/dev/null 2>&1; then
+    info "claude CLI not found on PATH; skipping --plugins (install the plugins from inside Claude Code instead)"
+    return
+  fi
+  local kind arg
+  while IFS=$'\t' read -r kind arg; do
+    if [[ "$kind" == "marketplace" ]]; then
+      claude plugin marketplace add "$arg" || info "could not add marketplace $arg (already added?)"
+    else
+      claude plugin install "$arg" || info "could not install plugin $arg"
+    fi
+  done < <(python3 - "$SETTINGS_DEST" <<'PY'
+import json, sys
+s = json.load(open(sys.argv[1]))
+for m in (s.get("extraKnownMarketplaces") or {}).values():
+    src = m.get("source") or {}
+    ref = src.get("repo") or src.get("url") or src.get("path")
+    if ref:
+        print(f"marketplace\t{ref}")
+for plugin, on in (s.get("enabledPlugins") or {}).items():
+    if on is True:
+        print(f"plugin\t{plugin}")
+PY
+)
+}
+
 backup_and_place_tree() {
   local src_dir="$1" dest_dir="$2" rel f backup_dest
   mkdir -p "$dest_dir"
@@ -85,7 +173,7 @@ backup_and_place_tree() {
   done < <(find "$src_dir" -type f -print0)
 }
 
-# Before the plugin existed, install.sh's `--target claude` path copied
+# Before the plugin existed, the pre-plugin copy installer (since removed) copied
 # agents/*.md and skills/*/ verbatim and unprefixed into ~/.claude/agents and
 # ~/.claude/skills. The plugin now exposes that same content prefixed
 # (addit-harness:code-reviewer, etc.), so anyone who ran the old install path
@@ -168,6 +256,59 @@ cleanup_legacy_claude_dupes() {
   fi
 }
 
+# References that earlier releases shipped and later releases replaced by topic
+# files. backup_and_place_tree only adds files, so a re-sync would leave them
+# behind (and project scope writes into the user's own repo, so they may have
+# edited or reused the name). Fixed list, "relative path|sha256 of the version
+# shipped at main (git show main:references/<path> | sha256sum)". A retired file
+# is removed only when it is a symlink into a plugin root (--link install) or a
+# regular file whose sha256 equals the shipped one. Anything else is copied to
+# $BACKUP_ROOT/retired/ and reported, never deleted.
+RETIRED_REFERENCES=(
+  "java/java-best-practices.md|ea37c9476ddedd06ff9efb2405aa4ab38928c9d9fe044c04722b33fa56341e46"
+  "go/app-erp-conventions.md|84e6a0f0d096d19b27cd913699548ad64b54472232dd9202bdba0e279276228c"
+)
+
+file_sha256() {
+  python3 -c "import hashlib, sys; print(hashlib.sha256(open(sys.argv[1], 'rb').read()).hexdigest())" "$1"
+}
+
+cleanup_retired_references() {
+  local entry rel want dest target got
+  local removed=0 skipped=()
+  for entry in "${RETIRED_REFERENCES[@]}"; do
+    rel="${entry%%|*}"
+    want="${entry##*|}"
+    dest="$REFERENCES_DEST/$rel"
+    [[ -e "$PLUGIN_ROOT/references/$rel" ]] && continue # still shipped: not retired
+    if [[ -L "$dest" ]]; then
+      target="$(readlink "$dest")"
+      if [[ "$target" == "$PLUGIN_ROOT"/* || "$target" == */plugins/*/references/"$rel" ]]; then
+        rm -f "$dest"
+        removed=$((removed + 1))
+      else
+        skipped+=("references/$rel (symlink to $target)")
+      fi
+    elif [[ -f "$dest" ]]; then
+      got="$(file_sha256 "$dest")"
+      if [[ "$got" == "$want" ]]; then
+        rm -f "$dest"
+        removed=$((removed + 1))
+      else
+        mkdir -p "$BACKUP_ROOT/retired/$(dirname "$rel")"
+        cp -p "$dest" "$BACKUP_ROOT/retired/$rel"
+        skipped+=("references/$rel (modified; copy in $BACKUP_ROOT/retired/)")
+      fi
+    fi
+  done
+  if [[ "$removed" -gt 0 ]]; then
+    info "removed $removed retired reference file(s) superseded by topic files"
+  fi
+  if [[ ${#skipped[@]} -gt 0 ]]; then
+    info "kept ${#skipped[@]} retired reference file(s) that differ from the shipped version — review by hand: ${skipped[*]}"
+  fi
+}
+
 echo "addit-harness setup: placing config (scope: $SCOPE, mode: $MODE)"
 echo
 
@@ -186,12 +327,19 @@ info "placed rules/ -> $RULES_DEST"
 
 backup_and_place_tree "$PLUGIN_ROOT/references" "$REFERENCES_DEST"
 info "placed references/ -> $REFERENCES_DEST"
+cleanup_retired_references
 
-backup_and_place "$PLUGIN_ROOT/settings.json" "$SETTINGS_DEST"
+place_settings "$PLUGIN_ROOT/settings.json" "$SETTINGS_DEST"
 info "placed settings.json -> $SETTINGS_DEST"
 
 if [[ "$SCOPE" == "global" ]]; then
   cleanup_legacy_claude_dupes
+fi
+
+if [[ "$INSTALL_PLUGINS" -eq 1 ]]; then
+  echo
+  echo "Installing plugins declared in settings.json (--plugins)"
+  install_declared_plugins
 fi
 
 # Record a content hash of just the files this script actually copies
@@ -236,6 +384,7 @@ fi
 
 echo
 echo "Done."
+info "Next: /addit-harness:dev-flow <what to build> for non-trivial work; /addit-harness:tips for the short guide; local telemetry stays off unless you enable it in /config."
 info "Backups of anything overwritten live under $BACKUP_ROOT/ (if anything was backed up)."
 if [[ "$SCOPE" == "global" ]]; then
   info "Re-run /addit-harness:setup after the plugin auto-updates to re-sync these files."

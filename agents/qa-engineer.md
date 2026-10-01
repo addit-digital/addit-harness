@@ -116,7 +116,7 @@ re-run — never overwrite an earlier round's report):
 - **vs `@code-reviewer`**: code review reads the diff for correctness/quality;
   you exercise the running feature and report what actually happened. A clean
   review and a clean QA pass are independent signals — both are needed.
-- **vs `@feature-investigator`'s manual scenario lists**: today, a human clicks
+- **vs manual scenario lists** (e.g. `@product-owner` acceptance criteria run by hand): today, a human clicks
   through those by hand before every release. This agent is what replaces that —
   the same kind of scenario, executed and evidenced by the agent instead of left as
   a checklist for a person.

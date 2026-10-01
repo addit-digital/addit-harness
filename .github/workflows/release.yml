@@ -36,6 +36,12 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      # Fail before anything changes: a release needs notes. The text under
+      # "## [Unreleased]" becomes the release body, so an empty section means the
+      # owner has not written the changelog yet.
+      - name: Require unreleased changelog notes
+        run: .github/scripts/changelog-section.sh --require-nonempty Unreleased > /dev/null
+
       - name: Bump plugin.json version
         id: bump
         env:
@@ -63,7 +69,8 @@ jobs:
         env:
           NEW_VERSION: ${{ steps.bump.outputs.version }}
         run: |
-          git add .claude-plugin/plugin.json
+          .github/scripts/changelog-release.sh "$NEW_VERSION" "$(date -u +%F)"
+          git add .claude-plugin/plugin.json CHANGELOG.md
           git commit -m "chore: bump plugin version to v$NEW_VERSION"
           git push origin HEAD:main
 
@@ -75,8 +82,15 @@ jobs:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: claude plugin tag --push -m "addit-harness %s"
 
+      # Release notes are the "## [<version>]" section the bump commit just cut from
+      # "## [Unreleased]"; there is no fallback, so a release never ships generated
+      # notes and the released text never stays under Unreleased.
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ steps.bump.outputs.tag }}
-        run: gh release create "$RELEASE_TAG" --generate-notes
+          NEW_VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          notes="$(mktemp)"
+          .github/scripts/changelog-section.sh --require-nonempty "$NEW_VERSION" > "$notes"
+          gh release create "$RELEASE_TAG" --notes-file "$notes"

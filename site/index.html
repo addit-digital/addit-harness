@@ -2,10 +2,9 @@
 layout: default
 title: Wire your agent into a full product team
 description: >-
-  addit-harness installs an opinionated plan → verify → commit loop, fourteen
-  specialized subagents, and auto-loaded language conventions into Claude
-  Code, Cursor, Codex CLI, or Kiro — curated from established sources, not
-  hand-rolled.
+  addit-harness is a Claude Code plugin: a plan → verify → commit loop, fourteen
+  specialist subagents, a /dev-flow command that gates implementation on your
+  approval, and Go, Java and TypeScript conventions that load automatically.
 ---
 <main id="main">
   <section class="hero">
@@ -14,15 +13,17 @@ description: >-
         <span class="eyebrow">Claude Code Plugin</span>
         <h1>Wire your agent into a full <em>product&nbsp;team</em></h1>
         <p class="lede">
-          A coding agent's default config is a blank slate. <code>addit-harness</code> installs
-          an opinionated plan → verify → commit loop, fourteen specialized subagents, and
-          auto-loaded language conventions — curated from established sources, not hand-rolled.
+          For developers and small teams who build software with Claude Code and are tired of
+          re-explaining how they work. <code>addit-harness</code> gives the agent a plan → verify →
+          commit loop, fourteen specialist subagents, and a <code>/dev-flow</code> command that
+          takes a change from idea to reviewed code — and stops for your approval before it
+          writes any of it.
         </p>
         <div class="cta-row">
           <a href="{{ '/#install' | relative_url }}" class="btn btn-primary">Install the plugin →</a>
-          <a href="{{ '/docs/getting-started/' | relative_url }}" class="btn btn-ghost">Read the docs</a>
+          <a href="{{ '/docs/example-workflow/' | relative_url }}" class="btn btn-ghost">See a worked example</a>
         </div>
-        <p class="cta-note">MIT licensed · Go · Java · TypeScript · zero config to start</p>
+        <p class="cta-note">MIT licensed · Go · Java · TypeScript · Claude Code only</p>
       </div>
 
       <div>
@@ -95,34 +96,6 @@ description: >-
     </div>
   </section>
 
-  <section id="compat" aria-labelledby="compat-label">
-    <div class="wrap">
-      <div class="tag compat-label" id="compat-label">One config · four agents</div>
-      <div class="compat">
-        <div class="compat-item primary">
-          <div class="compat-pin"></div>
-          <div class="compat-name">Claude Code</div>
-          <div class="compat-role">native plugin · this listing</div>
-        </div>
-        <div class="compat-item">
-          <div class="compat-pin"></div>
-          <div class="compat-name"><a href="{{ '/docs/other-agents/#cursor' | relative_url }}">Cursor</a></div>
-          <div class="compat-role">rules sync</div>
-        </div>
-        <div class="compat-item">
-          <div class="compat-pin"></div>
-          <div class="compat-name"><a href="{{ '/docs/other-agents/#codex-cli' | relative_url }}">Codex CLI</a></div>
-          <div class="compat-role">AGENTS.md sync</div>
-        </div>
-        <div class="compat-item">
-          <div class="compat-pin"></div>
-          <div class="compat-name"><a href="{{ '/docs/other-agents/#kiro' | relative_url }}">Kiro</a></div>
-          <div class="compat-role">steering sync</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <section id="compare">
     <div class="wrap">
       <div class="section-head">
@@ -143,7 +116,7 @@ description: >-
             <tr><td>Language conventions</td><td class="bad" data-label="Blank slate">Re-pasted into context every session</td><td class="good" data-label="With addit-harness">Auto-loaded per file type — Go, Java, TypeScript</td></tr>
             <tr><td>Code review</td><td class="bad" data-label="Blank slate">"Hey Claude, can you review this?"</td><td class="good" data-label="With addit-harness">@code-reviewer enforces conventions with file:line citations</td></tr>
             <tr><td>UX &amp; design</td><td class="bad" data-label="Blank slate">Describe it and hope</td><td class="good" data-label="With addit-harness">@ux-designer → @figma-designer → @frontend-architect pipeline</td></tr>
-            <tr><td>Feature build</td><td class="bad" data-label="Blank slate">Hand-drive every Agent call yourself, every time</td><td class="good" data-label="With addit-harness">/dev-flow — deterministic design-gate + review-gate loops, one human approval gate</td></tr>
+            <tr><td>Feature build</td><td class="bad" data-label="Blank slate">Hand-drive every Agent call yourself, every time</td><td class="good" data-label="With addit-harness">/dev-flow — light, standard or deep effort, scripted design and review loops, and one approval gate before implementation</td></tr>
             <tr><td>e2e/regression QA</td><td class="bad" data-label="Blank slate">Manual click-through before every release</td><td class="good" data-label="With addit-harness">@qa-engineer — evidence-backed verification, web + mobile</td></tr>
             <tr><td>New machine</td><td class="bad" data-label="Blank slate">Redo everything by hand</td><td class="good" data-label="With addit-harness">Three commands</td></tr>
           </tbody>
@@ -175,7 +148,7 @@ description: >-
         <div class="feature">
           <span class="feature-index">03 · CONVENTIONS</span>
           <h3>Tiered language rules</h3>
-          <p>Go, Java, and TypeScript conventions auto-load per file type — thin pointers at all times, deep references pulled in only for substantial work.</p>
+          <p>Go, Java, and TypeScript conventions auto-load per file type — thin pointers at all times, deep references pulled in only for substantial work. Frontend work follows a contract that is checked with a line-count test. Where plugin and project disagree on where documents live, the plugin's layout wins.</p>
         </div>
         <div class="feature">
           <span class="feature-index">04 · REVIEW</span>
@@ -185,17 +158,17 @@ description: >-
         <div class="feature">
           <span class="feature-index">05 · CURATED</span>
           <h3>Vendored, not vibes</h3>
-          <p>Assets are adopted from established sources and pinned at a commit — provenance tracked in AGENTS_SOURCES.md. A thin curation layer, not bespoke skills.</p>
+          <p>Assets are adopted from established sources and pinned at a commit — provenance tracked in AGENTS_SOURCES.md. Documents the agents write follow one protocol: short, describing the current state, diagrams kept, edited in place. The four architect and design agents' first turn went from about 33k to about 17k tokens in a controlled probe (3 runs each).</p>
         </div>
         <div class="feature">
-          <span class="feature-index">06 · PORTABLE</span>
-          <h3>One source, four agents</h3>
-          <p>AGENTS.md is the canonical memory — Claude Code, Cursor, Codex CLI, and Kiro all sync from the same source of truth.</p>
+          <span class="feature-index">06 · LOCAL</span>
+          <h3>Telemetry that stays on your machine</h3>
+          <p>Off by default. If you turn it on, it logs metadata only, never sends it anywhere, and can build an offline report page. Publishing a summary as an Artifact happens only when you answer yes to that question.</p>
         </div>
         <div class="feature">
           <span class="feature-index">07 · ORCHESTRATION</span>
-          <h3>Deterministic Workflow scripts</h3>
-          <p><code>/dev-flow</code> drives the design-gate and review-gate loops as real control flow — convergence check, round cap, budget guard, non-progress circuit breaker — instead of hoping the model remembers to keep looping. One human approval gate before implementation starts; everything else runs itself.</p>
+          <h3>Effort that matches the change</h3>
+          <p><code>/addit-harness:dev-flow</code> scores each request into a light, standard or deep tier and shows you the result; you can move it one tier either way. Intake produces a one-page brief, the architect proposes its own alternatives before seeing your idea, QA runs once, and the design and review loops have round caps. Implementation never starts without your approval. Worst-case agent calls are capped per tier and asserted by tests (not measured on live runs).</p>
         </div>
       </div>
     </div>
@@ -208,13 +181,13 @@ description: >-
           <div class="tag">How it works</div>
           <h2>One feature, six handoffs</h2>
         </div>
-        <p class="section-desc">A concrete build, start to ship — the subagents from "What's wired in," in the order they actually fire. <code>/dev-flow</code> automates this whole sequence as one deterministic run, with a single approval gate before implementation starts.</p>
+        <p class="section-desc">A concrete build, start to ship — the subagents from "What's wired in," in the order they fire at the standard tier. <code>/dev-flow</code> runs this sequence for you, with a single approval gate before implementation starts. <a href="{{ '/docs/example-workflow/' | relative_url }}">Follow a full worked example →</a></p>
       </div>
       <div class="pipeline">
         <div class="pipeline-step">
           <span class="pipeline-step-index">01</span>
           <p class="pipeline-step-name">Investigate</p>
-          <p class="pipeline-step-who">@feature-investigator</p>
+          <p class="pipeline-step-who">@product-owner</p>
         </div>
         <div class="pipeline-step">
           <span class="pipeline-step-index">02</span>

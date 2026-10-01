@@ -1,0 +1,30 @@
+{
+ "hook_event_name": "PostToolUse",
+ "session_id": "3f2a9c1e-7b4d-4e8a-9c6b-1d2e3f4a5b6c",
+ "cwd": "/workspace/u/proj",
+ "transcript_path": "/workspace/u/.claude/projects/p/t.jsonl",
+ "tool_name": "Workflow",
+ "tool_input": {
+  "scriptPath": "/p/workflows/dev-flow-design.js",
+  "script": "// full script source",
+  "args": {
+   "slug": "2026-10-02-billing-export",
+   "track": "backend",
+   "repo": "/workspace/u/proj",
+   "request": "add billing export",
+   "tier": "standard"
+  }
+ },
+ "tool_response": {
+  "runId": "wf_8c1d2e3f4a5b",
+  "scriptPath": "/p/workflows/dev-flow-design.js",
+  "status": "async_launched",
+  "summary": "Launched",
+  "taskId": "t1",
+  "taskType": "local_workflow",
+  "transcriptDir": "/workspace/u/.claude/wf",
+  "workflowName": "dev-flow-design"
+ },
+ "tool_use_id": "toolu_04",
+ "prompt_id": "p-4"
+}

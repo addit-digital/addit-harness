@@ -5,6 +5,37 @@ points here. Covers both **frontend/mobile** (React, Next.js, React Native) and
 **backend** (Bun) focus areas — see the matching subsection below. Convention
 text is **vendored from recognized sources**, not hand-written.
 
+## Read order (frontend)
+1. The Frontend Implementation Contract (`rules/typescript-frontend.md`, also in `frontend-developer`) is sufficient to start.
+2. Structure: `react/project-structure.md`, `react/components-and-styling.md`, `react/state-management.md`, `react/api-layer.md`.
+3. Framework specifics (lookup): `nextjs-best-practices.md`, `react-native-best-practices.md`.
+4. `typescript-best-practices.md`, `react-best-practices.md`: lookup only; the table below wins.
+
+| Topic | Conflict (where) | Resolution |
+|---|---|---|
+| File names | kebab-case (`react/project-standards.md`) vs PascalCase `UserProfile.tsx` (`react-best-practices.md`, `react-native-best-practices.md`) | Match the project. Greenfield: kebab-case files (`user-profile.tsx`, `use-auth.ts`), PascalCase identifiers |
+| Exports | "no default exports" (`typescript-best-practices.md`) vs default per `.tsx` (`react-native-best-practices.md`) vs framework needs | Named. Default only for Next `page`/`layout`/`template`/`loading`/`error`/`not-found`, expo-router screens, tool configs; `route.ts` named `GET`/`POST` |
+| Data in pages | `nextjs-best-practices.md:56-68` awaits data in a Server Component page vs FC-7 | Server Components await a feature `api/` function; client components use the feature's server-cache hooks; never raw `fetch` in a component |
+| Barrels | discouraged (`react/project-structure.md`); others silent | No barrel files (FC-8) |
+| Cross-feature imports | forbidden (bulletproof); others silent | Forbidden; compose at app/route level (FC-8) |
+
+### Optional ESLint block (opt-in, never auto-installed)
+Maps the contract to deterministic rules. In legacy code, start the size and complexity rules at `warn` and ratchet.
+```js
+// eslint.config.js
+rules: {
+  'max-lines': ['error', { max: 250, skipBlankLines: true, skipComments: true }],
+  'max-lines-per-function': ['warn', { max: 80, skipBlankLines: true, skipComments: true }],
+  'react/jsx-max-depth': ['error', { max: 4 }],
+  'complexity': ['warn', 10],
+  'sonarjs/cognitive-complexity': ['error', 10],      // eslint-plugin-sonarjs
+  'react/no-multi-comp': ['error', { ignoreStateless: true }],
+  'react/no-unstable-nested-components': 'error',
+  'no-nested-ternary': 'error',
+  'import/no-restricted-paths': ['error', { zones: [/* bulletproof cross-feature + unidirectional zones */] }],
+}
+```
+
 ## Frontend & mobile (React / Next.js / React Native)
 
 ### Vendored (read these)

@@ -1,5 +1,6 @@
 ---
 title: Use cases
+description: Concrete workflows showing which addit-harness agents, skills and commands fire together, from a feature build to legal review.
 nav_order: 9
 nav_group: Guides
 ---
@@ -8,17 +9,18 @@ Concrete workflows showing which configs fire together.
 
 ## Build a new feature
 
-`/dev-flow` automates this exact walkthrough end-to-end — investigate → design ⇄
-`@architect-reviewer` loop → your approval gate → implement → `@qa-engineer`
-verifies → `@code-reviewer` ⇄ fix loop → re-verify — as deterministic `Workflow`
-scripts instead of hand-driving each step below yourself. The steps below still
+`/dev-flow` automates this exact walkthrough end-to-end — triage → intake brief →
+design ⇄ `@architect-reviewer` loop → your approval gate → implement →
+`@code-reviewer` ⇄ fix loop → `@qa-engineer` verifies once — as deterministic
+`Workflow` scripts instead of hand-driving each step below yourself. The
+[example workflow](../example-workflow/) follows one run from start to finish. The steps below still
 apply if you'd rather drive them by hand, or when the request doesn't fit the
 software-development-lifecycle shape `/dev-flow` is scoped to. See
 [How dev-flow works](../dev-flow/) for the phase-by-phase mechanics.
 
 ```mermaid
 flowchart LR
-  FI["@feature-investigator\nspec / PRD-lite"]
+  FI["@product-owner\nproblem statement"]
   LA["@saas-legal-advisor *(if data/payments/integrations)*\nlegal impact → doc updates"]
   UX["@ux-designer\nflows · wireframes · IA"]
   FG["@figma-designer *(optional)*\nFigma frames + tokens"]
@@ -37,16 +39,16 @@ flowchart LR
   FG --> FA
   FA --> SP
   SP --> BD & FE
-  BD --> QA
-  FE --> QA
-  QA --> CR
+  BD --> CR
+  FE --> CR
+  CR --> QA
 ```
 
-1. `@feature-investigator` → requirements/scope (spec/PRD-lite) before any code.
+1. `@product-owner` → problem statement (never a solution) before any design.
 2. `@saas-legal-advisor` *(if the feature touches user data, payments,
    third-party integrations, or account types)* → runs in parallel with UX
    design; produces an impact table (Critical/Important/Advisory) and drafts
-   updated legal clauses. Saves the assessment to `docs/legal/`. Legal doc
+   updated legal clauses. Saves the assessment to docs/work/<slug>/legal/assessment.md. Legal doc
    updates ship before or with the feature — not after.
 3. `@ux-designer` → user flows, journey map, IA, wireframes, state matrix,
    and interaction specs. Reads `.claude/design-conventions.md`; flags
@@ -61,11 +63,11 @@ flowchart LR
    phased steps so status is visible; TaskUpdate each task as it completes.
 7. Implement — `@backend-developer` and/or `@frontend-developer` write +
    verify the code; Tier-1 `rules/<lang>.md` auto-load per file type.
-8. `@qa-engineer` → verifies the implemented feature via e2e/regression
+8. `@code-reviewer` → checks correctness, security, *and* adherence to the
+   language conventions (file:line violations); fix and re-review until clean.
+9. `@qa-engineer` → verifies the reviewed feature via e2e/regression
    testing, evidence-backed (a separate, UI-level check from the unit/
    integration tests in step 7).
-9. `@code-reviewer` → checks correctness, security, *and* adherence to the
-   vendored conventions (file:line violations).
 
 ## Review or debug existing code
 
@@ -103,7 +105,7 @@ Before a feature that touches user data, payments, or third-party services
 ships, invoke `@saas-legal-advisor` with the feature description or PR diff.
 It produces an impact table (Critical / Important / Advisory) mapping each
 change to the specific legal document and clause affected, then drafts the
-updated clause(s). Output saves to `docs/legal/<date>-<slug>.md` — update the
+updated clause(s). Assessment → docs/work/<slug>/legal/assessment.md; standing docs updated in docs/legal/<document-kind>.md — update the
 live documents before or alongside the feature, never after.
 
 ```

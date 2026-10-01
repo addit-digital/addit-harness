@@ -481,47 +481,6 @@ h2 {
   margin: 0;
 }
 
-/* ---------- compat strip ---------- */
-#compat { padding-top: 0; padding-bottom: 0; border-top: none; }
-#compat .wrap { padding-bottom: 84px; }
-.compat-label { margin-bottom: 18px; }
-.compat {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  overflow: hidden;
-}
-.compat-item {
-  padding: 22px 20px;
-  border-left: 1px solid var(--line);
-  position: relative;
-}
-.compat-item:first-child { border-left: none; }
-.compat-item.primary { background: var(--accent-soft); }
-.compat-pin {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--ink-faint);
-  margin-bottom: 14px;
-}
-.compat-item.primary .compat-pin { background: var(--accent); }
-.compat-name {
-  font-family: var(--font-mono);
-  font-weight: 500;
-  font-size: 14.5px;
-  margin-bottom: 4px;
-}
-.compat-name a {
-  text-decoration: none;
-  color: inherit;
-}
-.compat-name a:hover { color: var(--accent); }
-.compat-role {
-  font-size: 12.5px;
-  color: var(--ink-dim); /* a11y (A1): moved off ink-faint */
-}
-.compat-item.primary .compat-role { color: var(--accent); }
-
 /* ---------- comparison ---------- */
 .compare {
   border: 1px solid var(--line);
@@ -954,8 +913,5 @@ footer {
 
 @media (max-width: 900px) {
   .hero-grid { grid-template-columns: 1fr; }
-  .compat { grid-template-columns: repeat(2, 1fr); }
-  .compat-item:nth-child(2) { border-left: none; }
-  .compat-item:nth-child(3), .compat-item:nth-child(4) { border-top: 1px solid var(--line); }
   .feature-grid { grid-template-columns: 1fr; }
 }

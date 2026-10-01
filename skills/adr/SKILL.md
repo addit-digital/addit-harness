@@ -20,7 +20,7 @@ Sources / further reading:
 ADR-worthy = **significant and hard to reverse**: technology/framework/database
 choice, API or integration style, data model, architectural pattern (monolith vs
 services, sync vs event-driven), security approach, or a notable trade-off. Skip
-trivial, easily-reversed choices.
+trivial, easily-reversed choices. In a work item, write the ADR only after plan approval, one per "ADR: candidate" line in the solution's ## Decision (references/doc-protocol.md); status "accepted".
 
 ## Choosing minimal vs full
 - **Minimal** (default): smaller/medium decisions — Context & Problem, Considered
@@ -30,12 +30,9 @@ trivial, easily-reversed choices.
 - Honor `--full`/`--minimal` if given; otherwise pick by decision weight.
 
 ## Procedure
-1. **Locate/initialize the store.** Use `docs/adr/`. If it doesn't exist, create
-   it and a `docs/adr/README.md` index. If the repo already has an ADR location or
-   template, follow that instead. Optionally seed the meta-ADR
-   `0001-record-architecture-decisions.md` (records the decision to use ADRs).
+1. **Locate/initialize the store.** Use docs/adr/ — plugin conventions win (rules/engineering-loop.md). Create it and docs/adr/README.md if missing; optionally seed 0001-record-architecture-decisions.md. If the repo has an ADR store elsewhere, leave it, link it from docs/adr/README.md, and number from (highest in either store)+1 so 0001 is never duplicated.
 2. **Assign the next number.** Scan `docs/adr/` for the highest `NNNN`, increment;
-   4-digit zero-padded starting at `0001`.
+   4-digit zero-padded starting at `0001`; if that NNNN is taken, take the next free number; never overwrite.
 3. **Gather context.** From the conversation/code extract: the problem and why
    now, decision drivers/forces, the alternatives considered, the chosen option,
    and consequences (good and bad). Ask the user only for what you can't infer —
@@ -47,7 +44,10 @@ trivial, easily-reversed choices.
    renders. Skip it for non-structural decisions.
 5. **Update the index** `docs/adr/README.md` with a row: number, title (link),
    status, date.
-6. **Report** the path and a one-line summary. Don't commit unless asked.
+6. **Link back.** Replace the solution's "ADR: candidate …" line with "ADR: [ADR-NNNN](../../../adr/NNNN-<title>.md)" (text path if repos differ); change nothing else.
+7. **Report** the path and a one-line summary. Don't commit unless asked.
+
+Ceiling: minimal ≤60 lines, full ≤80.
 
 ## MADR — minimal template
 ```markdown
@@ -74,9 +74,11 @@ graph TD
 
 ## Considered Options
 
-* {option 1}
-* {option 2}
-* {option 3}
+* {option 1 — one line + why not}
+* {option 2 — one line + why not}
+* {option 3 — one line + why not}
+
+Design detail: [solution](../work/<slug>/solutions/solution-<track>.md) — if the solution lives in another repo (`secondaryRepo`), write the repo-relative path as text, no link.
 
 ## Decision Outcome
 
@@ -120,9 +122,11 @@ graph TD
 
 ## Considered Options
 
-* {option 1}
-* {option 2}
-* {option 3}
+* {option 1 — one line + why not}
+* {option 2 — one line + why not}
+* {option 3 — one line + why not}
+
+Design detail: [solution](../work/<slug>/solutions/solution-<track>.md) — if the solution lives in another repo (`secondaryRepo`), write the repo-relative path as text, no link.
 
 ## Decision Outcome
 

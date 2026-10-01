@@ -1,5 +1,6 @@
 ---
 title: Skills & commands
+description: Every slash command addit-harness adds, the Claude Code built-ins it reuses, and the official plugins it declares.
 nav_order: 5
 nav_group: Reference
 ---
@@ -19,8 +20,10 @@ try the `addit-harness:` prefix before assuming it's missing.
 | `/save-plan` | Persist an implementation plan to `docs/work/<slug>/plans/` (or `--temp`) so mermaid renders in an IDE/GitHub |
 | `/go-conventions [--refresh]` | Scan a Go repo and write `.claude/go-conventions.md` — the project-specific layer on top of the global Go baseline |
 | `/design-conventions [--refresh]` | Scan a TS/React project's existing UI layer and write `.claude/design-conventions.md` (tokens, type/spacing/color scales, component lib, layout rhythm, state patterns) |
-| `/addit-harness:setup [--scope global\|project] [--link]` | Places `CLAUDE.md`/`AGENTS.md`/`rules/`/`references/`/`settings.json` for Claude Code — the parts the plugin can't carry natively |
-| `/dev-flow [what to build or fix]` | Deterministic SDLC orchestration: investigate → design ⇄ `architect-reviewer` loop → your approval gate → implement → `qa-engineer` verifies → review ⇄ fix loop → re-verify. The loops run as `Workflow` scripts, not hand-driven `Agent` calls — see [How dev-flow works](../dev-flow/) for the full mechanics |
+| `/addit-harness:setup [--scope global\|project] [--link] [--plugins]` | Places `CLAUDE.md`/`AGENTS.md`/`rules/`/`references/`/`settings.json` for Claude Code — the parts the plugin can't carry natively. Merges into your existing `settings.json` (backup first); `--plugins` also installs the declared plugins. Details in [Getting started](../getting-started/#what-setup-does-to-your-settingsjson) |
+| `/dev-flow [what to build or fix] [--tier light\|standard\|deep]` | Deterministic SDLC orchestration: triage → tier gate → intake brief → design ⇄ `architect-reviewer` loop → your approval gate → implement → review ⇄ fix loop → `qa-engineer` verifies once. `--tier` overrides the triaged tier. Progress shows in `/workflows` and, with task tools on, a six-step task list. See [How dev-flow works](../dev-flow/#watching-a-run) |
+| `/addit-harness:tips` | User-invoked only. Prints five short tips: when to use `/dev-flow`, approving the plan, where documents land, calling the specialist agents, and the local telemetry option. The first-run welcome line points here. See [Getting started](../getting-started/#first-run) |
+| `/addit-harness:telemetry-export [--days N]` | User-invoked only. Builds `data.json` and an offline `report.html` from the local telemetry log (default window 30 days); publishes aggregated numbers as a private Artifact only if you answer yes. See [Local telemetry](../telemetry/) |
 
 `docs/work/<slug>/solutions/` (architecture designs) and
 `docs/work/<slug>/architecture-reports/` (review reports) are written directly
@@ -45,8 +48,8 @@ hand-roll a competing skill:
 Enabled from the auto-available `claude-plugins-official` marketplace (+
 `anthropics/skills`). The big win is real **language servers**: `gopls-lsp`,
 `jdtls-lsp`, `typescript-lsp`, plus `pr-review-toolkit`, `commit-commands`,
-`security-guidance`, and `document-skills` (doc generation). They install on
-first start, or run `./install.sh --plugins` to do it now.
+`security-guidance`, and `document-skills` (doc generation). Run
+`/addit-harness:setup --plugins` to install them now.
 
 ## Iterating & giving feedback on plans or code
 

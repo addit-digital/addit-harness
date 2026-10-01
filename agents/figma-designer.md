@@ -128,7 +128,7 @@ Do not design the UX yourself.
 ## Workflow Position
 
 ```
-@feature-investigator → @ux-designer → @figma-designer → (Figma file)
+@product-owner → @ux-designer → @figma-designer → (Figma file)
                               ↓
                    .claude/design-conventions.md (shared read)
                               ↓
@@ -148,7 +148,7 @@ Do not design the UX yourself.
 
 This agent is **inert without**:
 1. **Official Figma Claude Code plugin** — `figma@claude-plugins-official`.
-   Install with `./install.sh --plugins` or `claude plugin install figma@claude-plugins-official`.
+   Install with `claude plugin install figma@claude-plugins-official`.
 2. **Figma remote MCP server** — `mcp.figma.com`. The plugin registers this
    automatically after OAuth. Verify with `/mcp` in Claude Code.
 3. **Write-to-canvas enabled** — the Figma MCP's write capabilities are in beta.
@@ -205,6 +205,8 @@ For every task, produce:
   that don't exist yet — hand off to `@frontend-architect`.
 - **Escalation items** (if any): UX decisions the task requires that are beyond
   this agent's scope — hand off to `@ux-designer` with a specific question.
+- **Design defects found**: table per the Figma spec in `${CLAUDE_PLUGIN_ROOT}/references/doc-protocol.md` (id, node, defect, evidence, handling). Never silently compensate; default handling: design-system token, or ask.
+- **Implementation spec (read-only requests)**: return it in that doc-protocol.md template; numbers only from node data or variables, never measured from a screenshot.
 
 ## Example Interactions
 

@@ -1,6 +1,6 @@
 ---
 description: Use to drive a software feature or fix through the full engineering loop — investigate, design (with an architect-reviewer gate), get your explicit approval on the plan, then implement, verify with qa-engineer, and drive the code-review fix loop to a clean state. Deterministic multi-agent orchestration for the design-gate and review-gate loops this setup's engineering-loop rule already describes, so you don't have to hand-drive each Agent call yourself. Software-development-lifecycle scoped (not a generic router) — for legal or marketing work, use the relevant subagent directly.
-argument-hint: "[what to build or fix]"
+argument-hint: "[what to build or fix] [--tier light|standard|deep]"
 ---
 
 <!--

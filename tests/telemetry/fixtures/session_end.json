@@ -1,0 +1,8 @@
+{
+ "hook_event_name": "SessionEnd",
+ "session_id": "3f2a9c1e-7b4d-4e8a-9c6b-1d2e3f4a5b6c",
+ "cwd": "/workspace/u/proj",
+ "transcript_path": "/workspace/u/.claude/projects/p/t.jsonl",
+ "reason": "other",
+ "prompt_id": "p-1"
+}

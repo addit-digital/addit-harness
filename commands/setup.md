@@ -1,6 +1,6 @@
 ---
 description: Use once, right after installing the addit-harness Claude Code plugin, to place the parts a plugin can't carry natively (CLAUDE.md, AGENTS.md, path-scoped rules/, references/, settings.json) into ~/.claude or the current project. Also use to re-sync after a plugin update, or to switch between global and project scope.
-argument-hint: "[--scope global|project] [--link]"
+argument-hint: "[--scope global|project] [--link] [--plugins]"
 ---
 
 <!--
