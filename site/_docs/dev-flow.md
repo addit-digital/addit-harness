@@ -39,7 +39,7 @@ flowchart TD
 ## Tiers — proportional effort
 
 Before any design work, `workflows/dev-flow-triage.js` runs one read-only agent
-(`@task-triager`, `Read`/`Glob`/`Grep`, `haiku`) that answers a fixed questionnaire
+(`@task-triager`, `Read`/`Glob`/`Grep`, `sonnet`) that answers a fixed questionnaire
 with facts only: which files the change would touch, whether they are new, whether it
 touches a public contract, security surface, or stored data, whether it adds a
 dependency, how reversible it is, what build/test commands exist. It never returns a

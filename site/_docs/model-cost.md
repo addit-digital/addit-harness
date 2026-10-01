@@ -39,7 +39,7 @@ Set via `model:` in each agent's frontmatter (`agents/*.md`):
 | `cloud-architect` | `opus` | Infra design + review — mistakes are costly and often hard to reverse |
 | `devops-engineer` | `sonnet` | Implementation/execution against a design |
 | `qa-engineer` | `sonnet` | e2e/regression verification against a given scenario |
-| `task-triager` | `haiku` | Mechanical fact-gathering for `/dev-flow` triage; never returns a verdict |
+| `task-triager` | `sonnet` | Mechanical fact-gathering for `/dev-flow` triage; never returns a verdict |
 
 Other mechanical agents (test-runners, formatters) should use `haiku` too.
 Override all subagents at once with `CLAUDE_CODE_SUBAGENT_MODEL`.

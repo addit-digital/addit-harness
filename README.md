@@ -648,7 +648,7 @@ prevented) and Sonnet's strong, cheaper execution against your rules.
 | `cloud-architect` | `opus` | Infra design + review — mistakes are costly and often hard to reverse |
 | `devops-engineer` | `sonnet` | Implementation/execution against a design — fast + cheap, same rationale as the other `*-developer` agents |
 | `qa-engineer` | `sonnet` | e2e/regression verification execution — running and reporting against a given scenario, not designing one |
-| `task-triager` | `haiku` | Fact-gathering for `/dev-flow` triage; read-only, never returns a verdict |
+| `task-triager` | `sonnet` | Fact-gathering for `/dev-flow` triage; read-only, never returns a verdict |
 
 Every agent declares an explicit `tools:` list, so it does not load every MCP
 server's tool schemas on its first turn. For the four architect and design

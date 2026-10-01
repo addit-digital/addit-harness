@@ -7,6 +7,16 @@ only on [GitHub Releases](https://github.com/addit-digital/addit-harness/release
 
 ## [Unreleased]
 
+### Fixed
+
+- `/dev-flow` triage failed on larger tasks. The `task-triager` agent ran on `haiku`; after
+  scanning a two-repo ticket it wrote a prose summary instead of calling the structured
+  output tool, and the run returned no facts (tier defaulted to `standard` with no score).
+  It now runs on `sonnet`, is told its last action must be the structured call and to stay
+  within about 20 tool calls, and is given the second repo. Paths the agent reports as
+  absolute under either repo are made repo-relative in the script, so the second repo's files
+  now reach `plannedFiles` (they were silently dropped before).
+
 ## [0.4.2] - 2026-10-01
 
 ### Fixed

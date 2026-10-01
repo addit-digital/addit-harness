@@ -42,7 +42,7 @@ upstream tier — implementation/execution against a design, same rationale as
 `backend-developer`/`frontend-developer`), `qa-engineer` = `sonnet` (authored —
 execution-tier, same rationale as `backend-developer`/`frontend-developer`/
 `figma-designer`: running and reporting against a given scenario, not designing
-one), `task-triager` = `haiku` (authored — a bounded fact scan, scored by a script). Override any of these by editing the `model:` field, or globally via
+one), `task-triager` = `sonnet` (authored — a bounded fact scan, scored by a script; `haiku` skipped the structured output on large two-repo tasks). Override any of these by editing the `model:` field, or globally via
 `CLAUDE_CODE_SUBAGENT_MODEL`.
 
 ## Notes
