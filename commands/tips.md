@@ -13,4 +13,4 @@ upstream. Keep the frontmatter above in sync with skills/tips/SKILL.md.
 -->
 
 Do not call the Skill tool: this skill is user-invoked only (`disable-model-invocation`), so
-the Skill tool refuses it. Read `${CLAUDE_PLUGIN_ROOT}/skills/tips/SKILL.md` and follow it exactly.
+the Skill tool refuses it. Read `${CLAUDE_PLUGIN_ROOT}/skills/tips/SKILL.md` (your only tool call), then print the five tips in it to the user exactly as written, with no preamble and no commentary.

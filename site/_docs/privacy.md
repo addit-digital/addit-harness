@@ -52,7 +52,7 @@ hooks, and none of them makes a network request:
 - **Setup-version check** (session start): reads the plugin's own files and the
   version marker that `/addit-harness:setup` wrote on your machine, hashes the
   plugin files locally, and shows a reminder if they changed. The first time
-  you start an interactive session after install, it also shows a one-line
+  you start an interactive terminal session after install, it also shows a one-line
   welcome and creates an empty marker file, `onboarding/welcome-v1`, in the
   plugin's data folder so the welcome appears only once. The marker is local,
   holds nothing, is never sent anywhere, and is deleted when you uninstall.

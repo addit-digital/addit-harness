@@ -159,7 +159,7 @@ is ever triggered that way, would need an explicit wait loop instead, since ther
 no later turn for a notification to land in — not the common case this skill is
 written for.
 
-While any workflow runs, `/workflows` shows its metadata-only log lines: `dev-flow <name> start: tier=… track=…`, `<Loop> r<n>/<cap>: <k> blocking` per round, `gate <name>: <verdict>`, and `HALT <haltedBy>: …`. Point the user there instead of narrating progress.
+While any workflow runs, `/workflows` shows its metadata-only log lines: `dev-flow <name> start: tier=… track=…`, `<Loop> r<n>/<cap>: <k> at/above <floor>` per round, `gate <name>: <verdict>`, and `HALT <haltedBy>: …`. Point the user there instead of narrating progress.
 
 ## 7. When `Workflow A` returns — reconcile the index, then stop for approval
 

@@ -132,9 +132,9 @@ No clone, no shell script — install the plugin from inside Claude Code:
   that variable yourself) because Claude Code's task tools are off by default on
   newer models; `/dev-flow` uses them for its lifecycle task list. The per-turn
   context this adds has not been measured.
-- The first interactive session after install shows a one-line welcome, once
-  (an empty marker, `onboarding/welcome-v1`, in the plugin data folder keeps it
-  from repeating). It is a hook message for you, not model context. Setup ends
+- The first interactive terminal session after install shows a one-line welcome, once
+  (not the desktop app or IDE integrations; an empty marker,
+  `onboarding/welcome-v1`, in the plugin data folder keeps it from repeating). It is a hook message for you, not model context. Setup ends
   with a next-steps line, and `/addit-harness:tips` prints five short tips.
 
 ### Migrating from `install.sh`
@@ -174,7 +174,7 @@ keeps working but is frozen; to keep updating it, pin commit `ebea6f3` or tag
 | `skills/tips/` + `commands/tips.md` | `/addit-harness:tips` — user-invoked only: prints five short tips (when to use `/dev-flow`, plan approval, where documents land, calling the specialist agents, the local telemetry option) | Authored |
 | `skills/telemetry-export/` + `commands/telemetry-export.md` | `/addit-harness:telemetry-export [--days N]` — user-invoked only: builds `data.json` and an offline `report.html` (no network, no external assets) from the local telemetry log under `export/<timestamp>/` in the plugin data folder. Only if you answer yes when asked, it publishes aggregated KPIs (no per-session rows, ids or hashes) as a private Artifact on claude.ai, which uploads them to Anthropic's hosted service under your account | Authored |
 | `skills/dev-flow/` + `workflows/*.js` | `/dev-flow [what to build or fix] [--tier light|standard|deep]` — deterministic SDLC orchestration: triage (facts by `task-triager`, tier scored in JS) → tier gate → investigate → design ⇄ `architect-reviewer` loop → **your approval gate** → implement → review ⇄ fix loop → `qa-engineer` verifies once (re-verifies only after a QA-driven fix). The loops run as `Workflow` scripts (`workflows/dev-flow-triage.js`, `workflows/dev-flow-design.js`, `workflows/dev-flow-implement.js`), each tier-parameterised; the skill holds the one human gate a script can't pause for. See [How dev-flow works](#how-dev-flow-works) for the phase-by-phase mechanics and loop-termination logic. Relies on `${CLAUDE_PLUGIN_ROOT}` and the `Workflow` tool | Authored |
-| `hooks/` | `SessionStart` hook — reminds the user to re-run `/addit-harness:setup` once the plugin's version has drifted past what was last synced (tracked via a version marker `setup.sh` writes per scope), and on the first interactive startup after install shows a one-time welcome line (a `systemMessage`, not model context; an empty marker `onboarding/welcome-v1` in the plugin data folder keeps it to once); `PreToolUse` hook on `Workflow` — blocks `dev-flow-implement` unless the approved plan's marker and hash check out (all other workflows untouched); `PostToolUse` advisory frontend check (non-blank line count on UI .ts/.tsx; ADDIT_FE_GATE=eslint opts into your project's ESLint, =0 disables; set in shell or settings.json "env"); an optional local telemetry hook (`hooks/telemetry.sh`/`telemetry.py`) that runs its script only when you turn on `telemetry_local` (see [Local telemetry](#local-telemetry-off-by-default)). None of the four makes a network request | Authored |
+| `hooks/` | `SessionStart` hook — reminds the user to re-run `/addit-harness:setup` once the plugin's version has drifted past what was last synced (tracked via a version marker `setup.sh` writes per scope), and on the first interactive terminal startup after install shows a one-time welcome line (a `systemMessage`, not model context; an empty marker `onboarding/welcome-v1` in the plugin data folder keeps it to once); `PreToolUse` hook on `Workflow` — blocks `dev-flow-implement` unless the approved plan's marker and hash check out (all other workflows untouched); `PostToolUse` advisory frontend check (non-blank line count on UI .ts/.tsx; ADDIT_FE_GATE=eslint opts into your project's ESLint, =0 disables; set in shell or settings.json "env"); an optional local telemetry hook (`hooks/telemetry.sh`/`telemetry.py`) that runs its script only when you turn on `telemetry_local` (see [Local telemetry](#local-telemetry-off-by-default)). None of the four makes a network request | Authored |
 | `settings.json` | Default model + permissions + official plugins (`enabledPlugins`) + `env` (`CLAUDE_CODE_ENABLE_TODO_TOOLS=1`, turns the task tools on) — placed by `/addit-harness:setup` | Authored |
 | `mcp.example.json` | Disabled Atlassian/DB scaffolding (opt-in) | Reference config |
 | `templates/CLAUDE.project.md` | Per-repo memory template | Authored |
@@ -389,9 +389,10 @@ outcomes.
 
 **Watching a run.** While a workflow runs, `/workflows` shows fixed-format
 progress lines: `dev-flow <workflow> start: tier=… track=…`,
-`<Loop> r<n>/<cap>: <k> blocking` per review round, `gate <name>: <verdict>`, and
-`HALT <haltedBy>: <reason>` (the reason can include an agent's error message or,
-for a scope breach, file paths). No request text or agent output is logged;
+`<Loop> r<n>/<cap>: <k> at/above <floor>` per review round (`<k>` counts findings
+at or above the tier's floor), `gate <name>: <verdict>`, and
+`HALT <haltedBy>: <reason>` (fixed text or counts). No request text, agent output,
+error messages or file paths are logged;
 `tests/workflows/log-contract.mjs` checks this on every mock scenario. With the
 task tools on, dev-flow also keeps six tasks (`Triage`, `Design + plan`,
 `Approve plan`, `Implement + review`, `QA`, `Commit`) current at each step;
@@ -772,10 +773,12 @@ gh release create addit-harness--v<version> --notes-file notes.md
 ```
 
 `.github/workflows/release.yml` (manual `workflow_dispatch`) runs the bump, tag
-and release in CI. It takes the release body from the `CHANGELOG.md` section for
-the new version, falls back to `[Unreleased]`, then to GitHub's generated notes,
-and never edits `CHANGELOG.md`. The docs changelog page renders the
-`[Unreleased]` section plus every GitHub release at deploy time.
+and release in CI. It fails before changing anything if `## [Unreleased]` in
+`CHANGELOG.md` is empty; otherwise the bump commit renames it to
+`## [<version>] - <date>` and adds a fresh empty `## [Unreleased]` above it, and
+the release body is that version's section (no fallback to generated notes). The
+docs changelog page renders the `[Unreleased]` section plus every GitHub release
+at deploy time, so released text appears once, from the release.
 
 `claude plugin tag` creates a `addit-harness--v<version>` tag (not a bare
 `vX.Y.Z`) and refuses a dirty working tree or a duplicate tag unless

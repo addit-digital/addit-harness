@@ -55,7 +55,9 @@ jobs:
 
       # The changelog page renders CHANGELOG.md's "## [Unreleased]" section above
       # the release list; released sections reach the page through releases.json,
-      # since release.yml publishes each one as its release body.
+      # since release.yml publishes each one as its release body. release.yml also
+      # renames "## [Unreleased]" in the bump commit, so after a release this section
+      # is empty (the page then hides it) and the text is not shown twice.
       - name: Extract unreleased changelog
         run: |
           .github/scripts/changelog-section.sh Unreleased \

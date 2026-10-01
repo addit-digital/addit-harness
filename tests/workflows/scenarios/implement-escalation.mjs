@@ -35,7 +35,10 @@ export default {
       assert.equal(r.callsByType[`${R}qa-engineer`] ?? 0, c.halt ? 0 : 1, c.name) // the halt stops everything after the first review
       assert.equal(r.callsByType[`${R}code-reviewer`], 1, c.name)
     })
-    assert.ok(runs[0].logs.some(l => /HALT escalation: scope breach at light — risk-surface files outside the plan: auth\/login\.js/.test(l)))
+    assert.ok(runs[0].logs.includes('HALT escalation: scope breach at light — 1 risk-surface files outside the plan'))
+    assert.ok(runs[3].logs.includes('HALT escalation: scope breach at light — 3 files touched vs 2 planned'))
+    // paths stay in the returned result and never reach a log line
+    assert.ok(!runs.flatMap(r => r.logs).some(l => /auth\/login|billing\/|\.js/.test(l)))
     assert.ok(runs[1].logs.some(l => /Scope breach \(not escalating at standard\)/.test(l)))
     assert.equal(runs[1].result.qaPassed, true)
     assert.deepEqual(runs[0].result.scopeBreach.risk, ['auth/login.js'])

@@ -7,7 +7,7 @@ disable-model-invocation: true
 
 # addit-harness tips
 
-Print the five tips below to the user exactly as written, with no preamble, no commentary and no tool calls.
+Print the five tips below to the user exactly as written, with no preamble and no commentary.
 
 1. **Bigger than a small fix?** `/addit-harness:dev-flow <what to build or fix>` investigates, designs, and stops for your OK before writing code. For small fixes, just ask.
 2. **You approve the plan.** dev-flow shows the plan and waits. Say yes to build it, or say what to change. Nothing is implemented until you approve.

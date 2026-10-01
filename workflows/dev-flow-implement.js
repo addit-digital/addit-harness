@@ -58,9 +58,9 @@ const callAgent = async (prompt, opts) => {
   if (++calls > POLICY.callCap) { haltedBy = 'call-ceiling'; log(`HALT call-ceiling: ${tier} cap ${POLICY.callCap}`); return null } // backstop: must never fire under correct code
   try { return await agent(prompt, o) }
   catch (e) {
-    const c = classify(e), msg = `${o.label ?? o.agentType}: ${e?.message ?? e}`
-    if (c === 'transient') { if (!(optional && looksLikeNotInstalled(e))) log(`agent failed: ${msg}`); return null }
-    haltedBy = c === 'budget' ? 'budget-cap' : 'config-error'; log(`HALT ${haltedBy}: ${msg}`); return null
+    const c = classify(e), who = o.label ?? o.agentType // never log e.message: it can quote prompt text or paths
+    if (c === 'transient') { if (!(optional && looksLikeNotInstalled(e))) log(`agent failed: ${who}`); return null }
+    haltedBy = c === 'budget' ? 'budget-cap' : 'config-error'; log(`HALT ${haltedBy}: ${c === 'budget' ? 'agent budget exceeded' : 'agent config error'}`); return null
   }
 }
 const ctx = () => UNTRUSTED + ORCHESTRATED
@@ -183,7 +183,9 @@ const checkScope = touchedFiles => {
   scopeChecked = true
   breach = scopeBreach(touchedFiles)
   if (!breach) return
-  const what = breach.unknown ? 'the reviewers reported no touched files, so the scope cannot be verified' : `${breach.risk.length ? `risk-surface files outside the plan: ${breach.risk.join(', ')}` : ''}${breach.risk.length && breach.magnitude ? '; ' : ''}${breach.magnitude ? `${breach.touched.length} files touched vs ${plannedFiles.length} planned` : ''}`
+  // Counts only: the paths stay in the returned scopeBreach (the skill shows them), never in a log line.
+  const what = breach.unknown ? 'the reviewers reported no touched files, so the scope cannot be verified'
+    : [breach.risk.length && `${breach.risk.length} risk-surface files outside the plan`, breach.magnitude && `${breach.touched.length} files touched vs ${plannedFiles.length} planned`].filter(Boolean).join('; ')
   if (tier === 'light') { haltedBy = 'escalation'; escalateTo = 'standard'; log(`HALT escalation: scope breach at light — ${what}`) }
   else log(`Scope breach (not escalating at ${tier}): ${what}`)
 }
@@ -197,7 +199,7 @@ for (let round = 0; round <= REVIEW_MAX_ROUNDS && !haltedBy; round++) {
   if (!scopeChecked) checkScope(reviewed.touchedFiles)
   if (haltedBy) break
   const findings = reviewed.findings
-  log(`Review r${round + 1}/${REVIEW_MAX_ROUNDS + 1}: ${findings.length} blocking`)
+  log(`Review r${round + 1}/${REVIEW_MAX_ROUNDS + 1}: ${findings.length} at/above ${POLICY.floor}`)
   if (findings.length === 0) { clean = true; break }
   if (verdictOnly) break
   const key = sortedKey(findings)
@@ -229,7 +231,8 @@ if (!haltedBy) {
     { agentType: 'addit-harness:qa-engineer', phase: 'QA', schema: QA_SCHEMA }
   )
   if (!qa) log('QA phase: qa-engineer returned no result — treating as not passed')
-  log(`gate qa: ${verdict(qa?.passed === true)}`)
+  // A failure that gets a fix cycle is logged as 'first'; the plain 'gate qa' line is always the final verdict.
+  log(qa?.passed === false && !haltedBy ? 'gate qa first: fail' : `gate qa: ${verdict(qa?.passed === true)}`)
 } else log('gate qa: skipped')
 if (qa?.passed === false && !haltedBy) {
   phase('QA fix')
@@ -243,7 +246,7 @@ if (qa?.passed === false && !haltedBy) {
     )
     postQaFixReviewed = !!rr
     postQaReviewBlocking = qualifying(rr?.findings).length
-    if (rr) log(`QA fix r1/1: ${postQaReviewBlocking} blocking`)
+    if (rr) log(`QA fix r1/1: ${postQaReviewBlocking} at/above ${POLICY.floor}`)
     if (!rr) log('QA fix: scoped re-review returned no result')
   } else {
     log('Post-QA fix was not code-reviewed (light tier)')

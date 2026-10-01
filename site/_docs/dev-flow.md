@@ -229,15 +229,16 @@ write fixed-format lines for the run's state:
 |---|---|
 | `dev-flow <triage\|design\|implement> start: tier=<tier> track=<track>` | Once, at the start of each workflow. Triage logs `tier=pending` unless it was given a tier |
 | `Triage: tier=<tier> S=<n> R=<n> floors=<list\|none>` | After triage scores the request |
-| `<UX\|Design\|Plan\|Review\|QA fix> r<n>/<cap>: <k> blocking` | After each review round; `<k>` counts the findings at or above the tier's floor |
-| `gate <design_review\|code_review\|qa>: <verdict>` | When a gate is decided; the verdict is `pass`, `fail`, `blocked` (the run halted) or `skipped` |
-| `HALT <haltedBy>: <reason>` | When the run halts (`budget-cap`, `config-error`, `call-ceiling`, `implement-failed`, `escalation`) |
+| `<UX\|Design\|Plan\|Review\|QA fix> r<n>/<cap>: <k> at/above <floor>` | After each review round; `<k>` counts the findings at or above the tier's floor (`blocking`, `major` or `minor`), and the line names that floor |
+| `gate <design_review\|code_review\|qa>: <verdict>` | When a gate is decided; the verdict is `pass`, `fail`, `blocked` (the run halted) or `skipped`. A QA failure that gets its fix cycle first logs `gate qa first: fail`; the plain `gate qa` line is always the final verdict |
+| `HALT <haltedBy>: <reason>` | When the run halts (`budget-cap`, `config-error`, `call-ceiling`, `implement-failed`, `escalation`); the reason is fixed text or counts |
 
-These lines carry no request text, brief or agent output: only tier, track,
-round numbers, counts, gate names and verdicts. The reason after a `HALT` is
-short, but it can include an agent's error message or, for a scope-breach
-escalation, the file paths outside the plan. The skill points you at
-`/workflows` instead of narrating progress in the conversation.
+These lines carry no request text, brief, agent output or file paths: only tier,
+track, round numbers, counts, gate names, verdicts and fixed reason text. An
+agent's error message is never logged, and a scope-breach escalation logs only
+how many files fall outside the plan (the paths are in the run's result, which
+the skill shows you). The skill points you at `/workflows` instead of narrating
+progress in the conversation.
 
 **The lifecycle task list.** Setup's `settings.json` template sets
 `CLAUDE_CODE_ENABLE_TODO_TOOLS=1`, because the task tools are off by default on
@@ -263,7 +264,8 @@ flowchart LR
 - Task text is the six names plus the tier and the halt id: no request text,
   code or paths.
 
-Without the task tools (setup not run, or the variable not set), the skill skips
+Without the task tools (setup not run, or `CLAUDE_CODE_ENABLE_TODO_TOOLS` unset
+or set to anything other than `1`, which setup never overwrites), the skill skips
 the list silently. The variable lives in your `settings.json` `env`, and setup
 merges `env` key by key with your values winning, so a value you set yourself is
 never overwritten (see [Getting started](../getting-started/#what-setup-does-to-your-settingsjson)).

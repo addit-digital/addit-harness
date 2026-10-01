@@ -109,6 +109,8 @@ merged = {**existing, **template}
 for key in ("enabledPlugins", "extraKnownMarketplaces", "env"):
     if isinstance(template.get(key), dict) and isinstance(existing.get(key), dict):
         merged[key] = {**template[key], **existing[key]}
+    elif isinstance(template.get(key), dict) and key in existing:
+        print(f'warning: "{key}" in {dest} is not a JSON object; replaced with the template\'s (your original is in the backup)', file=sys.stderr)
 # permissions: keep the user's own rules — union the allow/deny/ask lists, existing entries first
 tp, ep = template.get("permissions"), existing.get("permissions")
 if isinstance(tp, dict) and isinstance(ep, dict):

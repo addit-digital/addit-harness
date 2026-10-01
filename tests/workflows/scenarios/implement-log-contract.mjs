@@ -23,18 +23,18 @@ export default {
     assert.equal(fix.error, null)
     assert.deepEqual(fix.logs.filter(l => !/^agent failed/.test(l)), [
       'dev-flow implement start: tier=standard track=backend',
-      'Review r1/3: 1 blocking',
-      'Review r2/3: 0 blocking',
+      'Review r1/3: 1 at/above major',
+      'Review r2/3: 0 at/above major',
       'gate code_review: pass',
-      'gate qa: fail',
-      'QA fix r1/1: 0 blocking',
+      'gate qa first: fail',
+      'QA fix r1/1: 0 at/above major',
       'gate qa: pass',
     ])
     assert.equal(halted.result.haltedBy, 'budget-cap')
     assert.ok(halted.logs.some(l => /^HALT budget-cap:/.test(l)))
     assert.ok(halted.logs.includes('gate code_review: blocked'))
     assert.ok(halted.logs.includes('gate qa: skipped'))
-    // agent error text may appear in HALT/agent-failed lines (pre-existing); round, gate and start lines carry none
-    assert.ok(![...fix.logs, ...halted.logs].filter(l => /^(gate|dev-flow|\w+ r\d)/.test(l)).some(l => /SENTINEL/.test(l)))
+    // no line carries agent output: HALT and agent-failed lines are fixed text too
+    assert.ok(![...fix.logs, ...halted.logs].some(l => /SENTINEL/.test(l)))
   },
 }

@@ -46,18 +46,21 @@ only on [GitHub Releases](https://github.com/addit-digital/addit-harness/release
   yes.
 - Mock test harness for the dev-flow workflow scripts (`tests/workflows/`) and unit
   tests for the telemetry writer and exporter (`tests/telemetry/`).
-- `CHANGELOG.md`; the release workflow uses its section as the release notes.
+- `CHANGELOG.md`; the release workflow fails if `## [Unreleased]` is empty, cuts it to
+  `## [<version>] - <date>` in the bump commit (with a fresh empty `Unreleased` above)
+  and uses that section as the release notes, with no generated-notes fallback.
+  Fixture tests for both scripts live in `tests/release/`.
 - `/dev-flow` progress lines in the built-in `/workflows` view: a start line with
-  tier and track, one line per review round with its blocking count, each gate
-  verdict, and a `HALT` line with the halt reason. They carry no request text or
-  agent output; a halt reason can include an error message or, for a scope breach,
-  file paths. `tests/workflows/log-contract.mjs` checks the format on every mock
-  scenario run.
+  tier and track, one line per review round with its count at or above the tier's floor, each gate
+  verdict (`gate qa first` marks a QA failure that gets a fix cycle), and a `HALT` line with a fixed reason. They carry metadata only: no request
+  text, agent output, error messages or file paths (a scope breach logs a count; the
+  paths stay in the run's result). `tests/workflows/log-contract.mjs` checks the
+  format, including every `HALT` line, on every mock scenario run.
 - `/dev-flow` lifecycle task list: six tasks (`Triage`, `Design + plan`,
   `Approve plan`, `Implement + review`, `QA`, `Commit`) kept current at each step,
   when the task tools are available. Not yet checked in a live terminal.
-- First run: a one-time welcome line on the first interactive startup after
-  install, shown to you as a hook message and not added to the model's context. An
+- First run: a one-time welcome line on the first interactive terminal startup after
+  install (not the desktop app or IDE integrations), shown to you as a hook message and not added to the model's context. An
   empty local marker, `onboarding/welcome-v1` in the plugin data folder, keeps it
   to once. New `/addit-harness:tips` command (user-invoked only) prints five short
   tips, and setup ends with a next-steps line.
@@ -112,6 +115,9 @@ only on [GitHub Releases](https://github.com/addit-digital/addit-harness/release
 ### Fixed
 
 - Setup no longer drops your own `permissions` rules on re-sync.
+- Setup warns when your `settings.json` has `env`, `enabledPlugins` or
+  `extraKnownMarketplaces` as something other than an object and the template's value
+  replaces it (your original stays in the backup); it did so silently before.
 - `/dev-flow`: two tracks in the same repo fix sequentially; reviewer
   `touchedFiles` are keyed by repo, and missing ones count as unknown scope; the
   owner-proposal end marker is stripped fully; triage counts root-level files as one

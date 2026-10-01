@@ -26,6 +26,7 @@ class TestEnvMerge(unittest.TestCase):
         env = {**os.environ, "HOME": str(self.home), "CLAUDE_PLUGIN_ROOT": str(REPO)}
         proc = subprocess.run(["bash", str(SETUP)], capture_output=True, text=True, env=env, timeout=60)
         self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.stderr = proc.stderr
         return json.loads(self.settings.read_text())
 
     def test_template_carries_the_key(self):
@@ -47,6 +48,12 @@ class TestEnvMerge(unittest.TestCase):
     def test_non_object_env_is_not_crashed_on(self):
         self.settings.write_text(json.dumps({"env": "oops"}))
         self.assertEqual(self.run_setup()["env"], {KEY: "1"})
+        self.assertRegex(self.stderr, r'warning: "env" in .* is not a JSON object')
+
+    def test_object_env_gives_no_warning(self):
+        self.settings.write_text(json.dumps({"env": {"MY_VAR": "a"}}))
+        self.run_setup()
+        self.assertNotIn("warning", self.stderr)
 
     def test_second_run_is_byte_identical(self):
         self.settings.write_text(json.dumps({"env": {"MY_VAR": "a"}}))

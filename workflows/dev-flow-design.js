@@ -41,9 +41,9 @@ const callAgent = async (prompt, opts) => {
   if (++calls > POLICY.callCap) { haltedBy = 'call-ceiling'; log(`HALT call-ceiling: ${tier} cap ${POLICY.callCap}`); return null } // backstop: must never fire under correct code
   try { return await agent(prompt, o) }
   catch (e) {
-    const c = classify(e), msg = `${o.label ?? o.agentType}: ${e?.message ?? e}`
-    if (c === 'transient') { if (!(optional && looksLikeNotInstalled(e))) log(`agent failed: ${msg}`); return null }
-    haltedBy = c === 'budget' ? 'budget-cap' : 'config-error'; log(`HALT ${haltedBy}: ${msg}`); return null
+    const c = classify(e), who = o.label ?? o.agentType // never log e.message: it can quote prompt text or paths
+    if (c === 'transient') { if (!(optional && looksLikeNotInstalled(e))) log(`agent failed: ${who}`); return null }
+    haltedBy = c === 'budget' ? 'budget-cap' : 'config-error'; log(`HALT ${haltedBy}: ${c === 'budget' ? 'agent budget exceeded' : 'agent config error'}`); return null
   }
 }
 const ctx = () => UNTRUSTED + ORCHESTRATED + (A.briefPath ? `Problem brief (supersedes the raw request; read first): ${A.briefPath}\n\n` : '')
@@ -135,7 +135,7 @@ if (A.needsUX && POLICY.ux) {
     )
     if (!review) { log(`UX round ${round + 1}: reviewer returned no result`); round++; continue }
     const blocking = qualifying(review.findings)
-    log(`UX r${round + 1}/${POLICY.designRounds}: ${blocking.length} blocking`)
+    log(`UX r${round + 1}/${POLICY.designRounds}: ${blocking.length} at/above ${POLICY.floor}`)
     uxApproved = blocking.length === 0
     const key = sortedKey(blocking)
     if (lastKey && key === lastKey) { log('UX loop not converging (same findings again), aborting'); break }
@@ -191,7 +191,7 @@ if (tier === 'light') {
       round = 1
       designFindings = review.findings
       approved = qualifying(designFindings).length === 0
-      log(`Design r1/1: ${qualifying(designFindings).length} blocking`)
+      log(`Design r1/1: ${qualifying(designFindings).length} at/above ${POLICY.floor}`)
     }
   }
 } else {
@@ -266,7 +266,7 @@ if (tier === 'light') {
     }
     if (alt) designFindings = [...designFindings, { severity: 'major', description: `Better alternative: ${JSON.stringify(alt)}` }]
     const blocking = qualifying(designFindings)
-    log(`Design r${round + 1}/${POLICY.designRounds}: ${blocking.length} blocking`)
+    log(`Design r${round + 1}/${POLICY.designRounds}: ${blocking.length} at/above ${POLICY.floor}`)
     approved = blocking.length === 0
     const key = sortedKey(blocking)
     if (lastKey && key === lastKey) { log('Design loop not converging (same findings again), aborting'); designBreaker = true; break }
@@ -292,7 +292,7 @@ if (POLICY.planPhase) {
     planReview = plan ? await callAgent(ctx() + `Review the plan at ${PLAN_PATH}.` + SEVERITY_ASK, {
       agentType: 'addit-harness:architect-reviewer', phase: 'Plan', schema: REVIEW_SCHEMA, effort: POLICY.revEffort,
     }) : null
-    if (planReview) log(`Plan r1/1: ${qualifying(planReview.findings).length} blocking`)
+    if (planReview) log(`Plan r1/1: ${qualifying(planReview.findings).length} at/above ${POLICY.floor}`)
   }
 }
 log(`gate design_review: ${verdict(approved)}`)

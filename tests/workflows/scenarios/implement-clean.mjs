@@ -19,7 +19,7 @@ export default {
     assert.deepEqual(out.phases, ['Implement', 'Review', 'QA'])
     assert.deepEqual(out.logs, [
       'dev-flow implement start: tier=standard track=backend',
-      'Review r1/3: 0 blocking',
+      'Review r1/3: 0 at/above major',
       'gate code_review: pass',
       'gate qa: pass',
     ])

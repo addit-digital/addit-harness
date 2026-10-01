@@ -79,15 +79,21 @@ if [[ -z "$STATE" ]]; then
 fi
 tel setup "$STATE"
 
-# Welcome: once per install, interactive sessions only. CLAUDE_CODE_ENTRYPOINT is `cli` in a terminal and
-# `sdk-cli` under `claude -p`; unset means unknown, which shows. The marker is created exclusively (noclobber)
-# BEFORE printing, so a lost race or an unwritable data dir prints nothing instead of repeating every session.
+# Welcome: once per install, interactive terminal sessions only. CLAUDE_CODE_ENTRYPOINT is `cli` in a terminal and
+# `sdk-cli` under `claude -p`; unset means unknown, which shows; the desktop app and IDE integrations use other
+# values and are deliberately not shown it. The output is built BEFORE the marker is written, and the marker is
+# created exclusively (noclobber) just before printing, so a lost race or an unwritable data dir prints nothing
+# instead of repeating every session, and a failure while building the message does not use up the welcome.
 WELCOME=""
+is_startup() { printf '%s' "$IN" | python3 -c 'import json, sys; sys.exit(0 if json.load(sys.stdin).get("source") == "startup" else 1)' 2>/dev/null; }
 welcome_due() {
-  case "$IN" in *'"source":"startup"'*|*'"source": "startup"'*) ;; *) return 1;; esac
   [[ "${CLAUDE_CODE_ENTRYPOINT:-cli}" == cli ]] || return 1
   local dir="${CLAUDE_PLUGIN_DATA:-}"
   [[ -n "$dir" && ! -e "$dir/onboarding/welcome-v1" ]] || return 1
+  is_startup
+}
+claim_welcome() {
+  local dir="${CLAUDE_PLUGIN_DATA:-}"
   mkdir -p "$dir/onboarding" 2>/dev/null || return 1
   ( set -o noclobber; : > "$dir/onboarding/welcome-v1" ) 2>/dev/null
 }
@@ -104,12 +110,20 @@ fi
 
 NOTICE=""
 [[ ${#MESSAGES[@]} -gt 0 ]] && NOTICE="$(printf '%s\n' "${MESSAGES[@]}")"
-python3 -c "
+emit() {
+  python3 -c "
 import json, sys
 welcome, notice = sys.argv[1], sys.stdin.read()
 out = {'systemMessage': '\n'.join(p for p in (welcome, notice.rstrip('\n')) if p)}
 if notice.strip():
     out['hookSpecificOutput'] = {'hookEventName': 'SessionStart', 'additionalContext': notice}
 print(json.dumps(out))
-" "$WELCOME" <<< "$NOTICE"
+" "$1" <<< "$NOTICE"
+}
+OUT="$(emit "$WELCOME")" || exit 0
+if [[ -n "$WELCOME" ]] && ! claim_welcome; then  # lost the race or cannot write: no welcome, keep any drift notice
+  [[ ${#MESSAGES[@]} -eq 0 ]] && exit 0
+  OUT="$(emit "")" || exit 0
+fi
+printf '%s\n' "$OUT"
 exit 0

@@ -17,5 +17,11 @@ export default {
   expect: ({ runs }) => {
     CASES.forEach(([tier, sev, want], i) => assert.equal(runs[i].result.clean, want, `${tier} with only ${sev} findings`))
     assert.equal(runs[0].result.fixRounds, 0)
+    // the count is of findings at/above the tier's floor (one per reviewer here), labelled with that floor
+    const FLOOR = { light: 'blocking', standard: 'major', deep: 'minor' }
+    CASES.forEach(([tier, , clean], i) => {
+      const n = clean ? 0 : tier === 'light' ? 1 : 5
+      assert.ok(runs[i].logs.includes(`Review r1/3: ${n} at/above ${FLOOR[tier]}`), `${tier}: ${JSON.stringify(runs[i].logs)}`)
+    })
   },
 }

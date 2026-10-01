@@ -17,9 +17,9 @@ export default {
     assert.equal(out.error, null)
     assert.deepEqual(out.logs, [
       'dev-flow design start: tier=standard track=backend',
-      'Design r1/3: 1 blocking',
-      'Design r2/3: 0 blocking',
-      'Plan r1/1: 0 blocking',
+      'Design r1/3: 1 at/above major',
+      'Design r2/3: 0 at/above major',
+      'Plan r1/1: 0 at/above major',
       'gate design_review: pass',
     ])
     assert.ok(!out.logs.some(l => /SENTINEL/.test(l)))

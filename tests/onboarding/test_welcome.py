@@ -26,15 +26,15 @@ class WelcomeCase(unittest.TestCase):
         self.data.mkdir()
         self.marker = self.data / "onboarding/welcome-v1"
 
-    def run_hook(self, source="startup", entrypoint="cli", data="DEFAULT"):
-        env = {"PATH": os.environ["PATH"], "HOME": str(self.home), "CLAUDE_PLUGIN_ROOT": str(REPO)}
+    def run_hook(self, source="startup", entrypoint="cli", data="DEFAULT", raw=None, path=None):
+        env = {"PATH": path or os.environ["PATH"], "HOME": str(self.home), "CLAUDE_PLUGIN_ROOT": str(REPO)}
         if data == "DEFAULT":
             data = str(self.data)
         if data is not None:
             env["CLAUDE_PLUGIN_DATA"] = data
         if entrypoint is not None:
             env["CLAUDE_CODE_ENTRYPOINT"] = entrypoint
-        proc = subprocess.run(["bash", str(HOOK)], input=json.dumps({**PAYLOAD, "source": source}), capture_output=True, text=True, env=env, timeout=30)
+        proc = subprocess.run(["bash", str(HOOK)], input=raw if raw is not None else json.dumps({**PAYLOAD, "source": source}), capture_output=True, text=True, env=env, timeout=30)
         self.assertEqual(proc.returncode, 0, proc.stderr)
         return proc.stdout
 
@@ -77,6 +77,32 @@ class TestWelcome(WelcomeCase):
             self.assertEqual(self.run_hook(source=source), "", source)
         self.assertFalse(self.marker.exists())
 
+    def test_startup_text_inside_another_field_is_not_a_startup(self):
+        for payload in (
+            {**PAYLOAD, "source": "resume", "extra": {"source": "startup"}},
+            {**PAYLOAD, "source": "resume", "note": 'x "source": "startup" y'},
+            {k: v for k, v in PAYLOAD.items() if k != "source"} | {"extra": {"source": "startup"}},
+        ):
+            self.assertEqual(self.run_hook(raw=json.dumps(payload)), "", payload)
+        self.assertFalse(self.marker.exists())
+
+    def test_malformed_payload_is_silent(self):
+        self.assertEqual(self.run_hook(raw="not json"), "")
+        self.assertFalse(self.marker.exists())
+
+    def test_startup_with_other_spacing_still_shows(self):
+        self.assertTrue(json.loads(self.run_hook(raw='{"hook_event_name":"SessionStart",\n "source" :\t"startup"}'))["systemMessage"])
+
+    def test_emit_failure_leaves_no_marker_so_the_next_start_still_welcomes(self):
+        real = shutil.which("python3")
+        stub = self.tmp / "bin"
+        stub.mkdir()
+        (stub / "python3").write_text(f'#!/bin/bash\ncase "$*" in *systemMessage*) exit 1;; esac\nexec {real} "$@"\n')
+        (stub / "python3").chmod(0o755)
+        self.assertEqual(self.run_hook(path=f"{stub}:{os.environ['PATH']}"), "")
+        self.assertFalse(self.marker.exists())
+        self.assertTrue(json.loads(self.run_hook())["systemMessage"])
+
     def test_no_data_dir_is_silent(self):
         self.assertEqual(self.run_hook(data=None), "")
         self.assertEqual(self.run_hook(data=""), "")
@@ -98,6 +124,19 @@ class TestWelcome(WelcomeCase):
         self.marker.write_text("keep")
         self.assertEqual(self.run_hook(), "")
         self.assertEqual(self.marker.read_text(), "keep")
+
+
+class TestTipsCommand(unittest.TestCase):
+    def test_command_and_skill_agree_the_skill_file_is_read_then_printed(self):
+        command = (REPO / "commands/tips.md").read_text()
+        skill = (REPO / "skills/tips/SKILL.md").read_text()
+        self.assertIn("skills/tips/SKILL.md", command)
+        self.assertNotIn("no tool calls", skill)
+
+    def test_description_stays_small(self):
+        for f in ("commands/tips.md", "skills/tips/SKILL.md"):
+            desc = next(l for l in (REPO / f).read_text().splitlines() if l.startswith("description:"))
+            self.assertLessEqual(len(desc), 120, f)
 
 
 class TestWelcomeWithDrift(WelcomeCase):

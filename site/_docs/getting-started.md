@@ -32,8 +32,8 @@ addit-harness supports Claude Code only. If you used the old `install.sh`, see
 
 ## First run
 
-The first time you start an interactive session after installing, the plugin
-shows one welcome line. If setup has not run yet, it says to run
+The first time you start an interactive terminal session after installing, the
+plugin shows one welcome line. If setup has not run yet, it says to run
 `/addit-harness:setup`; once setup has run, it points at
 `/addit-harness:dev-flow <what to build>`. Both versions mention
 `/addit-harness:tips`.
@@ -45,7 +45,9 @@ shows one welcome line. If setup has not run yet, it says to run
 - It appears only at a fresh startup in an interactive terminal session (the
   hook checks that `CLAUDE_CODE_ENTRYPOINT` is `cli` or unset): not under
   `claude -p`, and not on resume, `/clear` or compaction. If your first session
-  is headless, the welcome waits for the first interactive one.
+  is headless, the welcome waits for the first interactive one. The filter is
+  deliberately narrow: other entrypoints (the desktop app, IDE integrations) are
+  not shown the welcome.
 - It is shown to you as a hook message and is not added to the model's
   context. Nothing is sent anywhere (see [Privacy](../../privacy/)).
 

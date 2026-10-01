@@ -88,7 +88,7 @@ See [Watching a run](../dev-flow/#watching-a-run).
 
 ## First run
 
-The first interactive session after install shows a one-line welcome, once,
+The first interactive terminal session after install shows a one-line welcome, once,
 pointing at setup or `/dev-flow` and the new `/addit-harness:tips` command. It is
 shown to you, not added to the model's context, and a local empty marker file keeps
 it from repeating. Setup now ends with a next-steps line. See

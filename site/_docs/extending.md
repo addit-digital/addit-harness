@@ -63,10 +63,13 @@ step 1 above (bump `version` by hand) always comes first.
 The [`release.yml` workflow](https://github.com/addit-digital/addit-harness/blob/main/.github/workflows/release.yml)
 runs the bump, tag and release steps in CI — trigger it with
 `workflow_dispatch` instead of running the commands locally. It uses the
-`CHANGELOG.md` section for the new version as the release body, falls back to
-the `[Unreleased]` section if you have not renamed it yet, and to GitHub's
-generated notes if both are empty. It does not edit `CHANGELOG.md` itself. See
-the [Changelog](../changelog/) for what that produces.
+`CHANGELOG.md` as its input: it fails before changing anything if the
+`[Unreleased]` section is empty, then, in the bump commit, renames it to
+`## [<version>] - <date>` and adds a fresh empty `[Unreleased]` above it
+(`.github/scripts/changelog-release.sh`). The release body is that new version's
+section; there is no fallback to generated notes. So write the release notes
+under `[Unreleased]` before you dispatch it. See the [Changelog](../changelog/)
+for what that produces.
 
 ## Next
 

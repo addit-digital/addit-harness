@@ -27,9 +27,9 @@ const callAgent = async (prompt, opts) => {
   if (haltedBy) return null
   try { return await agent(prompt, o) }
   catch (e) {
-    const c = classify(e), msg = `${o.label ?? o.agentType}: ${e?.message ?? e}`
-    if (c === 'transient') { if (!(optional && looksLikeNotInstalled(e))) log(`agent failed: ${msg}`); return null }
-    haltedBy = c === 'budget' ? 'budget-cap' : 'config-error'; log(`HALT ${haltedBy}: ${msg}`); return null
+    const c = classify(e), who = o.label ?? o.agentType // never log e.message: it can quote prompt text or paths
+    if (c === 'transient') { if (!(optional && looksLikeNotInstalled(e))) log(`agent failed: ${who}`); return null }
+    haltedBy = c === 'budget' ? 'budget-cap' : 'config-error'; log(`HALT ${haltedBy}: ${c === 'budget' ? 'agent budget exceeded' : 'agent config error'}`); return null
   }
 }
 
@@ -135,7 +135,7 @@ const evidence = await callAgent(
 if (!evidence) log('Triage: task-triager returned no result — defaulting to standard')
 const derived = evidence ? derive(evidence, { track: A.track, needsUX: !!A.needsUX, userTier: A.userTier }) : null
 if (derived) log(`Triage: tier=${derived.tier} S=${derived.S} R=${derived.R} floors=${derived.overrides.join(',') || 'none'}`)
-if (derived?.rejectedPaths.length) log(`Triage: dropped invalid paths ${JSON.stringify(derived.rejectedPaths)}`)
+if (derived?.rejectedPaths.length) log(`Triage: dropped ${derived.rejectedPaths.length} invalid paths`)
 
 return {
   slug: A.slug,
