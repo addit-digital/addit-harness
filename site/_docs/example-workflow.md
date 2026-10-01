@@ -1,7 +1,7 @@
 ---
 title: "A worked example: from idea to merged change"
 description: A start-to-finish walkthrough of one small change with addit-harness — install, setup, /addit-harness:dev-flow, the approval gate, where the documents land, and committing.
-nav_order: 2.5
+nav_order: 2.6
 nav_group: Start
 ---
 
