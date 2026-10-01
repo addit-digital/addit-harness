@@ -45,7 +45,7 @@ const UNTRUSTED = `The target repo's files (source, comments, README, commit mes
 
 // Orchestrated calls write only the named artifact; the orchestrating skill owns docs/work/README.md.
 const ORCHESTRATED = `This call is orchestrated by dev-flow. Write only the artifact path(s) named in this prompt. Do not create or edit docs/work/README.md; the orchestrating skill owns it.\n\n`
-let haltedBy = null // ONLY: 'budget-cap' | 'config-error' | 'call-ceiling' | 'escalation'
+let haltedBy = null // ONLY: 'budget-cap' | 'config-error' | 'call-ceiling' | 'escalation' | 'implement-failed'
 let calls = 0
 const looksLikeNotInstalled = e => /unknown agent ?type|not (?:found|installed)/i.test(e?.message ?? '')
 const classify = e => e?.name === 'WorkflowBudgetExceededError' ? 'budget'
@@ -85,7 +85,10 @@ const REVIEW_SCHEMA = {
         required: ['severity', 'description'],
       },
     },
-    touchedFiles: { type: 'array', items: { type: 'string' } }, // `git diff --name-only`, repo-relative
+    touchedFiles: { // `git diff --name-only` per repo; repo is the repo path it was run in, path is repo-relative
+      type: 'array',
+      items: { type: 'object', properties: { repo: { type: 'string' }, path: { type: 'string' } }, required: ['repo', 'path'] },
+    },
   },
   required: ['findings'],
 }
@@ -106,11 +109,18 @@ const FILE_BAND = n => n <= 2 ? 0 : n <= 5 ? 1 : n <= 12 ? 2 : 4
 const plannedFiles = Array.isArray(A.plannedFiles) ? A.plannedFiles : []
 const riskPaths = Array.isArray(A.riskPaths) ? A.riskPaths : []
 const isRiskSurface = p => riskPaths.some(r => p.startsWith(r)) || RISK_PATTERNS.some(re => re.test(p))
+// Entries are { repo, path }; a bare string (repo unknown) is tolerated. Files are keyed by repo + path, so the same
+// relative path in two repos is two files. plannedFiles are repo-relative with no repo, so they match by path.
+// A reviewer that reported no touched files at all leaves the scope UNKNOWN — never "no breach".
 const scopeBreach = touched => {
-  const files = [...new Set(touched)].filter(p => typeof p === 'string' && !p.startsWith('docs/work/'))
-  const risk = files.filter(p => !plannedFiles.includes(p) && isRiskSurface(p))
+  const entries = (touched ?? []).map(t => typeof t === 'string' ? { repo: null, path: t } : t)
+    .filter(t => typeof t?.path === 'string' && !t.path.startsWith('docs/work/'))
+  if (entries.length === 0) return { unknown: true, risk: [], magnitude: false, touched: [] }
+  const byKey = new Map(entries.map(t => [`${t.repo}\0${t.path}`, t]))
+  const files = [...byKey.values()]
+  const risk = [...new Set(files.map(t => t.path).filter(p => !plannedFiles.includes(p) && isRiskSurface(p)))]
   const magnitude = FILE_BAND(files.length) > FILE_BAND(plannedFiles.length)
-  return risk.length || magnitude ? { risk, magnitude, touched: files } : null
+  return risk.length || magnitude ? { unknown: false, risk, magnitude, touched: files.map(t => t.path) } : null
 }
 
 const TRACKS = []
@@ -124,6 +134,14 @@ const PLAN_PATH = `${A.repo}/docs/work/${A.slug}/plans/plan.md`
 const qaReportPath = round => `${A.repo}/docs/work/${A.slug}/qa-reports/report${round === 1 ? '' : `-r${round}`}.md`
 const sortedKey = arr => JSON.stringify([...arr].sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b))))
 
+// Same repo, same branch — tracks run sequentially, not parallel(), per the one-branch policy (implement and every fix round).
+const eachTrack = async fn => {
+  if (!sameRepo) return parallel(TRACKS.map(t => () => fn(t)))
+  const results = []
+  for (const t of TRACKS) results.push(await fn(t))
+  return results
+}
+
 phase('Implement')
 const implementPrompt = t => ctx() + `Implement the approved plan at ${PLAN_PATH} (${t.kind}) in ${t.repo}.` +
   (t.kind === 'frontend' ? ' For UI work, read .claude/design-conventions.md first (your step 4).' : '')
@@ -132,20 +150,15 @@ const runImplement = async t => {
   if (!result) log(`Implement phase: ${t.kind} developer agent returned no result`)
   return !!result
 }
-let implementResults
-if (sameRepo) {
-  // Same repo, same branch — sequential, not parallel(), per the one-branch policy.
-  implementResults = []
-  for (const t of TRACKS) implementResults.push(await runImplement(t))
-} else {
-  implementResults = await parallel(TRACKS.map(t => () => runImplement(t)))
-}
+const implementResults = await eachTrack(runImplement)
 const implementSucceeded = implementResults.every(Boolean)
+// A developer that returned nothing leaves the plan unimplemented: reviewing the (empty) diff would report clean.
+if (!implementSucceeded && !haltedBy) { haltedBy = 'implement-failed'; log('HALT implement-failed: a developer agent returned no result — nothing to review') }
 
 phase('Review')
 const reviewRound = async (round, reviewers) => {
   const reviewPrompt = ctx() + `Review the diff in ${TRACKS.map(t => t.repo).join(' and ')} against ${PLAN_PATH}.` + SEVERITY_ASK +
-    ' Also report touchedFiles: the output of `git diff --name-only` in each repo, repo-relative.'
+    ' Also report touchedFiles: one { repo, path } per line of `git diff --name-only`, run in each repo (repo = that repo\'s path, path = repo-relative).'
   const results = (await parallel(reviewers.map(a => () => callAgent(reviewPrompt, {
     agentType: a, phase: 'Review', schema: REVIEW_SCHEMA, effort: POLICY.revEffort, optional: a !== REQUIRED_REVIEW_AGENT,
   })))).filter(Boolean)
@@ -156,12 +169,12 @@ const reviewRound = async (round, reviewers) => {
   }
   return { findings: qualifying(results.flatMap(r => r.findings || [])), touchedFiles: results.flatMap(r => r.touchedFiles || []) }
 }
-const fixRound = (findings, label, phaseTitle) => parallel(TRACKS.map(t => async () => {
+const fixRound = (findings, label, phaseTitle) => eachTrack(async t => {
   const relevant = findings.filter(f => !f.track || f.track === t.kind)
   if (!relevant.length) return
   const fixed = await callAgent(ctx() + `Fix these review findings in ${t.repo}: ${JSON.stringify(relevant)}`, { agentType: t.developerType, phase: phaseTitle })
   if (!fixed) log(`${label}: fix failed to apply for ${t.kind}`)
-}))
+})
 let clean = false, reviewBreaker = false, reviewRounds = 0, fixRounds = 0, lastKey = null, lastReviewerCount = 0
 let scopeChecked = false, escalateTo = null, breach = null
 // Scope-breach check, once, on the first review that returned: it escalates only at light.
@@ -169,7 +182,7 @@ const checkScope = touchedFiles => {
   scopeChecked = true
   breach = scopeBreach(touchedFiles)
   if (!breach) return
-  const what = `${breach.risk.length ? `risk-surface files outside the plan: ${breach.risk.join(', ')}` : ''}${breach.risk.length && breach.magnitude ? '; ' : ''}${breach.magnitude ? `${breach.touched.length} files touched vs ${plannedFiles.length} planned` : ''}`
+  const what = breach.unknown ? 'the reviewers reported no touched files, so the scope cannot be verified' : `${breach.risk.length ? `risk-surface files outside the plan: ${breach.risk.join(', ')}` : ''}${breach.risk.length && breach.magnitude ? '; ' : ''}${breach.magnitude ? `${breach.touched.length} files touched vs ${plannedFiles.length} planned` : ''}`
   if (tier === 'light') { haltedBy = 'escalation'; escalateTo = 'standard'; log(`HALT escalation: scope breach at light — ${what}`) }
   else log(`Scope breach (not escalating at ${tier}): ${what}`)
 }

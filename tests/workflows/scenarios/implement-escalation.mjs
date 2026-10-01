@@ -11,6 +11,13 @@ const CASES = [
   { name: 'light + triage-predicted risk dir', args: { tier: 'light', plannedFiles: ['a.js'], riskPaths: ['billing/'] }, touched: ['a.js', 'billing/x.js'], halt: true },
   { name: 'light + planned risk file is not a breach', args: { tier: 'light', plannedFiles: ['auth/login.js'] }, touched: ['auth/login.js'], halt: false },
   { name: 'light + work-item docs are ignored', args: { tier: 'light', plannedFiles: ['a.js'] }, touched: ['a.js', 'docs/work/s/plans/plan.md', 'docs/work/s/qa-reports/report.md', 'docs/work/s/x.md'], halt: false },
+  { name: 'light + touchedFiles missing: scope unknown, escalate', args: { tier: 'light', plannedFiles: ['a.js'] }, touched: undefined, halt: true, unknown: true },
+  { name: 'light + touchedFiles empty: scope unknown, escalate', args: { tier: 'light', plannedFiles: ['a.js'] }, touched: [], halt: true, unknown: true },
+  { name: 'standard + touchedFiles missing: log only', args: { tier: 'standard', plannedFiles: ['a.js'] }, touched: undefined, halt: false, unknown: true },
+  { name: 'light + same relative path in two repos counts twice', args: { tier: 'light', plannedFiles: ['src/a.js', 'src/b.js'], track: 'both', secondaryRepo: '/f' },
+    touched: [{ repo: '/r', path: 'src/a.js' }, { repo: '/f', path: 'src/a.js' }, { repo: '/r', path: 'src/b.js' }], halt: true },
+  { name: 'light + object entries within plan', args: { tier: 'light', plannedFiles: ['src/a.js', 'src/b.js'], track: 'both', secondaryRepo: '/f' },
+    touched: [{ repo: '/r', path: 'src/a.js' }, { repo: '/f', path: 'src/b.js' }], halt: false },
 ]
 export default {
   argsList: CASES.map(c => ({ ...base, ...c.args })),
@@ -33,5 +40,10 @@ export default {
     assert.equal(runs[1].result.qaPassed, true)
     assert.deepEqual(runs[0].result.scopeBreach.risk, ['auth/login.js'])
     assert.equal(runs[3].result.scopeBreach.magnitude, true)
+    CASES.forEach((c, i) => { if (c.unknown) assert.equal(runs[i].result.scopeBreach.unknown, true, c.name) })
+    assert.ok(runs[8].logs.some(l => /HALT escalation: scope breach at light — the reviewers reported no touched files/.test(l)))
+    assert.ok(runs[10].logs.some(l => /Scope breach \(not escalating at standard\): the reviewers reported no touched files/.test(l)))
+    assert.equal(runs[10].result.qaPassed, true)
+    assert.equal(runs[11].result.scopeBreach.magnitude, true)
   },
 }

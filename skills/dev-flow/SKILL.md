@@ -208,11 +208,16 @@ it's done. When it returns, reconcile the index row again (step 7.1).
 
 **If `haltedBy` is `escalation`** (scope breach, `light` only): the first review found
 the change outside what triage predicted — `scopeBreach.risk` lists risk-surface files
-outside the plan, `scopeBreach.magnitude` means it crossed a file-count band. Nothing
+outside the plan, `scopeBreach.magnitude` means it crossed a file-count band. `scopeBreach.unknown` means the reviewers reported no touched files, so the scope could not be verified and `light` escalates rather than assume no breach. Nothing
 after that review ran (no QA). Show the breached files and ask: keep the working tree,
 `git stash` it, or discard it. Then re-run the tier gate (step 6) preset to `standard`,
 run `Workflow A` again, and get the plan re-approved (new marker, new `planSha256`)
 before `Workflow B` — at most one such re-entry.
+
+**If `haltedBy` is `implement-failed`**: a developer agent returned no result, so the plan
+was not (fully) implemented; review and QA did not run and `clean` / `qaPassed` are false.
+Report which track failed (`implementSucceeded: false`), show the working tree state, and
+offer to re-run `Workflow B` (same plan, same `planSha256`).
 
 Otherwise report the final pass/fail and findings plainly — `haltedBy` if set; whether
 the review loop capped out without reaching clean (`reviewBreaker` if it stopped on

@@ -27,6 +27,7 @@ const ROWS = [
   row('migration plus unknown', 'backend', { filesToChange: files(3, ['db', 'src']), touchesDataPersistence: true, reversibility: 'not-revertible', unknowns: ['one'] }, { S: 4, R: 7, tier: 'deep' }),
 ]
 const EXTRA = [
+  { name: 'two root-level files are one directory, not a spread', track: 'backend', needsUX: false, ev: { ...base, filesToChange: [{ path: 'README.md', exists: true }, { path: 'LICENSE', exists: true }], changeShape: 'content' }, want: { S: 0, R: 0, tier: 'light' } },
   { name: 'needsUX floors to standard', track: 'frontend', needsUX: true, ev: { ...base, filesToChange: files(1), changeShape: 'content' }, want: { S: 0, R: 0, tier: 'standard', overrides: ['needs-ux'] } },
   { name: 'low confidence floors to standard', track: 'backend', needsUX: false, ev: { ...base, filesToChange: files(1), changeShape: 'content', confidence: 'low' }, want: { S: 0, R: 0, tier: 'standard', overrides: ['low-confidence'] } },
   { name: 'user override is exact (down)', track: 'backend', needsUX: false, userTier: 'light', ev: { ...base, filesToChange: files(1), touchesSecuritySurface: true }, want: { S: 1, R: 3, tier: 'light', overrides: ['security-or-persistence', 'user'] } },

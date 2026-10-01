@@ -11,7 +11,7 @@ export default {
   argsList: CASES.map(c => ({ slug: 's', track: 'backend', repo: '/r', planSha256: 'a'.repeat(64), tier: c.tier })),
   respond: ({ agentType }, state) => {
     if (agentType === `${R}qa-engineer`) return { passed: CASES[state.run].qa[qaSeen[state.run]++], findings: ['x'], evidence: [] }
-    if (agentType.endsWith('code-reviewer') || agentType.startsWith('pr-review-toolkit:')) return { findings: [], touchedFiles: [] }
+    if (agentType.endsWith('code-reviewer') || agentType.startsWith('pr-review-toolkit:')) return { findings: [], touchedFiles: [{ repo: '/r', path: 'a.js' }] }
     return 'done'
   },
   expect: ({ runs }) => {

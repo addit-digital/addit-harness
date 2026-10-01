@@ -185,7 +185,9 @@ You still run `git commit` yourself — `dev-flow` never commits.
 
 Every agent call goes through one wrapper. A single failed call is logged and
 the run continues; a budget-exceeded or schema-contradiction error halts the
-run and is reported as `haltedBy` (`budget-cap` or `config-error`). Each
+run and is reported as `haltedBy` (`budget-cap` or `config-error`). A developer agent that
+returns nothing halts the implement workflow as `implement-failed` before review, so an
+empty diff is never reported as clean. Each
 workflow also carries a per-tier call-ceiling backstop (`call-ceiling`) that must
 never fire under correct code; the mock suite asserts it doesn't. A loop that
 stops because its findings repeat is *not* a halt — it is reported as

@@ -6,7 +6,7 @@ export default {
   argsList: TIERS.map(tier => ({ slug: 's', track: 'backend', repo: '/r', planSha256: 'a'.repeat(64), tier })),
   respond: ({ agentType }) => {
     if (agentType === `${R}qa-engineer`) return { passed: true, findings: [], evidence: [] }
-    if (agentType.endsWith('code-reviewer') || agentType.startsWith('pr-review-toolkit:')) return { findings: [], touchedFiles: [] }
+    if (agentType.endsWith('code-reviewer') || agentType.startsWith('pr-review-toolkit:')) return { findings: [], touchedFiles: [{ repo: '/r', path: 'a.js' }] }
     return 'done'
   },
   expect: ({ runs }) => {

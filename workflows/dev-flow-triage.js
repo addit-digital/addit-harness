@@ -69,7 +69,7 @@ const TRIAGE_SCHEMA = {
 
 // Paths feed a derived score and the scope-breach comparison: nothing unvalidated goes near them.
 const validPath = p => typeof p === 'string' && p !== '' && !p.startsWith('/') && !p.includes('..') && !p.includes('\0')
-const topDir = p => p.split('/').filter(Boolean)[0] ?? ''
+const topDir = p => { const parts = p.split('/').filter(Boolean); return parts.length > 1 ? parts[0] : '.' } // all root-level files share one directory
 const FILE_BAND = n => n <= 2 ? 0 : n <= 5 ? 1 : n <= 12 ? 2 : 4
 const SHAPE_PTS = { content: 0, config: 0, logic: 1 }
 const REVERSIBILITY_PTS = { revert: 0, 'revert-plus-cleanup': 1, 'not-revertible': 3 }

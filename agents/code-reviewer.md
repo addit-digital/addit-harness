@@ -287,4 +287,4 @@ When the prompt asks for a structured result, tag every finding with a severity 
 - **blocking** — the change is wrong, unsafe, or will not work.
 - **major** — it works but will cause a real problem soon (a correctness edge case with a plausible trigger, a contract that will break a known consumer).
 - **minor** — everything else: style, hypothetical futures, adjacent code, "consider also."
-Your own clean/not-clean call is not used; the verdict is computed from the severities. Also report `touchedFiles`: the repo-relative output of `git diff --name-only` in each repo you were pointed at — a command's output, not a description of what you think changed.
+Your own clean/not-clean call is not used; the verdict is computed from the severities. Also report `touchedFiles`: one `{ repo, path }` per line of `git diff --name-only` in each repo you were pointed at (`repo` is that repo's path, `path` is repo-relative) — a command's output, not a description of what you think changed.
