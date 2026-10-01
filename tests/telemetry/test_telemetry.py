@@ -161,7 +161,8 @@ class TestOn(Sandbox):
         done = [r for r in self.lines() if r["name"] == "invoke_agent code-reviewer"][0]
         self.assertEqual((done["addit.outcome"], done["addit.resumes"], done["addit.closing_chars"]), ("completed", 1, 26))
         slash = [r for r in self.lines() if r["name"] == "execute_tool Skill save-plan"][0]
-        self.assertEqual((slash["addit.trigger"], slash["addit.component.kind"]), ("slash", "command"))
+        # no commands/ folder any more: a slash-invoked skill is kind "skill", trigger "slash"
+        self.assertEqual((slash["addit.trigger"], slash["addit.component.kind"]), ("slash", "skill"))
         self.assertEqual(len(self.files()), 1)
 
     def test_doc_metadata_only_counts(self):

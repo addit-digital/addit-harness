@@ -126,17 +126,15 @@ class TestWelcome(WelcomeCase):
         self.assertEqual(self.marker.read_text(), "keep")
 
 
-class TestTipsCommand(unittest.TestCase):
-    def test_command_and_skill_agree_the_skill_file_is_read_then_printed(self):
-        command = (REPO / "commands/tips.md").read_text()
+class TestTipsSkill(unittest.TestCase):
+    def test_skill_prints_itself_verbatim_and_asks_for_no_tool_calls_to_read_it(self):
         skill = (REPO / "skills/tips/SKILL.md").read_text()
-        self.assertIn("skills/tips/SKILL.md", command)
+        self.assertIn("Print the five tips below", skill)
         self.assertNotIn("no tool calls", skill)
 
     def test_description_stays_small(self):
-        for f in ("commands/tips.md", "skills/tips/SKILL.md"):
-            desc = next(l for l in (REPO / f).read_text().splitlines() if l.startswith("description:"))
-            self.assertLessEqual(len(desc), 120, f)
+        desc = next(l for l in (REPO / "skills/tips/SKILL.md").read_text().splitlines() if l.startswith("description:"))
+        self.assertLessEqual(len(desc), 120)
 
 
 class TestWelcomeWithDrift(WelcomeCase):

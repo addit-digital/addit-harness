@@ -7,6 +7,16 @@ only on [GitHub Releases](https://github.com/addit-digital/addit-harness/release
 
 ## [Unreleased]
 
+### Fixed
+
+- Typing `/addit-harness` listed every skill twice. The plugin shipped a thin
+  `commands/<name>.md` next to each skill (a workaround for
+  [anthropics/claude-code#18949](https://github.com/anthropics/claude-code/issues/18949)),
+  and current Claude Code shows a command and a skill with the same name as two entries
+  ([#88050](https://github.com/anthropics/claude-code/issues/88050)). The `commands/`
+  folder is removed; the skills are the slash commands, unchanged. A test now fails if a
+  command shares a name with a skill.
+
 ## [0.4.0] - 2026-10-01
 
 ### Added
