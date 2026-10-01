@@ -1,10 +1,11 @@
 {% assign docs = site.docs | where_exp: "p", "p.nav_exclude != true" | sort: "nav_order" %}
-{% assign current_index = 0 %}
+{% assign current_index = -1 %}
 {% for doc in docs %}
   {% if doc.url == page.url %}
     {% assign current_index = forloop.index0 %}
   {% endif %}
 {% endfor %}
+{% if current_index >= 0 %}
 <nav class="docs-prev-next" aria-label="Docs pages">
   {% assign prev_index = current_index | minus: 1 %}
   {% if prev_index >= 0 %}
@@ -25,3 +26,4 @@
     </a>
   {% endif %}
 </nav>
+{% endif %}

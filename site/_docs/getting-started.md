@@ -99,8 +99,8 @@ printed `claude plugin ...` command in a normal shell.
 
 ## Migrating from `install.sh`
 
-`install.sh`, `sync_tools.py` and `tools.config.json` were removed. Cursor,
-Kiro and Codex CLI are no longer supported. To move to the plugin:
+`install.sh`, `sync_tools.py` and `tools.config.json` were removed; addit-harness
+supports Claude Code only. To move to the plugin:
 
 ```
 /plugin marketplace add addit-digital/addit-harness

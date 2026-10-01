@@ -60,6 +60,10 @@
   --ink-faint: #6c7072;
   --accent: #dd9548;
   --accent-ink: #1b1206;
+  /* a11y: fill behind --accent-ink text (primary buttons). Dark: the accent
+     itself (7.5:1); light overrides it, because --accent-ink on the light
+     accent is only 4.2:1. */
+  --accent-fill: var(--accent);
   --accent-soft: rgba(221, 149, 72, 0.14);
   --line: rgba(236, 231, 222, 0.12);
   --line-strong: rgba(236, 231, 222, 0.22);
@@ -81,6 +85,7 @@
   --ink-dim: #53585a;
   --ink-faint: #83898b;
   --accent: #b0651c;
+  --accent-fill: #a35c15; /* 4.86:1 against --accent-ink */
   --accent-ink: #fff8ef;
   --accent-soft: rgba(176, 101, 28, 0.10);
   --line: rgba(20, 22, 26, 0.12);
@@ -98,7 +103,8 @@
     --ink-dim: #53585a;
     --ink-faint: #83898b;
     --accent: #b0651c;
-    --accent-ink: #fff8ef;
+    --accent-fill: #a35c15; /* 4.86:1 against --accent-ink */
+  --accent-ink: #fff8ef;
     --accent-soft: rgba(176, 101, 28, 0.10);
     --line: rgba(20, 22, 26, 0.12);
     --line-strong: rgba(20, 22, 26, 0.24);
@@ -242,9 +248,14 @@ nav.links a:hover, nav.links a:focus-visible { color: var(--ink); }
   cursor: pointer;
 }
 .btn-primary {
-  background: var(--accent);
+  background: var(--accent-fill);
   color: var(--accent-ink);
 }
+/* a11y: `nav.links a` (specificity 0,1,2) would otherwise win over
+   .btn-primary and paint the label in --ink-dim on the orange fill (1.1:1). */
+nav.links a.btn-primary,
+nav.links a.btn-primary:hover,
+nav.links a.btn-primary:focus-visible { color: var(--accent-ink); }
 .btn-primary:hover { filter: brightness(1.08); }
 .btn-ghost {
   border-color: var(--line-strong);
@@ -761,16 +772,74 @@ footer {
   border-left-color: var(--accent);
 }
 
+.docs-nav-sub { margin: 2px 0 8px; }
+.docs-nav-sub p {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin: 6px 0 4px 12px;
+}
+.docs-nav-sub ul { margin-left: 12px; border-left: 1px solid var(--line); }
+.docs-nav-sub a {
+  font-size: 13px;
+  padding: 4px 0 4px 12px;
+  margin-left: -1px;
+}
+.docs-nav-sub li[data-depth="3"] a { padding-left: 24px; }
+.docs-nav-sub a.is-active {
+  color: var(--ink);
+  border-left-color: var(--accent);
+}
+.docs-nav-all {
+  margin: 0 0 24px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+.docs-nav-all a {
+  display: inline;
+  padding: 0;
+  border-left: 0;
+  text-decoration: none;
+  color: var(--ink-dim);
+}
+.docs-nav-all a:hover,
+.docs-nav-all a[aria-current="page"] { color: var(--accent); }
+
 @media (max-width: 860px) {
   .docs-grid { grid-template-columns: 1fr; gap: 24px; }
   .docs-nav-disclosure summary.docs-nav-toggle::after { content: " ▾"; }
   .docs-nav-disclosure[open] summary.docs-nav-toggle::after { content: " ▴"; }
 }
 @media (min-width: 861px) {
+  /* Sticky, self-scrolling sidebar: stays under the 64px sticky header and
+     scrolls on its own when the tree is taller than the viewport. */
+  .docs-sidebar {
+    position: sticky;
+    top: 88px;
+    max-height: calc(100vh - 112px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* room for the focus ring of links on the edge of the scroll box */
+    padding: 2px;
+    margin: -2px;
+  }
   .docs-nav-disclosure summary.docs-nav-toggle { display: none; }
-  /* Force the sidebar content visible regardless of the <details> "open"
-     state at desktop widths — a CSS-only persistent-sidebar-on-desktop,
-     collapsible-on-mobile pattern, so no JS is needed for this behavior. */
+  /* The <details> is only a disclosure on mobile; here it is a plain block.
+     Chrome 131+ / Safari 18.4+ hide closed <details> content through
+     ::details-content { content-visibility: hidden }, which no rule on the
+     children can defeat, so override the pseudo-element itself. Engines
+     without ::details-content (older Firefox/Safari) hide the children with
+     display, so keep the child rule as the fallback. Keep them as separate
+     rules: an engine that doesn't know the selector drops the whole rule. */
+  .docs-nav-disclosure::details-content {
+    content-visibility: visible;
+    display: block;
+    block-size: auto;
+  }
   .docs-nav-disclosure > *:not(summary) { display: block !important; }
 }
 
@@ -785,6 +854,8 @@ footer {
   margin: 0 0 28px;
   text-wrap: balance;
 }
+.docs-article h2,
+.docs-article h3 { scroll-margin-top: 88px; }
 .docs-article h2 {
   font-size: clamp(20px, 2.4vw, 26px);
   margin-top: 48px;
@@ -871,6 +942,48 @@ footer {
   font-size: 14px;
 }
 @media (max-width: 500px) { .docs-toc ul { columns: 1; } }
+
+/* Docs index (/docs/): one link per card, so the accessible name is
+   "Title description". */
+.docs-index-group {
+  list-style: none;
+  margin: 0 0 40px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+.docs-index-group > li { margin: 0; }
+.docs-article .docs-index-group a {
+  display: block;
+  height: 100%;
+  text-decoration: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 2px solid transparent;
+  border-radius: 6px;
+  padding: 14px 16px;
+}
+.docs-article .docs-index-group a:hover {
+  border-color: var(--line-strong);
+  border-left-color: var(--accent);
+}
+.docs-index-title {
+  display: block;
+  color: var(--ink);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.docs-index-desc {
+  display: block;
+  color: var(--ink-dim);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.docs-index .docs-article { max-width: none; }
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
 
 .docs-prev-next {
   display: flex;

@@ -149,7 +149,7 @@ supports Claude Code only, as a plugin. If you used `./install.sh`:
 ```
 
 Setup retires the old unprefixed `~/.claude/agents` and `~/.claude/skills`
-copies (backed up first). Config already synced into Cursor, Kiro or Codex CLI
+copies (backed up first). Config already synced by the old `install.sh`
 keeps working but is frozen; to keep updating it, pin commit `ebea6f3` or tag
 `addit-harness--v0.3.0`, the last state that shipped `install.sh`.
 

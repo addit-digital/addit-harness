@@ -10,7 +10,7 @@ argument-hint: "[short plan title] [--temp]"
 The Claude Code CLI shows a ` ```mermaid ` block as raw code, never a rendered
 diagram, and a plan presented in the CLI isn't saved anywhere convenient to open.
 This skill writes the plan to a markdown file so it can be opened with **rendered
-mermaid** — in an IDE preview (Cursor / VS Code, Ctrl/Cmd+Shift+V) or on GitHub
+mermaid** — in an IDE preview (VS Code, Ctrl/Cmd+Shift+V) or on GitHub
 (renders mermaid natively).
 
 ## What to save
@@ -72,7 +72,7 @@ the relevant agent writes directly to the correct subfolder inside
 4. **Update the index** (permanent only): add a row to `docs/work/README.md` —
    row per doc-protocol.md "Index row"; update in place.
 5. **Report** the absolute path and how to view it rendered:
-   - Local: "open in Cursor / VS Code and toggle preview (Ctrl/Cmd+Shift+V)."
+   - Local: "open in VS Code (or any markdown preview that renders mermaid) and toggle preview (Ctrl/Cmd+Shift+V)."
    - Remote/container session: "this file is in the container — commit & push,
      then view on GitHub (renders mermaid), or pull it locally."
    Don't commit or push unless the user asks.
