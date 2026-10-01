@@ -2,14 +2,11 @@
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Claude Code](https://img.shields.io/badge/Claude_Code-compatible-orange)
-![Cursor](https://img.shields.io/badge/Cursor-compatible-000000)
-![Codex CLI](https://img.shields.io/badge/Codex_CLI-compatible-412991)
-![Kiro](https://img.shields.io/badge/Kiro-compatible-8A3FFC)
 ![Go](https://img.shields.io/badge/Go-00ADD8?logo=go&logoColor=white)
 ![Java](https://img.shields.io/badge/Java-ED8B00?logo=openjdk&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
 
-A coding agent's out-of-the-box config is a blank slate. **addit-harness** is the config harness that turns it into a **full digital product development kit** — covering every layer from idea to ship: legal compliance, UX design, architecture, implementation in Go · Java · TypeScript, and code review, all wired into a plan→verify→commit engineering loop. One-line install, auto-detecting whichever agent(s) you have. Philosophy: curate established assets and adapt them — don't hand-roll what already exists.
+A coding agent's out-of-the-box config is a blank slate. **addit-harness** is the config harness that turns it into a **full digital product development kit** — covering every layer from idea to ship: legal compliance, UX design, architecture, implementation in Go · Java · TypeScript, and code review, all wired into a plan→verify→commit engineering loop. One plugin install for Claude Code. Philosophy: curate established assets and adapt them — don't hand-roll what already exists.
 
 ---
 
@@ -17,11 +14,7 @@ A shared configuration that covers the full digital product development loop —
 from idea investigation and legal compliance through UX design,
 backend/frontend architecture, and implementation in Go · Java/Spring ·
 TypeScript (Bun backend · React/Next.js frontend), to code review and
-debugging — synced into [Claude Code](https://code.claude.com),
-[Cursor](https://cursor.com), [Codex CLI](https://developers.openai.com/codex),
-and [Kiro](https://kiro.dev). See [*Other coding agents*](#other-coding-agents)
-for what's covered per tool (GitHub Copilot support is planned, not yet
-implemented — see *Roadmap*).
+debugging — shipped as a [Claude Code](https://code.claude.com) plugin.
 Built for **SaaS founders and product engineers** who own the full feature
 lifecycle and want every layer of that loop to have an opinionated, specialized
 subagent behind it.
@@ -36,7 +29,7 @@ a pile of bespoke skills. It deliberately reuses Claude Code's built-ins
 
 The condensed, browsable version of this README lives at
 **[tools.addit.digital/harness/docs/](https://tools.addit.digital/harness/docs/getting-started/)**
-— grouped sidebar, on-page tables of contents, and per-tool install pages.
+— grouped sidebar, on-page tables of contents, and a step-by-step install page.
 Prefer browsing in-repo instead? Start at
 [`site/_docs/README.md`](site/_docs/README.md).
 
@@ -45,11 +38,11 @@ Prefer browsing in-repo instead? Start at
 - [Why this config?](#why-this-config)
 - [Install](#install)
   - [Claude Code](#claude-code)
-  - [Cursor / Kiro / Codex CLI](#cursor--kiro--codex-cli)
+  - [Migrating from `install.sh`](#migrating-from-installsh)
 - [What's in here](#whats-in-here)
   - [Language conventions — two tiers + per-project layer](#language-conventions--two-tiers--per-project-layer)
 - [How dev-flow works](#how-dev-flow-works)
-- [Other coding agents](#other-coding-agents)
+- [Using it](#using-it)
   - [Iterating & giving feedback on plans or code](#iterating--giving-feedback-on-plans-or-code)
   - [Official plugins (declared in `settings.json`)](#official-plugins-declared-in-settingsjson)
   - [Subagents](#subagents)
@@ -76,7 +69,7 @@ Prefer browsing in-repo instead? Start at
 | UX & design | Describe and hope | `@ux-designer` → `@figma-designer` → `@frontend-architect` pipeline |
 | Feature build | Hand-drive every `Agent` call yourself, every time | `/dev-flow` — deterministic design-gate + review-gate loops, one human approval gate |
 | e2e/regression QA | Manual click-through before every release | `@qa-engineer` — evidence-backed verification, web + mobile |
-| New machine | Redo everything | `./install.sh` |
+| New machine | Redo everything | plugin install + `/addit-harness:setup` |
 
 ## Install
 
@@ -103,40 +96,35 @@ No clone, no shell script — install the plugin from inside Claude Code:
   `.claude/settings.json`; default `--scope user` is global.
 - Plugin-provided agents are namespaced — invoke them as
   `@addit-harness:code-reviewer`, not bare `@code-reviewer`.
-- Prefer the old copy-based install instead? `./install.sh --target claude`
-  still works (see below) — it's no longer run automatically by
-  `./install.sh` with no arguments.
+- Add `--plugins` to also install the official plugins declared in
+  `settings.json` now (`/addit-harness:setup --plugins`). Setup merges
+  `settings.json` into yours instead of replacing it: your hooks,
+  `statusLine`, `env` and plugin choices survive, and a backup of the previous
+  file goes to `~/.claude/.install-backups/<timestamp>/`.
 
-### Cursor / Kiro / Codex CLI
+### Migrating from `install.sh`
 
-```bash
-git clone <this-repo> ~/src/addit-harness && cd ~/src/addit-harness
-./install.sh              # auto-detect: sync every supported agent found on this machine
-./install.sh --target X   # force one: claude|cursor|kiro|codex (copilot: see Roadmap)
-./install.sh --link       # symlink instead of copy, so edits track git
-./install.sh --plugins    # claude only: also register marketplaces + install official plugins
+`install.sh`, `sync_tools.py` and `tools.config.json` are gone: addit-harness
+supports Claude Code only, as a plugin. If you used `./install.sh`:
+
+```
+/plugin marketplace add addit-digital/addit-harness
+/plugin install addit-harness@addit
+/addit-harness:setup [--plugins]
 ```
 
-`install.sh` checks each tool's CLI on `PATH` or home directory (`~/.cursor`,
-`~/.kiro`, `~/.codex`) and syncs config into whichever it finds. It merges
-per-file into each tool's home, never clobbering the whole directory, so
-`projects/`, history, and existing hooks are preserved. Re-running backs up
-anything it replaces to `<tool-home>/.install-backups/<timestamp>/`.
-
-Claude Code has its own plugin-based install above and is no longer synced by
-a plain `./install.sh` run; `--target claude` still works if you'd rather use
-the copy-based path (backs up and replaces `~/.claude/settings.json` too —
-merge any custom permissions/hooks back from the backup).
+Setup retires the old unprefixed `~/.claude/agents` and `~/.claude/skills`
+copies (backed up first). Config already synced into Cursor, Kiro or Codex CLI
+keeps working but is frozen; to keep updating it, pin commit `ebea6f3` or tag
+`addit-harness--v0.3.0`, the last state that shipped `install.sh`.
 
 ## What's in here
 
 | Path | What | How it's sourced |
 |------|------|------------------|
-| `AGENTS.md` | Canonical, tool-neutral global memory: operating model + hard rules. Every tool's baseline is generated from this file (see *Other coding agents*) | Authored; follows [Anthropic memory](https://code.claude.com/docs/en/memory) & [best-practices](https://www.anthropic.com/engineering/claude-code-best-practices) |
+| `AGENTS.md` | Canonical global memory: operating model + hard rules, imported by `CLAUDE.md` | Authored; follows [Anthropic memory](https://code.claude.com/docs/en/memory) & [best-practices](https://www.anthropic.com/engineering/claude-code-best-practices) |
 | `CLAUDE.md` | 2-line `@import` pointer (`@AGENTS.md`, `@rules/engineering-loop.md`) — Claude Code specifically requires this literal filename | Authored |
 | `.claude-plugin/plugin.json` + `marketplace.json` | Self-hosted Claude Code plugin (`addit-harness@addit`) — `agents/` and `skills/` auto-discovered from here | Authored |
-| `tools.config.json` | Declarative per-tool mapping: where each artifact goes for cursor/kiro/codex/copilot (Claude Code uses the plugin above instead), and the few real content transforms (Kiro tool tags, Codex TOML) | Authored |
-| `sync_tools.py` | Interpreter for `tools.config.json`, called once per tool by `install.sh` | Authored |
 | `rules/engineering-loop.md` | Always-on plan→verify→commit model + anti-patterns; sets diagram-rich (mermaid) plan/design-doc standards | Authored |
 | `rules/{java,go,typescript}.md` | **Thin auto-loaded pointers** (Tier 1) — route to the references | Authored (routing only, no convention text) |
 | `references/{go,java,typescript}/` | **Convention guides + linked authorities, read on-demand** (Tier 2) | Go: codebase-derived from app-erp; Java/TS: vendored from recognized sources — see each `README.md` |
@@ -146,10 +134,10 @@ merge any custom permissions/hooks back from the backup).
 | `skills/save-plan/` | `/save-plan` — persist an **implementation plan** to `docs/work/<slug>/plans/` (or `--temp`) so mermaid renders in an IDE/GitHub. Architecture designs → `docs/work/<slug>/solutions/`; review reports → `docs/work/<slug>/architecture-reports/` (written directly by the relevant agent) | Authored |
 | `skills/go-conventions/` | `/go-conventions [--refresh]` — scan a Go repo and write `.claude/go-conventions.md` (project-specific layer on top of the global baseline) | Authored |
 | `skills/design-conventions/` | `/design-conventions [--refresh]` — scan a TS/React project's existing UI layer and write `.claude/design-conventions.md` (visual design language: tokens, type/spacing/color scales, component lib, layout rhythm, state patterns). For greenfield projects, `@frontend-architect` generates this file instead. | Authored |
-| `skills/setup/` | `/addit-harness:setup [--scope global\|project] [--link]` — places `CLAUDE.md`/`AGENTS.md`/`rules/`/`references/`/`settings.json` for Claude Code (the parts the plugin can't carry natively) | Authored |
-| `skills/dev-flow/` + `workflows/*.js` | `/dev-flow [what to build or fix] [--tier light|standard|deep]` — deterministic SDLC orchestration: triage (facts by `task-triager`, tier scored in JS) → tier gate → investigate → design ⇄ `architect-reviewer` loop → **your approval gate** → implement → review ⇄ fix loop → `qa-engineer` verifies once (re-verifies only after a QA-driven fix). The loops run as `Workflow` scripts (`workflows/dev-flow-triage.js`, `workflows/dev-flow-design.js`, `workflows/dev-flow-implement.js`), each tier-parameterised; the skill holds the one human gate a script can't pause for. See [How dev-flow works](#how-dev-flow-works) for the phase-by-phase mechanics and loop-termination logic. **Claude Code plugin install only** — relies on `${CLAUDE_PLUGIN_ROOT}` and the `Workflow` tool, neither of which exist under the legacy copy-based `install.sh --target claude` path or on Cursor/Kiro/Codex CLI; not synced by `install.sh` | Authored |
+| `skills/setup/` | `/addit-harness:setup [--scope global\|project] [--link] [--plugins]` — places `CLAUDE.md`/`AGENTS.md`/`rules/`/`references/`/`settings.json` for Claude Code (the parts the plugin can't carry natively) | Authored |
+| `skills/dev-flow/` + `workflows/*.js` | `/dev-flow [what to build or fix] [--tier light|standard|deep]` — deterministic SDLC orchestration: triage (facts by `task-triager`, tier scored in JS) → tier gate → investigate → design ⇄ `architect-reviewer` loop → **your approval gate** → implement → review ⇄ fix loop → `qa-engineer` verifies once (re-verifies only after a QA-driven fix). The loops run as `Workflow` scripts (`workflows/dev-flow-triage.js`, `workflows/dev-flow-design.js`, `workflows/dev-flow-implement.js`), each tier-parameterised; the skill holds the one human gate a script can't pause for. See [How dev-flow works](#how-dev-flow-works) for the phase-by-phase mechanics and loop-termination logic. Relies on `${CLAUDE_PLUGIN_ROOT}` and the `Workflow` tool | Authored |
 | `hooks/` | `SessionStart` hook — reminds the user to re-run `/addit-harness:setup` once the plugin's version has drifted past what was last synced (tracked via a version marker `setup.sh` writes per scope); `PreToolUse` hook on `Workflow` — blocks `dev-flow-implement` unless the approved plan's marker and hash check out (all other workflows untouched); `PostToolUse` advisory frontend check (non-blank line count on UI .ts/.tsx; ADDIT_FE_GATE=eslint opts into your project's ESLint, =0 disables; set in shell or settings.json "env") | Authored |
-| `settings.json` | Default model + permissions + official plugins (`enabledPlugins`) — Claude Code only, placed by `/addit-harness:setup` or `install.sh --target claude` | Authored |
+| `settings.json` | Default model + permissions + official plugins (`enabledPlugins`) — placed by `/addit-harness:setup` | Authored |
 | `mcp.example.json` | Disabled Atlassian/DB scaffolding (opt-in) | Reference config |
 | `templates/CLAUDE.project.md` | Per-repo memory template | Authored |
 
@@ -319,48 +307,9 @@ outcomes.
 actually callable before using it, rather than assuming from configuration —
 if it isn't, `skills/dev-flow/SKILL.md` documents a full manual fallback: the
 identical phase order and loop logic, driven by direct sequential `@agent`
-calls instead of a script. Slower, same gates, same outcome. This is also why
-`dev-flow` is **Claude Code plugin install only** — see the file-inventory
-note above.
+calls instead of a script. Slower, same gates, same outcome.
 
-## Other coding agents
-
-`AGENTS.md` is the single canonical source — every tool's config is generated
-from it (plus `rules/`, `references/`, `agents/`). For Cursor/Kiro/Codex CLI
-that generation is `sync_tools.py`, driven by the declarative mapping in
-`tools.config.json` (Claude Code is still one entry in that mapping too, kept
-for the `install.sh --target claude` legacy path). Claude Code's primary path
-is different — the same source files ship as a native plugin instead (see
-*Install* above), not because it's a privileged default, but because it's the
-one tool with a real plugin/marketplace system built to carry them.
-
-Most of what gets synced is **placement**, not transformation — same content,
-different path and frontmatter key names. Two tools need a real content
-transform for subagents specifically, because their tool-restriction model
-differs from Claude's exact tool names:
-
-| Tool | Baseline (`AGENTS.md` + engineering loop) | Language conventions | Subagents (`agents/*.md`) |
-|------|------|------|------|
-| **Claude Code** | Plugin: `agents/`/`skills/` auto-discovered. `/addit-harness:setup`: `~/.claude/CLAUDE.md` (`@import`) | `/addit-harness:setup`: `~/.claude/rules/*.md` (auto-load via `paths:`) | Plugin, auto-discovered — invoke as `@addit-harness:<name>` |
-| **Cursor** | `~/.cursor/rules/global.mdc` (`alwaysApply`) | `~/.cursor/rules/*.mdc` (`globs`) | Cursor 2.4+ reads `~/.claude/agents/*.md` natively — **only if that directory is populated.** Plugin-only Claude Code installs no longer write there; run `install.sh --target claude` (or its own future Cursor plugin, see Roadmap) if you want Cursor to pick these up too |
-| **Kiro** | `~/.kiro/steering/global.md` (`inclusion: always`) | `~/.kiro/steering/*.md` (`inclusion: fileMatch`) | `~/.kiro/agents/*.md` — tool names remapped to Kiro's category tags (`read`/`write`/`shell`/`web`/...) |
-| **Codex CLI** | `~/.codex/AGENTS.md` (native filename, no rename needed) | folded into the same `AGENTS.md` | `~/.codex/agents/*.toml` — converted to TOML; tool-restriction becomes a derived `sandbox_mode` (`read-only` vs `workspace-write`), since Codex has no per-tool allowlist |
-| **GitHub Copilot** | *(planned — see Roadmap)* | | |
-
-Vendored prose that hardcodes a `~/.claude/references/...` path (e.g.
-`rules/go.md`) is rewritten per tool to that tool's own reference path
-(`~/.cursor/references/...`, etc.) so the pointer actually resolves.
-
-MCP is **not** auto-synced for any tool — `mcp.example.json` is a disabled,
-human-curated catalogue by design (see its own `_README` entry): pick an
-entry, fill in credentials by hand, and paste it into the tool's real MCP
-config yourself (`install.sh`'s footer prints the right target path per tool
-after every run). See *Enabling MCP* below for the Claude Code specifics.
-
-Skills (`/adr`, `/save-plan`, etc.) are placed as files for the other tools
-today, but porting them with correct per-tool invocation semantics (Cursor
-commands, Kiro manual steering, Codex prompts, Copilot prompt files) is
-planned, not yet implemented — see *Roadmap*.
+## Using it
 
 ### Iterating & giving feedback on plans or code
 
@@ -378,7 +327,7 @@ Enabled from the auto-available `claude-plugins-official` marketplace (+
 `anthropics/skills`). The big win is real **language servers**:
 `gopls-lsp`, `jdtls-lsp`, `typescript-lsp`, plus `pr-review-toolkit`,
 `commit-commands`, `security-guidance`, and `document-skills` (doc generation).
-They install on first start, or run `./install.sh --plugins` to do it now.
+Run `/addit-harness:setup --plugins` to install them now.
 
 ### Subagents
 Delegate isolated work to keep your main context clean:
@@ -620,7 +569,10 @@ Sonnet ≈ daily-driver coding, Opus/Fable ≈ hardest reasoning at top cost.
 
 ## Enabling MCP (later)
 
-Both Atlassian and database MCP are intentionally **off** for now. To enable:
+Both Atlassian and database MCP are intentionally **off** for now, and MCP is
+never auto-enabled: `mcp.example.json` is a disabled, human-curated catalogue
+(see its own `_README` entry) — pick an entry and fill in credentials by hand.
+To enable:
 
 1. Open `mcp.example.json` and copy the entry you want into
    `~/.claude/.mcp.json` (under an `mcpServers` object).
@@ -628,7 +580,7 @@ Both Atlassian and database MCP are intentionally **off** for now. To enable:
    never commit them.
 3. Restart Claude Code; check with `/mcp`.
 
-- **Figma (official plugin — recommended):** run `./install.sh --plugins` (already adds `figma@claude-plugins-official`). Open any Figma file → authorise Claude Code in the plugin panel → OAuth completes → `/mcp` confirms the Figma server is connected. Write-to-canvas is in beta and will become usage-based/paid — confirm your plan covers cost before running `@figma-designer` for large tasks. See `mcp.example.json` → `figma_OFFICIAL` for the manual MCP-only path and `figma_COMMUNITY_ALTERNATIVE` for the free-plan plugin-bridge option.
+- **Figma (official plugin — recommended):** run `claude plugin install figma@claude-plugins-official` (or `/addit-harness:setup --plugins`, which installs it with the other declared plugins). Open any Figma file → authorise Claude Code in the plugin panel → OAuth completes → `/mcp` confirms the Figma server is connected. Write-to-canvas is in beta and will become usage-based/paid — confirm your plan covers cost before running `@figma-designer` for large tasks. See `mcp.example.json` → `figma_OFFICIAL` for the manual MCP-only path and `figma_COMMUNITY_ALTERNATIVE` for the free-plan plugin-bridge option.
 - **Atlassian Cloud:** `claude mcp add --transport http atlassian https://mcp.atlassian.com/v1/mcp` (official Rovo server, OAuth).
 - **Atlassian Data Center:** community `sooperset/mcp-atlassian` (token/PAT).
 - **Postgres:** `crystaldba/postgres-mcp` (read-only by default).
@@ -646,19 +598,6 @@ Both Atlassian and database MCP are intentionally **off** for now. To enable:
 
 See [open issues](https://github.com/addit-digital/addit-harness/issues?q=label%3Aroadmap) for planned work. Candidates:
 
-- **Native plugin packaging for Cursor, Kiro, and Codex CLI** — all three have
-  since shipped their own plugin/marketplace systems (Cursor plugins,
-  Kiro Powers, Codex CLI plugins), analogous to what Claude Code now has
-  above. Each has its own manifest format and real gaps (Kiro Powers can't
-  bundle custom agents; Codex CLI has an open team-rollout limitation), so
-  each is its own follow-up rather than one change — see
-  `docs/work/2026-07-10-claude-code-plugin-packaging/plans/plan.md`'s *Out of scope*.
-- **GitHub Copilot support** — project-scoped bundle (`.github/copilot-instructions.md`,
-  `.github/instructions/*.instructions.md`, `.github/agents/*.agent.md`), since
-  Copilot has no machine-wide home directory to sync into like the other tools
-- **Skills as real slash-commands/prompts** per tool (`.cursor/commands/`, Kiro
-  manual-inclusion steering, `~/.codex/prompts/`, `.github/prompts/*.prompt.md`)
-  with correct invocation semantics, not just file placement
 - `/design-review` skill — audit a `docs/work/<slug>/solutions/` design doc against the project's conventions
 - `@security-reviewer` subagent — dedicated security-focused review pass
 

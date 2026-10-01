@@ -4,12 +4,6 @@ nav_order: 1
 nav_group: Start
 ---
 
-## Which tool are you on?
-
-**Claude Code** → follow this page. **Cursor, Kiro, or Codex CLI** → the
-install steps differ (no plugin marketplace on those tools yet) — see
-[Other coding agents](../other-agents/) instead.
-
 ## Install (Claude Code)
 
 No clone, no shell script — install the plugin from inside Claude Code:
@@ -45,13 +39,6 @@ Run `/help` — you should see `@addit-harness:code-reviewer` and the other
 thirteen subagents listed under Agents. If they're missing, re-run
 `/addit-harness:setup` and check the plugin installed without errors.
 
-## Alternative: copy-based install
-
-Prefer the old copy-based install instead? `./install.sh --target claude`
-still works — see [Other coding agents](../other-agents/) for the general
-`install.sh` flags. It's no longer run automatically by a plain
-`./install.sh` with no arguments.
-
 ## All docs
 
 The sidebar has the full list; here's the same thing with what each page
@@ -66,7 +53,6 @@ actually covers, so you don't have to click through page by page to find it:
 - [Skills & commands](../skills-commands/) — every `/slash-command` this plugin adds
 - [Model & cost](../model-cost/) — which subagent runs on which tier, and how to cut spend
 - [Enabling MCP](../mcp/) — connecting Jira, databases, and other optional integrations
-- [Other coding agents](../other-agents/) — Cursor / Kiro / Codex CLI support
 
 **Guides**
 - [Use cases](../use-cases/) — concrete workflows showing which configs fire together

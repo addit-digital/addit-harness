@@ -24,7 +24,7 @@ Copy `templates/CLAUDE.project.md` to a repo's `./CLAUDE.md`. Codebase-specific 
 - Each addition should name the concrete pain it removes — no speculative tooling.
 - Prefer adopting well-known, maintained assets over hand-rolling bespoke ones.
 - Don't bundle unrelated changes in one PR.
-- Test your changes with `./install.sh` on a clean `~/.claude` or a backup.
+- Test your changes with `claude plugin validate .`, `claude --plugin-dir .`, and `/addit-harness:setup --scope project` in a scratch repo.
 
 ## License
 

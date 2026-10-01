@@ -4,7 +4,7 @@ title: Wire your agent into a full product team
 description: >-
   addit-harness installs an opinionated plan → verify → commit loop, fourteen
   specialized subagents, and auto-loaded language conventions into Claude
-  Code, Cursor, Codex CLI, or Kiro — curated from established sources, not
+  Code — curated from established sources, not
   hand-rolled.
 ---
 <main id="main">
@@ -95,34 +95,6 @@ description: >-
     </div>
   </section>
 
-  <section id="compat" aria-labelledby="compat-label">
-    <div class="wrap">
-      <div class="tag compat-label" id="compat-label">One config · four agents</div>
-      <div class="compat">
-        <div class="compat-item primary">
-          <div class="compat-pin"></div>
-          <div class="compat-name">Claude Code</div>
-          <div class="compat-role">native plugin · this listing</div>
-        </div>
-        <div class="compat-item">
-          <div class="compat-pin"></div>
-          <div class="compat-name"><a href="{{ '/docs/other-agents/#cursor' | relative_url }}">Cursor</a></div>
-          <div class="compat-role">rules sync</div>
-        </div>
-        <div class="compat-item">
-          <div class="compat-pin"></div>
-          <div class="compat-name"><a href="{{ '/docs/other-agents/#codex-cli' | relative_url }}">Codex CLI</a></div>
-          <div class="compat-role">AGENTS.md sync</div>
-        </div>
-        <div class="compat-item">
-          <div class="compat-pin"></div>
-          <div class="compat-name"><a href="{{ '/docs/other-agents/#kiro' | relative_url }}">Kiro</a></div>
-          <div class="compat-role">steering sync</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <section id="compare">
     <div class="wrap">
       <div class="section-head">
@@ -188,9 +160,9 @@ description: >-
           <p>Assets are adopted from established sources and pinned at a commit — provenance tracked in AGENTS_SOURCES.md. A thin curation layer, not bespoke skills.</p>
         </div>
         <div class="feature">
-          <span class="feature-index">06 · PORTABLE</span>
-          <h3>One source, four agents</h3>
-          <p>AGENTS.md is the canonical memory — Claude Code, Cursor, Codex CLI, and Kiro all sync from the same source of truth.</p>
+          <span class="feature-index">06 · SCOPED</span>
+          <h3>Global or per-project</h3>
+          <p>Run <code>/addit-harness:setup</code> to place the memory, rules and settings globally or in a single project. AGENTS.md is the canonical memory, imported by CLAUDE.md.</p>
         </div>
         <div class="feature">
           <span class="feature-index">07 · ORCHESTRATION</span>

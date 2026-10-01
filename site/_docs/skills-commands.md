@@ -45,8 +45,8 @@ hand-roll a competing skill:
 Enabled from the auto-available `claude-plugins-official` marketplace (+
 `anthropics/skills`). The big win is real **language servers**: `gopls-lsp`,
 `jdtls-lsp`, `typescript-lsp`, plus `pr-review-toolkit`, `commit-commands`,
-`security-guidance`, and `document-skills` (doc generation). They install on
-first start, or run `./install.sh --plugins` to do it now.
+`security-guidance`, and `document-skills` (doc generation). Run
+`/addit-harness:setup --plugins` to install them now.
 
 ## Iterating & giving feedback on plans or code
 

@@ -1,8 +1,8 @@
 {
-  "_README": "DISABLED SCAFFOLDING — not installed by install.sh and not loaded by Claude Code. When you want an integration, copy the relevant entry into ~/.claude/.mcp.json (under an `mcpServers` object), fill in credentials, and put secrets in ~/.claude/mcp.local.json (gitignored) rather than committing them. See repo README section 'Enabling MCP'.",
+  "_README": "DISABLED SCAFFOLDING — not placed by /addit-harness:setup and not loaded by Claude Code. When you want an integration, copy the relevant entry into ~/.claude/.mcp.json (under an `mcpServers` object), fill in credentials, and put secrets in ~/.claude/mcp.local.json (gitignored) rather than committing them. See repo README section 'Enabling MCP'.",
 
   "figma_OFFICIAL": {
-    "_about": "Official Figma remote MCP server (write-to-canvas beta — becoming usage-based/paid; confirm your plan covers cost before enabling). The official Figma Claude Code plugin (figma@claude-plugins-official, installed via ./install.sh --plugins) registers this server automatically after OAuth — only add this entry manually if you need MCP without the plugin. To enable via plugin: install the plugin, open any Figma file, authorise Claude Code in the plugin panel, then /mcp to confirm connection. To enable manually: copy this entry into ~/.claude/.mcp.json and run `claude mcp add --transport http figma https://mcp.figma.com/mcp`.",
+    "_about": "Official Figma remote MCP server (write-to-canvas beta — becoming usage-based/paid; confirm your plan covers cost before enabling). The official Figma Claude Code plugin (figma@claude-plugins-official, enabled by settings.json or /addit-harness:setup --plugins) registers this server automatically after OAuth — only add this entry manually if you need MCP without the plugin. To enable via plugin: install the plugin, open any Figma file, authorise Claude Code in the plugin panel, then /mcp to confirm connection. To enable manually: copy this entry into ~/.claude/.mcp.json and run `claude mcp add --transport http figma https://mcp.figma.com/mcp`.",
     "transport": "http",
     "url": "https://mcp.figma.com/mcp"
   },

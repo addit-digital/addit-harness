@@ -1,7 +1,7 @@
 title: addit-harness
 tagline: Wire your coding agent into a full product team
 description: >-
-  addit-harness turns Claude Code, Cursor, Codex CLI, or Kiro into a full
+  addit-harness turns Claude Code into a full
   product-development toolkit — an opinionated plan → verify → commit
   engineering loop, specialized subagents, and auto-loaded language
   conventions, curated from established sources.

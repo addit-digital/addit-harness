@@ -148,7 +148,7 @@ Do not design the UX yourself.
 
 This agent is **inert without**:
 1. **Official Figma Claude Code plugin** — `figma@claude-plugins-official`.
-   Install with `./install.sh --plugins` or `claude plugin install figma@claude-plugins-official`.
+   Install with `claude plugin install figma@claude-plugins-official`.
 2. **Figma remote MCP server** — `mcp.figma.com`. The plugin registers this
    automatically after OAuth. Verify with `/mcp` in Claude Code.
 3. **Write-to-canvas enabled** — the Figma MCP's write capabilities are in beta.
