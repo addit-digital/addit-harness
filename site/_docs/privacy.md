@@ -46,7 +46,9 @@ system that receives data from the plugin. Its hooks and setup scripts read and
 write only local files on your own machine and make no network requests. The
 `dev-flow-implement` gate hook reads the work item's `plan.md` and hashes it locally
 with `shasum` to confirm the plan you approved is the plan being implemented; it
-sends nothing anywhere.
+sends nothing anywhere. The optional frontend check reads the file just edited;
+only when you set ADDIT_FE_GATE=eslint does it also run your project's own locally
+installed ESLint and config. It makes no network requests.
 
 ## How your data is actually processed when you use the plugin
 

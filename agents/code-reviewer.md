@@ -253,6 +253,32 @@ conventions:
 Treat unaddressed convention violations as review blockers alongside correctness
 and security issues.
 
+### Frontend structural checklist (for .ts/.tsx diffs — measure, don't eyeball)
+Run `grep -cv '^[[:space:]]*$'` on every changed .ts/.tsx file and the project's
+ESLint on the changed files (if configured). Then check each item of the
+Frontend Implementation Contract (FC-1 to FC-10, in `frontend-developer` and
+`rules/typescript-frontend.md`):
+- FC-1/FC-2: file > 150 non-blank lines (hard cap 250, count with
+  `grep -cv '^[[:space:]]*$'`); component function > 80 lines; cite the measured number
+- FC-3 and FC-5 only from ESLint output (`react/jsx-max-depth`,
+  `sonarjs/cognitive-complexity`) when the project configures them; otherwise
+  report nested JSX ternaries only
+- FC-4: > 7 declared props (spread native attributes excluded) or > 2 boolean flags
+- FC-6 > 3 state/effect hooks in one component; `useEffect` used for derived state or fetching
+- FC-7 fetch/SDK call inside a component; page/route containing business logic
+- FC-8 cross-feature import or reverse-direction import
+- FC-9 render helpers / nested component definitions
+- FC-10 a new component/hook/util that duplicates an existing one (grep for it);
+  raw literals where a token exists
+- The developer's reported file/line table and reuse table match reality
+
+One finding per violation: track "frontend", severity per the map below,
+description "[FC-n] path:line: measured vs limit. Fix: …".
+Severity map: `blocking` = FC-7, FC-8, FC-10 duplication, FC-1 over 250, FC-2 over
+80 with no stated reason. `major` = the other FC breaches with no stated reason.
+`minor` = a breach that has a stated reason but a weak one. Unexplained contract
+violations block, like convention violations.
+
 Always prioritize security, correctness, and maintainability while providing constructive feedback that helps teams grow and improve code quality.
 
 ## Calibration

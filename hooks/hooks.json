@@ -22,6 +22,18 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 15,
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/fe-contract-check.sh\""
+          }
+        ]
+      }
     ]
   }
 }
