@@ -60,7 +60,7 @@ mechanics and how the loops know when to stop.
 
 | Stack | In-repo reference | Linked authorities |
 |-------|-------------------|--------------------|
-| Go | `references/go/app-erp-conventions.md` (codebase-derived) + per-project `.claude/go-conventions.md` | Effective Go, Go Code Review Comments, Google Go Style |
+| Go | `rules/go.md` contract (G-1..G-10) + topic files in `references/go/` + per-project `.claude/go-conventions.md` | Effective Go, Go Code Review Comments, Google Go Style |
 | Java/Spring | `rules/java.md` contract (J-1..J-14) + cited topic files in `references/java/` | Effective Java, Google Java Style, Spring docs |
 | TS / React / Next / RN | bulletproof-react docs (MIT) + sanjeed5 TS/React/Next/RN `.mdc` (CC0) | react.dev, Next.js docs, TypeScript Handbook, Total TypeScript |
 

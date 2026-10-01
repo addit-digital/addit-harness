@@ -1,5 +1,5 @@
 ---
-description: Scan the current Go repo and write .claude/go-conventions.md — a project-specific convention file that rules/go.md loads on every session instead of re-scanning the codebase from scratch. Use when starting work in a new Go repo, when conventions have drifted, or when --refresh is passed to merge in new patterns.
+description: Scan the current Go repo and write .claude/go-conventions.md — a project-specific convention file that rules/go.md reads whenever a .go file is read, instead of re-scanning the codebase from scratch. Use when starting work in a new Go repo, when conventions have drifted, or when --refresh is passed to merge in new patterns.
 argument-hint: "[--refresh]"
 ---
 

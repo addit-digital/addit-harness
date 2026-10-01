@@ -1,36 +1,27 @@
-# Go — conventions (baseline + authorities)
+# Go: conventions by topic
 
-On-demand reference (not auto-loaded). The Tier-1 rule `rules/go.md` points here.
+On-demand reference (not auto-loaded). `rules/go.md` holds the precedence line, the G-1..G-10 contract, the override model and the topic index; read the one or two topic files that match the edit. Every rule has an id (`G-<TOPIC>-n`) and a `Src:`: a link, `owner` (the owner's own approach), or `harness default` (no external authority; a reviewer must accept it). Reviewer findings cite ids.
 
-## Baseline (read first)
+| Topic | Covers |
+|-------|--------|
+| `layout.md` | `cmd/` wiring, `internal/`, domain package files, globals |
+| `naming-style.md` | package/receiver/error-string names, import groups, nesting |
+| `di.md` | Builder pattern, interface checks, functional options |
+| `errors.md` | typed error, sentinels, no wrapping, log before return |
+| `context.md` | `context` rules, user/tenant identity, `WithoutCancel` |
+| `concurrency.md` | goroutine lifetime, errgroup, channels, mutexes, atomics |
+| `logging.md` | `slog`, logger from context, hot-path attrs |
+| `http.md` | versioned routes, verbs, handler flow, error rendering |
+| `data.md` | MongoDB v2, SQL pools, uuid ids |
+| `events.md` | sync and async events, panic recovery |
+| `testing.md` | table tests, race/vet/govulncheck, fuzzing |
 
-| File | Source | Notes |
-|------|--------|-------|
-| `app-erp-conventions.md` | Derived from [addit-digital/app-erp](https://github.com/addit-digital/app-erp) | Gin · MongoDB v2 · uuid · decimal · slog/OTel |
+## Owner approach versus the Uber guide
+The Uber Go guide is used wherever it does not collide with the owner's approach. Deliberate owner choices: log before returning an error (Uber: handle errors once), never wrap errors with `%w` (G-10), async event goroutines are fire-and-forget with panic recovery (Uber: no fire-and-forget), three import groups (Uber: two), Builder structs for services (Uber: functional options).
 
-This replaces the previous Uber Go Style Guide baseline. Conventions reflect the
-actual codebase, not an external style guide.
-
-## Authorities (link-only — fallback for greenfield code)
-
-Use when the codebase is silent on a topic or for brand-new projects with no
-established patterns:
-
-- [Effective Go](https://go.dev/doc/effective_go) — foundational idiomatic Go (Go team)
-- [Go Code Review Comments](https://go.dev/wiki/CodeReviewComments) — de-facto reviewer checklist
-- [Google Go Style Guide](https://google.github.io/styleguide/go/) — comprehensive style + decisions
-- [Go Proverbs](https://go-proverbs.github.io/) — design philosophy
-
-## Stack-specific (this user's stack)
-
-- Web: [gin-gonic/gin](https://github.com/gin-gonic/gin) — examples & docs for idiomatic Gin
-- Data: [mongodb/mongo-go-driver v2](https://github.com/mongodb/mongo-go-driver) — official v2 driver patterns
-- IDs: [google/uuid](https://pkg.go.dev/github.com/google/uuid)
-- Decimal: [greatcloak/decimal](https://github.com/greatcloak/decimal) — for money + quantities
-- OTel: [honeycombio/otel-config-go](https://github.com/honeycombio/otel-config-go) — single-call OTel setup
+## Authorities (link-only)
+- [Effective Go](https://go.dev/doc/effective_go), [Go Code Review Comments](https://go.dev/wiki/CodeReviewComments), [Google Go Style Guide](https://google.github.io/styleguide/go/), [Uber Go Style Guide](https://github.com/uber-go/guide/blob/master/style.md), [Go Proverbs](https://go-proverbs.github.io/).
+- Stack: [gin-gonic/gin](https://github.com/gin-gonic/gin), [mongo-go-driver v2](https://github.com/mongodb/mongo-go-driver), [google/uuid](https://pkg.go.dev/github.com/google/uuid), [greatcloak/decimal](https://github.com/greatcloak/decimal), [honeycombio/otel-config-go](https://github.com/honeycombio/otel-config-go) (an example OTel setup).
 
 ## Per-project layer
-
-Run `/go-conventions` in a repo to generate `.claude/go-conventions.md` — a
-project-specific extension of this baseline. `rules/go.md` loads that file first
-when it exists, then falls back here.
+Run `/go-conventions` to write `.claude/go-conventions.md` containing only the delta from this baseline. It may add rules and override a topic rule with `# OVERRIDE: G-<TOPIC>-n <reason>`. It may not override G-1..G-8 or G-10. G-9 numbers come from `.golangci.yml`.

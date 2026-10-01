@@ -127,7 +127,7 @@ keeps working but is frozen; to keep updating it, pin commit `ebea6f3` or tag
 | `.claude-plugin/plugin.json` + `marketplace.json` | Self-hosted Claude Code plugin (`addit-harness@addit`) — `agents/` and `skills/` auto-discovered from here | Authored |
 | `rules/engineering-loop.md` | Always-on plan→verify→commit model + anti-patterns; sets diagram-rich (mermaid) plan/design-doc standards | Authored |
 | `rules/{java,go,typescript}.md` | **Thin auto-loaded pointers** (Tier 1) — route to the references | Authored (routing only, no convention text) |
-| `references/{go,java,typescript}/` | **Convention guides + linked authorities, read on-demand** (Tier 2) | Go: codebase-derived from app-erp; Java/TS: vendored from recognized sources — see each `README.md` |
+| `references/{go,java,typescript}/` | **Convention guides + linked authorities, read on-demand** (Tier 2) | Go and Java: topic files with rule ids and cited sources; TS: vendored from recognized sources. See each `README.md` |
 | `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, frontend-architect, ux-designer, figma-designer, product-owner, backend-developer, frontend-developer, saas-legal-advisor, cloud-architect, devops-engineer, qa-engineer, task-triager | **Vendored + pinned** (except `backend-architect`/`frontend-architect`/`ux-designer`/`figma-designer`/`backend-developer`/`frontend-developer`/`saas-legal-advisor`/`qa-engineer`/`task-triager`, authored) — see `AGENTS_SOURCES.md` |
 | `AGENTS_SOURCES.md` | Provenance table for vendored agents (source repo, commit SHA, changes) — kept at repo root, not inside `agents/`, since the Claude Code plugin auto-discovers every `.md` file in `agents/` as an agent | Authored |
 | `skills/adr/` | `/adr` — record Architecture Decision Records (**MADR 4.0**) | Adopts MADR (see `skills/SOURCES.md`) |
@@ -166,13 +166,13 @@ Three ways assets are delivered:
 
 | Stack | In-repo reference | Linked authorities |
 |-------|-------------------|--------------------|
-| Go | `references/go/app-erp-conventions.md` (codebase-derived: Gin · MongoDB v2 · slog · OTel) + per-project `.claude/go-conventions.md` | Effective Go, Go Code Review Comments, Google Go Style |
+| Go | `rules/go.md` contract (G-1..G-10) + 11 topic files in `references/go/` + per-project `.claude/go-conventions.md` | Effective Go, Go Code Review Comments, Google Go Style |
 | Java/Spring | `rules/java.md` contract (J-1..J-14) + 12 cited topic files in `references/java/` | Effective Java, Google Java Style, Spring docs |
 | TS / React / Next / RN | bulletproof-react docs (MIT) + sanjeed5 TS/React/Next/RN `.mdc` (CC0) | react.dev, Next.js docs, TypeScript Handbook, Total TypeScript |
 
-The Go reference is **codebase-derived** (not a third-party style guide) — it
-reflects the actual patterns in addit-digital/app-erp and expands per-project
-via `/go-conventions`. The **`code-reviewer` subagent checks adherence** to
+The Go and Java rules are split into cited topic files with rule ids. The Go
+topics follow the owner's own approach and use the Uber guide where it does not
+collide; both expand per-project (`/go-conventions` for Go). The **`code-reviewer` subagent checks adherence** to
 whichever conventions apply.
 
 ## How dev-flow works
