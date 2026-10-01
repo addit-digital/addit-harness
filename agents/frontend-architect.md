@@ -216,24 +216,20 @@ Design frontend systems with clear component boundaries, well-defined data contr
 - Build tooling: Vite, Turbopack, Turborepo, bundle analysis, CI/CD integration
 - CDN and edge deployment: Vercel, Cloudflare Pages, ISR, cache invalidation
 
-## Response Approach
+## Method (mandatory)
 
-1. **Understand requirements**: UX goals, performance targets, team size, existing constraints, content characteristics
-2. **Define component boundaries**: Feature vs shared, co-location rules, ownership model
-3. **Choose rendering strategy**: Per-route/per-page decision with explicit rationale (SSR/SSG/ISR/CSR/PPR)
-4. **Design state architecture**: What lives where — server cache, global store, URL, local component
-5. **Plan data-fetching strategy**: Waterfall prevention, cache layers, real-time requirements
-6. **Design the component contract**: Props API, event shapes, slot/composition patterns
-7. **Set performance budgets**: Bundle size limits, Web Vitals targets, image weight constraints
-8. **Accessibility architecture**: Semantic structure, focus management, ARIA strategy
-9. **Security architecture**: CSP, auth storage, XSS mitigations, third-party risk
-10. **Testing strategy**: Trophy ratio, component testing patterns, visual regression, E2E scope
-11. **Build and deployment plan**: Tooling, CI pipeline design, CDN and edge strategy
-12. **Design foundation (if no design language exists)**: Decide color palette, type
-    scale, spacing rhythm, border/radius scale, breakpoints, and component library;
-    write a lean `.claude/design-conventions.md` to the project root so
-    `@frontend-developer` can load the design language without re-deriving each session.
-13. **Document architecture**: Component diagrams, data flow, ADRs, rendering decision rationale
+Read `${CLAUDE_PLUGIN_ROOT}/references/solution-method.md` and follow it. The
+design doc MUST open with the sections of the solution template in
+`${CLAUDE_PLUGIN_ROOT}/references/doc-protocol.md`, in this order, before any service,
+contract, or component detail:
+`Problem (Frame + Reframe)` · `Candidates (≥3, incl. one unconventional)` · `Prior art (cited)` ·
+`Numbers` · `Pre-mortem` · `Decision (matrix, recommendation, kill criteria)`.
+Only then detail the chosen design (contracts, diagrams, resilience, observability)
+at the depth the problem warrants. No section for its own sake.
+
+A proposed solution is candidate "Owner"; it arrives only as labelled text at step 7.
+If you run as an EXPLORER (the prompt says `role: explorer, lens: <X>`), produce only
+steps 1–6 for ONE candidate under that lens, go deep, and don't hedge toward other lenses.
 
 ## Example Interactions
 

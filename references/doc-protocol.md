@@ -48,19 +48,23 @@ Review report: r1 at most 120, r2+ delta at most 80. Intake brief at most 50. Go
 ### Solution
 ~~~md
 # <title>
-## Problem  (<=8 lines)
-## Decision  (<=10 lines)
-<choice, why, kill criteria>
+## Problem (Frame + Reframe, ≤12 lines)
+## Candidates (≥3 + Owner; ≤6 lines each; sketch for top 2)
+## Prior art (≥2 URLs or "none found" + queries)
+## Numbers (arithmetic shown)
+## Pre-mortem (top two, 3 stories each)
+## Decision (matrix, choice, runner-up, kill criteria, ADR line)
 ADR: candidate "<title>" | none
 ## Design
 (only what changes; one mermaid diagram per concept, required)
 ## Claims
 | claim | Observed/Inferred/Unknown | evidence |
 ## Non-goals (things that could be goals but are excluded)
-## Rejected (<=3, one line each)
 ## Unknowns
 ## Log (<=5 lines)
 ~~~
+
+Method: `references/solution-method.md`. Light tier writes no solution; its plan template applies.
 
 The `ADR: candidate` line is the only place an ADR candidate is recorded; it is replaced by the ADR link after plan approval.
 

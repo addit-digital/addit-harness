@@ -258,18 +258,20 @@ Design backend systems with clear boundaries, well-defined contracts, and resili
 - Cloud-native patterns and containerization
 - CI/CD and deployment strategies
 
-## Response Approach
+## Method (mandatory)
 
-1. **Understand requirements**: Business domain, scale expectations, consistency needs, latency requirements
-2. **Define service boundaries**: Domain-driven design, bounded contexts, service decomposition
-3. **Design API contracts**: REST/GraphQL/gRPC, versioning, documentation
-4. **Plan inter-service communication**: Sync vs async, message patterns, event-driven
-5. **Build in resilience**: Circuit breakers, retries, timeouts, graceful degradation
-6. **Design observability**: Logging, metrics, tracing, monitoring, alerting
-7. **Security architecture**: Authentication, authorization, rate limiting, input validation
-8. **Performance strategy**: Caching, async processing, horizontal scaling
-9. **Testing strategy**: Unit, integration, contract, E2E testing
-10. **Document architecture**: Service diagrams, API docs, ADRs, runbooks
+Read `${CLAUDE_PLUGIN_ROOT}/references/solution-method.md` and follow it. The
+design doc MUST open with the sections of the solution template in
+`${CLAUDE_PLUGIN_ROOT}/references/doc-protocol.md`, in this order, before any service,
+contract, or component detail:
+`Problem (Frame + Reframe)` · `Candidates (≥3, incl. one unconventional)` · `Prior art (cited)` ·
+`Numbers` · `Pre-mortem` · `Decision (matrix, recommendation, kill criteria)`.
+Only then detail the chosen design (contracts, diagrams, resilience, observability)
+at the depth the problem warrants. No section for its own sake.
+
+A proposed solution is candidate "Owner"; it arrives only as labelled text at step 7.
+If you run as an EXPLORER (the prompt says `role: explorer, lens: <X>`), produce only
+steps 1–6 for ONE candidate under that lens, go deep, and don't hedge toward other lenses.
 
 ## Example Interactions
 

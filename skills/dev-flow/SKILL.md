@@ -94,7 +94,7 @@ Workflow({
 
 **Tier gate.** Show the user: `tier` (`light` | `standard` | `deep`), `S` and `R` with
 `sizeTier` / `riskTier`, the `overrides` that held, `wouldBeT0`, `triageFailed` if set
-(then the tier is `standard`), and the tier's row of the worst-case table below. The user answers `ok`, `deeper` (one tier up)
+(then the tier is `standard`), and the tier's row of the worst-case table below. At `deep`, say: "deep design phase costs ≈ +40–80% tokens vs standard". The user answers `ok`, `deeper` (one tier up)
 or `lighter` (one tier down); the result is the run's `tier`. If `lighter` lands on
 `light` while `needsUX` is true, say "UX pass skipped at light" and carry on — light
 never runs the UX loop. Resolve `investigate` (step 3) from the final tier.
@@ -104,13 +104,14 @@ first intake batch (step 6.3). Triage is read-only and also reachable directly a
 
 Worst-case agent calls per tier (hard caps, asserted by the mock suite; a run that
 needs fewer simply makes fewer). `both` = backend and frontend tracks; the last column
-is one track with a UX pass:
+is one track with a UX pass. The `standard`/`deep` design caps include the owner-idea call
+(one per track) and, at `deep`, the three explorers and one candidate switch:
 
 | Tier | Design A (`both`, +UX) | Implement B (`both`) | Whole run incl. triage | One track, +UX |
 |---|---|---|---|---|
 | `light` | 4 (no UX) | 13 | 18 | 12 (no UX) |
-| `standard` | 21 | 22 | 44 | 37 |
-| `deep` | 21 | 22 | 44 | 37 |
+| `standard` | 23 | 22 | 46 | 38 |
+| `deep` | 27 | 22 | 50 | 42 |
 
 ## 6.3. Intake — interview and brief
 
@@ -123,10 +124,14 @@ workflow only as the `ownerProposal` text. If the tier gate lands on `light`, sk
 
 ## 6.5. Run `Workflow A`
 
+`fanoutTrack` is the track (`backend` | `frontend`) whose repo holds more of triage's
+`riskPaths` (tie → `backend`; one track → that track); only `deep` uses it, to pick the
+track that gets the parallel explorers.
+
 ```
 Workflow({
   scriptPath: "${CLAUDE_PLUGIN_ROOT}/workflows/dev-flow-design.js",
-  args: { slug, track, needsUX, investigate, repo, secondaryRepo, request, tier, plannedFiles, riskPaths, briefPath, ownerProposal },
+  args: { slug, track, needsUX, investigate, repo, secondaryRepo, request, tier, plannedFiles, riskPaths, briefPath, ownerProposal, fanoutTrack },
 })
 ```
 

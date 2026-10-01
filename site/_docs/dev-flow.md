@@ -71,8 +71,8 @@ failing):
 | Tier | Design A (`both`, +UX) | Implement B (`both`) | Whole run incl. triage | One track, +UX |
 |---|---|---|---|---|
 | `light` | 4 (no UX) | 13 | 18 | 12 (no UX) |
-| `standard` | 21 | 22 | 44 | 37 |
-| `deep` | 21 | 22 | 44 | 37 |
+| `standard` | 23 | 22 | 46 | 38 |
+| `deep` | 27 | 22 | 50 | 42 |
 
 The worst-case figures are hard caps, and the mock suite (`tests/workflows/`) asserts that
 adversarial runs (reviewers never clean, design never approved, QA always failing) hit each

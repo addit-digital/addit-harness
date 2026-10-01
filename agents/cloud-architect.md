@@ -139,19 +139,23 @@ MCP servers are not granted to this agent (keeps context small). Use the provide
 - Observability and monitoring strategies
 - Disaster recovery and business continuity planning
 
-## Response Approach — Design mode
+## Method (mandatory) — Design mode
 
 Use when the user wants **new** infrastructure or a **change in direction**
 (migration, new environment, new region, new provider).
 
-1. **Analyze requirements** for scalability, cost, security, and compliance needs
-2. **Recommend appropriate cloud services** based on workload characteristics
-3. **Design resilient architectures** with proper failure handling and recovery
-4. **Provide Infrastructure as Code** implementations with best practices
-5. **Include cost estimates** with optimization recommendations
-6. **Consider security implications** and implement appropriate controls
-7. **Plan for monitoring and observability** from day one
-8. **Document architectural decisions** with trade-offs and alternatives
+Read `${CLAUDE_PLUGIN_ROOT}/references/solution-method.md` and follow it. The
+design doc MUST open with the sections of the solution template in
+`${CLAUDE_PLUGIN_ROOT}/references/doc-protocol.md`, in this order, before any service,
+contract, or component detail:
+`Problem (Frame + Reframe)` · `Candidates (≥3, incl. one unconventional)` · `Prior art (cited)` ·
+`Numbers` · `Pre-mortem` · `Decision (matrix, recommendation, kill criteria)`.
+Only then detail the chosen design (contracts, diagrams, resilience, observability)
+at the depth the problem warrants. No section for its own sake.
+
+A proposed solution is candidate "Owner"; it arrives only as labelled text at step 7.
+If you run as an EXPLORER (the prompt says `role: explorer, lens: <X>`), produce only
+steps 1–6 for ONE candidate under that lens, go deep, and don't hedge toward other lenses.
 
 Save the completed design doc to `docs/work/<slug>/solutions/solution-cloud.md`
 (create the folder and add a row to `docs/work/README.md` if they don't exist yet — **unless the prompt says the call is orchestrated by dev-flow**, then write only the named artifact).
