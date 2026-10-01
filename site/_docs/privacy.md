@@ -4,17 +4,20 @@ permalink: /privacy/
 nav_exclude: true
 ---
 
-**Last updated: 11 July 2026**
+**Last updated: 1 October 2026**
 
 This Privacy Policy explains how the `addit-harness` Claude Code plugin
 ("addit-harness", "the plugin") handles data. It is published by addit digital
 ("we", "us"), the maker of addit-harness and other developer tools.
 
-The short version: **addit-harness collects nothing.** It has no server, no
-database, no analytics, and no telemetry. It never sends any data to us or to
-any third party. Everything it does runs locally, inside your own Claude Code
-session, on your own machine, using your own Anthropic account. The rest of
-this page explains that in detail so you can verify it before you install.
+The short version: **addit-harness sends nothing to us or to anyone.** It has no
+server, no database, and no analytics. One optional feature, off by default,
+keeps a metadata-only log on your own machine; it is described under
+[Optional local telemetry](#optional-local-telemetry-off-by-default). The only
+exception is a publish you explicitly confirm, also described there. Everything
+the plugin does runs locally, inside your own Claude Code session, on your own
+machine, using your own Anthropic account. The rest of this page explains that
+in detail so you can verify it before you install.
 
 ## What addit-harness is
 
@@ -32,23 +35,31 @@ You can read every file it ships before you install it.
 
 ## Data we collect
 
-**None.**
+**None.** We receive no data from the plugin.
 
 addit-harness has no backend of any kind. It does not:
 
-- collect, store, or transmit personal data;
-- include any analytics, tracking, telemetry, or "phone-home" code;
-- assign you an identifier or track usage across sessions;
+- send or transmit any data to us or to anyone;
+- include analytics, tracking, or "phone-home" code, and we never receive an
+  identifier of any kind;
 - read your source code, prompts, or files and send them anywhere.
 
 There is no account to create and no data for us to hold, because we operate no
-system that receives data from the plugin. Its hooks and setup scripts read and
-write only local files on your own machine and make no network requests. The
-`dev-flow-implement` gate hook reads the work item's `plan.md` and hashes it locally
-with `shasum` to confirm the plan you approved is the plan being implemented; it
-sends nothing anywhere. The optional frontend check reads the file just edited;
-only when you set ADDIT_FE_GATE=eslint does it also run your project's own locally
-installed ESLint and config. It makes no network requests.
+system that receives data from the plugin. The plugin runs scripts in four
+hooks, and none of them makes a network request:
+
+- **Setup-version check** (session start): reads the plugin's own files and the
+  version marker that `/addit-harness:setup` wrote on your machine, hashes the
+  plugin files locally, and shows a reminder if they changed.
+- **`dev-flow-implement` gate**: reads the work item's `plan.md` and hashes it
+  locally with `shasum` to confirm the plan you approved is the plan being
+  implemented.
+- **Frontend check**: reads the file just edited and counts its lines. Only when
+  you set ADDIT_FE_GATE=eslint does it also run your project's own locally
+  installed ESLint and config.
+- **Local telemetry** (runs its script only when you turn it on): writes the
+  local log described [below](#optional-local-telemetry-off-by-default),
+  including the verdicts and counts of the other hooks. It sends nothing.
 
 ## How your data is actually processed when you use the plugin
 
@@ -59,9 +70,62 @@ governed by Anthropic's own privacy policy, not by us:
 
 - [Anthropic Privacy Policy](https://www.anthropic.com/legal/privacy)
 
-addit-harness sits on top of Claude Code as configuration. It does not add any
-data-collection layer of its own, and it does not change what Anthropic
-collects or how. Whatever data handling happens is between you and Anthropic.
+addit-harness sits on top of Claude Code as configuration. It adds no data
+collection that leaves your machine (the optional local log is described
+below), and it does not change what Anthropic collects or how. Whatever data
+handling happens is between you and Anthropic.
+
+## Optional local telemetry (off by default)
+
+If you turn on the `telemetry_local` option in `/config`, addit-harness appends
+one line per event to a log folder on your own machine,
+`~/.claude/plugins/data/<plugin-id>/telemetry/`. While the option is off, the
+plugin writes nothing there.
+
+**What a line records:**
+
+- which addit-harness agents, skills, commands, dev-flow workflows and gates ran,
+  and how they ended;
+- counts and sizes (characters, lines, diagrams), the kind of document written
+  (plan, solution, report and so on), the context size Claude Code reports when
+  a session resumes, and gate verdicts and the results of the other hooks
+  (frontend line-cap findings, setup drift state);
+- the names of the standard instruction files (`CLAUDE.md`, `AGENTS.md`) and of
+  the plugin's own rules that were loaded, with their sizes;
+- timestamps, and the random session, agent and workflow-run identifiers that
+  Claude Code itself assigns;
+- pseudonymous salted hashes of your project folder path, of the paths of
+  documents written under a `docs/` folder, and of dev-flow work-item names. The
+  salt is a random value stored only on your machine. These hashes are
+  pseudonymous, not anonymous: anyone who holds both the log and the salt can
+  test a guess against them.
+
+To count lines, diagrams and headings, the plugin reads Markdown documents that
+Claude Code writes under a `docs/` folder and keeps only those numbers.
+
+**What it never records:** prompts, responses, code, file contents, the names or
+paths of your own files and folders, command lines, error text, branch or
+repository names, or account, email or organisation details. Any name that is
+not one of addit-harness's own components is recorded as "other".
+
+**Where it goes:** nowhere, unless you publish a summary as described
+below. The plugin opens no network connection and never
+transmits the log. Files are removed automatically after 90 days (checked when a
+session starts), and the folder is capped at 100 MB. To delete the log yourself,
+turn the option off and delete the folder. Uninstalling the plugin deletes the
+folder by default, unless you uninstall with `--keep-data`.
+
+**Summary page and optional publish:** the `/addit-harness:telemetry-export`
+command, which you run yourself, builds a summary page (`data.json` and an
+offline `report.html`) in an `export/` folder next to the log. Those files stay
+on your machine and contain only the same metadata, including pseudonymous
+hashes in the per-session rows. Only if you explicitly answer yes when the
+command asks does it publish aggregated numbers, with no per-session rows, ids
+or hashes, as a private page (an Artifact) on claude.ai under your Anthropic
+account. That upload goes to Anthropic's hosted service through Claude Code's
+own Artifact tool, not through a connection opened by the plugin, and that page
+is governed by Anthropic's terms. A yes is not remembered; the command asks
+every time. If the Artifact tool is not available to you, nothing is published.
 
 ## Third-party integrations you configure yourself
 
@@ -90,16 +154,17 @@ not part of the plugin.
 
 ## Data sharing and sale
 
-We do not share, sell, rent, or disclose your data — because we do not collect
+We do not share, sell, rent, or disclose your data — because we do not receive
 any. There is nothing for us to share or sell.
 
 ## Your rights
 
 Privacy laws such as the GDPR and the CCPA give people rights to access,
 correct, delete, and port their personal data. We honour the spirit of these
-rights fully: because addit-harness holds no personal data about you and we
-operate no system that receives any, there is no data for us to access,
-correct, delete, or export on your behalf.
+rights fully: because we operate no system that receives data from the plugin,
+there is no data about you for us to access, correct, delete, or export on your
+behalf. The optional local log lives on your machine, under your control: you
+can read or delete it at any time.
 
 For the data that *is* processed when you use Claude Code, direct any such
 requests to Anthropic under
@@ -108,8 +173,8 @@ by any third-party tool you connected yourself, direct requests to that provider
 
 ## Children
 
-addit-harness is a developer tool with no data collection and is not directed at
-children.
+addit-harness is a developer tool that sends no data to us and is not directed
+at children.
 
 ## Changes to this policy
 
@@ -117,8 +182,8 @@ If we change how the plugin handles data, we will update this page and change th
 "Last updated" date above. Because the plugin's source is public, any change to
 its behaviour is also visible in the
 [git history](https://github.com/addit-digital/addit-harness). If a future
-version were ever to collect data, we would say so here clearly and prominently
-before that version shipped.
+version were ever to send data off your machine, we would say so here clearly and
+prominently before that version shipped.
 
 ## Contact
 

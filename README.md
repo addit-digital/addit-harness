@@ -48,6 +48,7 @@ Prefer browsing in-repo instead? Start at
   - [Subagents](#subagents)
 - [Use cases](#use-cases)
 - [Model & cost](#model--cost)
+- [Local telemetry (off by default)](#local-telemetry-off-by-default)
 - [Enabling MCP (later)](#enabling-mcp-later)
 - [Roadmap](#roadmap)
 - [Extending](#extending)
@@ -135,8 +136,9 @@ keeps working but is frozen; to keep updating it, pin commit `ebea6f3` or tag
 | `skills/go-conventions/` | `/go-conventions [--refresh]` — scan a Go repo and write `.claude/go-conventions.md` (project-specific layer on top of the global baseline) | Authored |
 | `skills/design-conventions/` | `/design-conventions [--refresh]` — scan a TS/React project's existing UI layer and write `.claude/design-conventions.md` (visual design language: tokens, type/spacing/color scales, component lib, layout rhythm, state patterns). For greenfield projects, `@frontend-architect` generates this file instead. | Authored |
 | `skills/setup/` | `/addit-harness:setup [--scope global\|project] [--link] [--plugins]` — places `CLAUDE.md`/`AGENTS.md`/`rules/`/`references/`/`settings.json` for Claude Code (the parts the plugin can't carry natively) | Authored |
+| `skills/telemetry-export/` + `commands/telemetry-export.md` | `/addit-harness:telemetry-export [--days N]` — user-invoked only: builds `data.json` and an offline `report.html` (no network, no external assets) from the local telemetry log under `export/<timestamp>/` in the plugin data folder. Only if you answer yes when asked, it publishes aggregated KPIs (no per-session rows, ids or hashes) as a private Artifact on claude.ai, which uploads them to Anthropic's hosted service under your account | Authored |
 | `skills/dev-flow/` + `workflows/*.js` | `/dev-flow [what to build or fix] [--tier light|standard|deep]` — deterministic SDLC orchestration: triage (facts by `task-triager`, tier scored in JS) → tier gate → investigate → design ⇄ `architect-reviewer` loop → **your approval gate** → implement → review ⇄ fix loop → `qa-engineer` verifies once (re-verifies only after a QA-driven fix). The loops run as `Workflow` scripts (`workflows/dev-flow-triage.js`, `workflows/dev-flow-design.js`, `workflows/dev-flow-implement.js`), each tier-parameterised; the skill holds the one human gate a script can't pause for. See [How dev-flow works](#how-dev-flow-works) for the phase-by-phase mechanics and loop-termination logic. Relies on `${CLAUDE_PLUGIN_ROOT}` and the `Workflow` tool | Authored |
-| `hooks/` | `SessionStart` hook — reminds the user to re-run `/addit-harness:setup` once the plugin's version has drifted past what was last synced (tracked via a version marker `setup.sh` writes per scope); `PreToolUse` hook on `Workflow` — blocks `dev-flow-implement` unless the approved plan's marker and hash check out (all other workflows untouched); `PostToolUse` advisory frontend check (non-blank line count on UI .ts/.tsx; ADDIT_FE_GATE=eslint opts into your project's ESLint, =0 disables; set in shell or settings.json "env") | Authored |
+| `hooks/` | `SessionStart` hook — reminds the user to re-run `/addit-harness:setup` once the plugin's version has drifted past what was last synced (tracked via a version marker `setup.sh` writes per scope); `PreToolUse` hook on `Workflow` — blocks `dev-flow-implement` unless the approved plan's marker and hash check out (all other workflows untouched); `PostToolUse` advisory frontend check (non-blank line count on UI .ts/.tsx; ADDIT_FE_GATE=eslint opts into your project's ESLint, =0 disables; set in shell or settings.json "env"); an optional local telemetry hook (`hooks/telemetry.sh`/`telemetry.py`) that runs its script only when you turn on `telemetry_local` (see [Local telemetry](#local-telemetry-off-by-default)). None of the four makes a network request | Authored |
 | `settings.json` | Default model + permissions + official plugins (`enabledPlugins`) — placed by `/addit-harness:setup` | Authored |
 | `mcp.example.json` | Disabled Atlassian/DB scaffolding (opt-in) | Reference config |
 | `templates/CLAUDE.project.md` | Per-repo memory template | Authored |
@@ -566,6 +568,33 @@ all subagents at once with `CLAUDE_CODE_SUBAGENT_MODEL`.
 
 **Rough trade-off** (verify current pricing): Haiku ≈ cheapest (mechanical work),
 Sonnet ≈ daily-driver coding, Opus/Fable ≈ hardest reasoning at top cost.
+
+## Local telemetry (off by default)
+
+An optional hook keeps a metadata-only usage log on your own machine so you can
+see which agents, skills and dev-flow steps you actually use. It is off unless
+you turn on the `telemetry_local` option in `/config`; while it is off, the
+plugin writes nothing.
+
+- **Records:** which addit-harness components ran and how they ended, counts and
+  sizes, gate verdicts, and pseudonymous salted hashes of your project folder
+  path, document paths and dev-flow work-item names. The hashes are pseudonymous,
+  not anonymous: whoever holds the log and its salt can test a guess against them.
+- **Never records:** prompts, responses, code, file contents, your file names or
+  paths, error text, or account details.
+- **Stays local:** the plugin opens no network connection. Files are kept for 90
+  days and deleted automatically; to delete them sooner, turn the option off and
+  remove the folder. Uninstalling deletes it by default (unless `--keep-data`).
+
+- **Summary page:** `/addit-harness:telemetry-export` (user-invoked only) writes
+  `data.json` and an offline `report.html` next to the log, on your machine. Only if
+  you answer yes when it asks does it publish aggregated numbers (no per-session
+  rows, ids or hashes) as a private Artifact on claude.ai. That upload goes to
+  Anthropic's hosted service under your account, through Claude Code's own
+  Artifact tool; the plugin itself still opens no network connection. Without the
+  Artifact tool, nothing is published and the local path is printed.
+
+Details and the exact list: the [privacy policy](https://tools.addit.digital/privacy/).
 
 ## Enabling MCP (later)
 

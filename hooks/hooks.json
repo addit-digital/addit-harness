@@ -10,6 +10,18 @@
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/check-setup-version.sh\""
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/telemetry.sh"
+            ],
+            "timeout": 5
+          }
+        ]
       }
     ],
     "PreToolUse": [
@@ -31,6 +43,132 @@
             "type": "command",
             "timeout": 15,
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/fe-contract-check.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "SubagentHandback",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/telemetry.sh"
+            ],
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Skill|Workflow",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/telemetry.sh"
+            ],
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/telemetry.sh"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/telemetry.sh"
+            ]
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "matcher": "^(addit-harness:.+|pr-review-toolkit:code-reviewer)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/telemetry.sh"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "^(addit-harness:.+|pr-review-toolkit:code-reviewer)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/telemetry.sh"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "Agent|Skill|Workflow",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/telemetry.sh"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptExpansion": [
+      {
+        "matcher": "^addit-harness:.+$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/telemetry.sh"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "InstructionsLoaded": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/hooks/telemetry.sh"
+            ],
+            "timeout": 5
           }
         ]
       }

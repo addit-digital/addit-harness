@@ -1,0 +1,68 @@
+{
+ "schema_version":"2.2",
+ "envelope":{"schema_version":"enum:schema","kind":"enum:kind","trace_id":"hex:32","span_id":"hex:16","service.name":"enum:service","service.version":"semver","session.id":"id","addit.project.hash":"hex:12"},
+ "span_envelope":{"parent_span_id":"hex:16?","start":"iso","end":"iso"},
+ "event_envelope":{"time":"iso"},
+ "records":{
+  "addit.session.start":{"kind":"event","keys":{"addit.session.source":"enum:session_source","addit.session.context_tokens":"int?"}},
+  "addit.setup.state":{"kind":"event","keys":{"addit.setup.state":"enum:setup_state"}},
+  "session":{"kind":"span","keys":{"addit.session.end_reason":"enum:end_reason"}},
+  "addit.agent.start":{"kind":"event","keys":{"gen_ai.agent.name":"name:agent","gen_ai.agent.id":"id"}},
+  "invoke_agent {gen_ai.agent.name}":{"kind":"span","keys":{"gen_ai.operation.name":"enum:op_agent","gen_ai.agent.name":"name:agent","gen_ai.agent.id":"id","addit.outcome":"enum:outcome","addit.closing_chars":"int","addit.resumes":"int"}},
+  "addit.agent.handback":{"kind":"event","keys":{"gen_ai.agent.name":"name:agent","gen_ai.agent.id":"id","addit.report_chars":"int"}},
+  "execute_tool Skill {addit.skill.name}":{"kind":"span","keys":{"gen_ai.operation.name":"enum:op_tool","gen_ai.tool.name":"enum:tool_skill","addit.skill.name":"name:skill","addit.component.kind":"enum:component","addit.trigger":"enum:trigger","gen_ai.tool.call.id":"id?"}},
+  "invoke_workflow {gen_ai.workflow.name}":{"kind":"span","keys":{"gen_ai.operation.name":"enum:op_workflow","gen_ai.workflow.name":"enum:workflow","addit.devflow.slug_hash":"hex:12?","addit.devflow.tier":"enum:tier?","addit.workflow.run_id":"id?"}},
+  "addit.gate.verdict":{"kind":"event","keys":{"addit.gate.name":"enum:gate","addit.gate.verdict":"enum:verdict","addit.devflow.slug_hash":"hex:12?","addit.devflow.round":"int?"}},
+  "addit.rule.loaded":{"kind":"event","keys":{"addit.rule.name":"name:rule","addit.rule.load_reason":"enum:load_reason","addit.rule.memory_type":"enum:memory_type","addit.rule.bytes":"int"}},
+  "addit.doc.write":{"kind":"event","keys":{"addit.doc.kind":"enum:doc_kind","addit.doc.track":"enum:track","addit.doc.layout":"enum:layout","addit.doc.op":"enum:doc_op","addit.doc.bytes":"int","addit.doc.lines":"int","addit.doc.mermaid_blocks":"int","addit.doc.path_hash":"hex:12","addit.devflow.slug_hash":"hex:12?","addit.doc.approved":"bool?","gen_ai.agent.name":"name:agent","addit.doc.has_candidates":"bool?","addit.doc.has_owner_idea":"bool?","addit.doc.candidates_before_owner":"bool?","addit.doc.claim_labels":"int?"}},
+  "addit.fc.violation":{"kind":"event","keys":{"addit.fc.id":"enum:fc_id","addit.fc.severity":"enum:fc_severity","addit.fc.count":"int","gen_ai.agent.name":"name:agent"}},
+  "addit.tool.failure":{"kind":"event","keys":{"gen_ai.tool.name":"enum:failed_tool","gen_ai.agent.name":"name:agent?","addit.skill.name":"name:skill?","gen_ai.workflow.name":"enum:workflow?","error.type":"enum:error_type"}},
+  "addit.telemetry.dropped":{"kind":"event","keys":{"addit.dropped.keys":"int","addit.dropped.reason":"enum:dropped_reason"}}
+ },
+ "enums":{
+  "schema":["2.0","2.1","2.2"],
+  "kind":["span","event"],
+  "service":["addit-harness"],
+  "session_source":["startup","resume","clear","compact","fork","other"],
+  "setup_state":["ok","drift","unmanaged","absent"],
+  "end_reason":["clear","resume","logout","prompt_input_exit","other","unknown"],
+  "op_agent":["invoke_agent"],
+  "op_tool":["execute_tool"],
+  "op_workflow":["invoke_workflow"],
+  "tool_skill":["Skill"],
+  "outcome":["completed","empty","interrupted"],
+  "component":["skill","command"],
+  "trigger":["model","slash"],
+  "workflow":["dev-flow-triage","dev-flow-design","dev-flow-implement","other"],
+  "tier":["light","standard","deep","other"],
+  "gate":["triage","intake_brief","design_review","plan_approval","qa","code_review","commit_guard","doc_location"],
+  "verdict":["pass","fail","blocked","skipped","bypassed"],
+  "load_reason":["session_start","nested_traversal","path_glob_match","include","compact","other"],
+  "memory_type":["User","Project","Local","Managed","other"],
+  "doc_kind":["plan","solution","report","qa","brief","adr","spec","other"],
+  "track":["backend","frontend","ux","other"],
+  "layout":["work","legacy"],
+  "doc_op":["write","edit"],
+  "fc_id":["FC-1"],
+  "fc_severity":["cap","advice"],
+  "failed_tool":["Agent","Skill","Workflow","other"],
+  "error_type":["interrupt","error"],
+  "dropped_reason":["unknown_record","missing_required","undeclared_key","bad_value","too_large"]
+ },
+ "workflow_result_keys":["clean","qaPassed","reviewRounds","fixRounds","escalateTo","haltedBy"],
+ "competitors":["pr-review-toolkit:code-reviewer"],
+ "doc_ceilings":{
+  "plan":{"light":40,"standard":120,"deep":200},
+  "solution":{"standard":200,"deep":350}
+ },
+ "limits":{"line_bytes":4096,"root_mb":100,"retention_days":90},
+ "export":{
+  "window_days":30,
+  "top_level_keys":["schema_version","generated_at","window","plugin_versions","sessions_n","invalid_lines","kpis","per_session"],
+  "per_session_keys":["sid_hash","day","duration_s","end_reason","setup_state","agents","outcomes","workflows","doc_writes","fc1_violations","always_on_bytes"],
+  "na":{
+   "CE1":"native OTel owns cost and latency (stage 1)","CE2":"native OTel owns tokens (stage 1)","DF2":"native OTel run join (stage 1)",
+   "LE2":"workflow result scalars are not delivered to hooks (launch acknowledgement only)","SQ2":"workflow result scalars are not delivered to hooks (launch acknowledgement only)",
+   "AR4":"needs claude plugin eval","AR5":"needs claude plugin eval","MH3":"size scan not built","LE4":"optional hook not built"}
+ }
+}

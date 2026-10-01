@@ -17,3 +17,6 @@ site/.jekyll-cache/
 site/vendor/
 site/.bundle/
 site/_config_version.yml
+
+# Python bytecode (tests/telemetry runs stdlib unittest)
+__pycache__/

@@ -16,7 +16,8 @@
 # opt-in the user hasn't made, not our place to nag about.
 set -uo pipefail  # no -e: this must never abort a session start over a stray failure
 
-cat >/dev/null  # consume the hook's stdin JSON payload; nothing here needs it
+IN="$(cat)"  # the payload only supplies session ids to the optional local telemetry
+tel() { case "${CLAUDE_PLUGIN_OPTION_TELEMETRY_LOCAL:-}" in true|True|1) printf '%s' "$IN" | python3 -S "${CLAUDE_PLUGIN_ROOT}/hooks/telemetry.py" "$@" >/dev/null 2>&1 || true;; esac; }
 
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-}"
 [[ -z "$PLUGIN_ROOT" ]] && exit 0
@@ -48,19 +49,31 @@ print(json.load(open('$PLUGIN_ROOT/.claude-plugin/plugin.json'))['version'])
 " 2>/dev/null)"
 
 MESSAGES=()
+STATE=""  # ok | drift, from the markers; unmanaged/absent are derived below when there is none
 
 check_marker() {
   local marker="$1" scope="$2" synced_hash synced_version
   [[ -f "$marker" ]] || return 0
   synced_hash="$(sed -n '1p' "$marker" 2>/dev/null)"
   synced_version="$(sed -n '2p' "$marker" 2>/dev/null)"
+  [[ -n "$synced_hash" && "$synced_hash" == "$CURRENT_HASH" && "$STATE" != drift ]] && STATE=ok
   if [[ -n "$synced_hash" && "$synced_hash" != "$CURRENT_HASH" ]]; then
+    STATE=drift
     MESSAGES+=("addit-harness's CLAUDE.md/AGENTS.md/rules/references/settings.json changed since your $scope-scope /addit-harness:setup last ran (synced from v${synced_version:-unknown}, plugin is now v${PLUGIN_VERSION:-unknown}) — run /addit-harness:setup to pick up the changes.")
   fi
 }
 
 check_marker "$HOME/.claude/.addit-harness-setup-version" "global"
 [[ -n "${CLAUDE_PROJECT_DIR:-}" ]] && check_marker "$CLAUDE_PROJECT_DIR/.claude/.addit-harness-setup-version" "project"
+
+if [[ -z "$STATE" ]]; then
+  STATE=absent
+  for f in "$HOME/.claude/AGENTS.md" "$HOME/.claude/CLAUDE.md" "$HOME"/.claude/rules/*.md; do
+    [[ -f "$f" ]] || continue
+    case "${f##*/}" in AGENTS.md|CLAUDE.md) STATE=unmanaged; break;; *) [[ -f "$PLUGIN_ROOT/rules/${f##*/}" ]] && { STATE=unmanaged; break; };; esac
+  done
+fi
+tel setup "$STATE"
 
 if [[ ${#MESSAGES[@]} -eq 0 ]]; then
   exit 0

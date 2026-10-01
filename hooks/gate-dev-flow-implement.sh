@@ -19,7 +19,9 @@ IN="$(cat)" || exit 0
 grep -q 'dev-flow-implement' <<< "$IN" || exit 0
 
 SUFFIX='Do not work around this; ask the user to approve the plan via /addit-harness:dev-flow.'
-deny() { echo "dev-flow-implement blocked: $1 $SUFFIX" >&2; exit 2; }
+# Records the verdict locally when telemetry_local is on; runs after the decision and never changes it.
+tel() { case "${CLAUDE_PLUGIN_OPTION_TELEMETRY_LOCAL:-}" in true|True|1) printf '%s' "$IN" | python3 -S "${CLAUDE_PLUGIN_ROOT}/hooks/telemetry.py" "$@" >/dev/null 2>&1 || true;; esac; }
+deny() { tel gate plan_approval blocked; echo "dev-flow-implement blocked: $1 $SUFFIX" >&2; exit 2; }
 
 command -v python3 >/dev/null 2>&1 || deny "python3 is required to verify the plan gate but was not found."
 
@@ -64,4 +66,5 @@ grep -q '^> dev-flow: approved' "$PLAN" || deny "plan.md has no approval marker.
 ACTUAL="$(shasum -a 256 "$PLAN" 2>/dev/null | cut -d' ' -f1)"
 [[ -n "$ACTUAL" ]] || deny "could not hash $PLAN."
 [[ "$ACTUAL" == "$SHA" ]] || deny "plan.md changed since approval (hash mismatch)."
+tel gate plan_approval pass
 exit 0
