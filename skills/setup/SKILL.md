@@ -66,8 +66,8 @@ placed and where.
 
 `settings.json` is merged, not replaced: your `hooks`, `statusLine`, `env`
 and other keys the template lacks survive, and `enabledPlugins` /
-`extraKnownMarketplaces` are deep-merged with your existing values winning (a
-plugin you disabled stays disabled). Keys the template owns (`model`,
+`extraKnownMarketplaces` / `env` are deep-merged with your existing values winning (a
+plugin you disabled stays disabled; an `env` value you set is never overwritten). Keys the template owns (`model`,
 `permissions`) are updated to the template's values, so a backup is taken
 first. Re-running is idempotent. With `--link`, `settings.json` is symlinked
 rather than merged.

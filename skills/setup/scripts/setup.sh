@@ -81,7 +81,7 @@ backup_and_place() {
 # enable/disable choices) that a blind overwrite would destroy, so copy mode
 # merges instead: top-level keys the template owns (model, permissions, ...)
 # are updated, keys it lacks survive, and enabledPlugins /
-# extraKnownMarketplaces are deep-merged with the user's existing values
+# extraKnownMarketplaces / env are deep-merged with the user's existing values
 # winning (a plugin they disabled stays disabled). Output is deterministic so
 # re-runs are byte-identical. Link mode symlinks, as for every other file.
 place_settings() {
@@ -106,7 +106,7 @@ except ValueError as e:
 if not isinstance(existing, dict):
     sys.exit(f"{dest} is not a JSON object; fix or remove it, then re-run")
 merged = {**existing, **template}
-for key in ("enabledPlugins", "extraKnownMarketplaces"):
+for key in ("enabledPlugins", "extraKnownMarketplaces", "env"):
     if isinstance(template.get(key), dict) and isinstance(existing.get(key), dict):
         merged[key] = {**template[key], **existing[key]}
 # permissions: keep the user's own rules — union the allow/deny/ask lists, existing entries first

@@ -113,6 +113,18 @@ is one track with a UX pass. The `standard`/`deep` design caps include the owner
 | `standard` | 23 | 22 | 46 | 38 |
 | `deep` | 27 | 22 | 50 | 42 |
 
+## 6.2. Lifecycle task list
+
+If `TaskCreate` is available (setup turns the task tools on with `CLAUDE_CODE_ENABLE_TODO_TOOLS=1`; without them skip this section silently), create these six tasks once, right after triage (or at the start when there is no triage), and keep them current with `TaskUpdate` at the existing steps: `Triage`, `Design + plan`, `Approve plan`, `Implement + review`, `QA`, `Commit`.
+
+- Tier gate answered: `Triage` done (subject `Triage (<tier>)`). `Workflow A` started: `Design + plan` in progress; returned: done.
+- Plan shown at step 7: `Approve plan` in progress; approved (7.5): done.
+- `Workflow B` started: `Implement + review` in progress; returned: `Implement + review` and `QA` done (QA only if it ran).
+- `Commit` stays pending: committing is the user's call.
+- `haltedBy` set (or the plan not approved): leave the current task in progress and append ` (halted: <haltedBy>)` to its subject.
+
+Task text is the names above plus the tier and `haltedBy`: no request text, code or paths.
+
 ## 6.3. Intake — interview and brief
 
 **Intake.** light: tier gate only; request used as-is; with a Figma URL ask only the Figma spec's Unknowns before implementation guidance. standard: `product-owner` mode=questions; one `AskUserQuestion` batch of ≤4 (slot 1 = tier gate; add track/secondaryRepo if unresolved; then its questions) — skip questions if it returned none; mode=brief; show the brief; continue. deep: same, plus at most one more ≤4 batch for gaps the answers opened; confirm the brief (correct / edit) only if ≥1 default was applied. Headless: all defaults, say so. Never swap the request for the brief silently: the brief quotes it and the owner sees it. Read `specs/owner-proposal.md` if present and pass its text as `ownerProposal`; pass `briefPath`.
