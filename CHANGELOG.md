@@ -7,6 +7,16 @@ only on [GitHub Releases](https://github.com/addit-digital/addit-harness/release
 
 ## [Unreleased]
 
+### Fixed
+
+- `/dev-flow` could not run its scripted workflows in a normal install: it called
+  `Workflow` with a `scriptPath` inside the plugin cache, which the tool refuses
+  ("scriptPath must be a script path this tool returned, or a file you can already
+  read"), so every run fell back to the manual procedure. It now calls the workflows by
+  name (`addit-harness:dev-flow-triage`, `-design`, `-implement`). The manual fallback
+  now tells you before it asks anything that triage was skipped and which tier it
+  proposes.
+
 ## [0.4.1] - 2026-10-01
 
 ### Fixed

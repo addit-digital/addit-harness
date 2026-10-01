@@ -75,19 +75,22 @@ whether `Workflow` merely appears in a tool grant somewhere. If it's genuinely n
 callable, skip to **"Fallback — no `Workflow` tool"** below and drive the same
 procedure by hand instead.
 
-Also note: `Workflow` being callable doesn't guarantee `workflows/dev-flow-design.js`
-actually exists at the resolved `${CLAUDE_PLUGIN_ROOT}` path — that only holds under
-a real plugin install (see the file's own "Claude Code plugin install only" note in
-`README.md`/`skills/SOURCES.md`). **If the `Workflow` call itself errors** (e.g. the
-script path can't be resolved), treat that the same as "`Workflow` isn't usable here"
-and fall through to the manual fallback below rather than surfacing a raw tool error.
+**Call the workflows by name, never by file path.** The plugin's scripts live in the
+plugin cache (`~/.claude/plugins/cache/…`), outside the project and any added folder, and
+the `Workflow` tool refuses a `scriptPath` it cannot already read ("scriptPath must be a
+script path this tool returned, or a file you can already read"). A by-name call
+(`name: "addit-harness:dev-flow-…"`) needs no path. The first call may show a "Review
+dynamic workflow before running" approval — that is normal; the user approves it.
+**If a by-name call still errors**, say so plainly in one line, then use the manual
+fallback below — do not surface a raw tool error and do not start asking intake questions
+before you have told the user the scripted workflow is unavailable.
 
 If it is callable, triage first. It is one read-only agent that reports facts; the
 tier is scored by deterministic JS, never by the agent:
 
 ```
 Workflow({
-  scriptPath: "${CLAUDE_PLUGIN_ROOT}/workflows/dev-flow-triage.js",
+  name: "addit-harness:dev-flow-triage",
   args: { slug, track, needsUX, repo, request, userTier },
 })
 ```
@@ -142,7 +145,7 @@ track that gets the parallel explorers.
 
 ```
 Workflow({
-  scriptPath: "${CLAUDE_PLUGIN_ROOT}/workflows/dev-flow-design.js",
+  name: "addit-harness:dev-flow-design",
   args: { slug, track, needsUX, investigate, repo, secondaryRepo, request, tier, plannedFiles, riskPaths, briefPath, ownerProposal, fanoutTrack },
 })
 ```
@@ -200,7 +203,7 @@ While any workflow runs, `/workflows` shows its metadata-only log lines: `dev-fl
 
 ```
 Workflow({
-  scriptPath: "${CLAUDE_PLUGIN_ROOT}/workflows/dev-flow-implement.js",
+  name: "addit-harness:dev-flow-implement",
   args: { slug, track, repo, secondaryRepo, planSha256: PLAN_SHA, tier, plannedFiles, riskPaths },
 })
 ```
@@ -255,4 +258,7 @@ cycle plus re-verify) — same
 human-approval gate before implementation starts (including the approval marker and
 `planSha256` by hand, step 7.5), same "you don't commit" rule at the end. This is slower and
 more manual than the scripted version, but the procedure and its gates don't change.
-Without `Workflow` there is no triage: run the `standard` tier (or the `--tier` the user gave).
+Without `Workflow` there is no triage: tell the user first that the scripted workflow is
+unavailable and triage was skipped, propose the `standard` tier (or the `--tier` the user
+gave), and let them change it at the tier gate before any intake question — never assume
+a tier silently.
