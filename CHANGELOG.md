@@ -105,8 +105,8 @@ only on [GitHub Releases](https://github.com/addit-digital/addit-harness/release
 - **Breaking:** `install.sh`, `sync_tools.py` and `tools.config.json`. addit-harness
   supports Claude Code only, as a plugin: `/plugin marketplace add
   addit-digital/addit-harness`, `/plugin install addit-harness@addit`, then
-  `/addit-harness:setup`. Cursor, Kiro and Codex CLI are no longer supported; config
-  already synced into them keeps working but no longer updates. Tag
+  `/addit-harness:setup`. Config synced earlier by `install.sh`
+  keeps working but no longer updates. Tag
   `addit-harness--v0.3.0` is the last release with `install.sh`.
 - `references/java/java-best-practices.md` and `references/go/app-erp-conventions.md`,
   replaced by topic files. Setup removes them on re-sync only if unchanged; an edited

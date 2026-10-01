@@ -36,8 +36,7 @@ Read these artifacts in priority order:
 **b. Existing config (if any)**
 - `.golangci.yml` / `.golangci.toml` — enabled linters and their settings
 - `Makefile` — `build`, `test`, `lint`, `run` targets
-- `.cursor/rules/*.mdc` or `.github/copilot-instructions.md` — any pre-existing
-  convention docs
+- `CONTRIBUTING.md` or any docs folder — pre-existing convention docs
 
 **c. Project layout** (just list, don't read all files yet)
 - Top-level dirs: `cmd/`, `internal/`, `pkg/`, `api/`, `app/`, etc.

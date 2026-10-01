@@ -41,7 +41,7 @@ In Claude Code, from any project:
 From the root of the service repo:
 
 ```
-/addit-harness:dev-flow add cursor pagination to GET /orders
+/addit-harness:dev-flow add pagination to GET /orders
 ```
 
 The skill infers `track` (an API change, so `backend`) and whether a UX pass is
@@ -70,7 +70,7 @@ this request they might be:
 
 ```
 1. Tier: ok / deeper / lighter
-2. Cursor or offset pagination?  (default: cursor)
+2. Offset or keyset pagination?  (default: offset)
 3. Default and maximum page size?  (default: 50 / 200)
 4. Must existing clients that send no parameters keep working?  (default: yes)
 ```
@@ -110,7 +110,7 @@ needed). Findings come with evidence such as a command and its exit code:
 
 ```
 Review: clean after 1 fix round.   QA: passed (1 run).
-`go test ./...` exit 0; GET /orders?limit=2 returned a next_cursor.
+`go test ./...` exit 0; GET /orders?limit=2 returned 2 orders and a next_offset.
 I have not committed anything. That is your call.
 ```
 
@@ -138,7 +138,7 @@ the current state, keep their diagrams and are edited in place.
 
 ```
 git status
-git add -A && git commit -m "feat(orders): cursor pagination on GET /orders"
+git add -A && git commit -m "feat(orders): paginate GET /orders"
 ```
 
 ## 10. Optional: local telemetry

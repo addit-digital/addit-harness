@@ -24,7 +24,7 @@ Always-on. The mental model for every non-trivial task.
 - Plans, solutions, ADRs and PR descriptions are design documentation: one mermaid diagram per concept, edited in place. Git holds history.
 - The CLI terminal **cannot render mermaid** (it shows raw code). So save a
   non-trivial plan to a markdown file with `/save-plan` (default
-  `docs/work/<slug>/plans/`), then open it in an IDE preview (Cursor / VS Code,
+  `docs/work/<slug>/plans/`), then open it in an IDE preview (VS Code,
   Ctrl/Cmd+Shift+V) or on GitHub — both render mermaid. ADRs and PR descriptions
   already live as files / on GitHub, so they render there too.
 
@@ -62,8 +62,8 @@ commit/push unless asked.
 - **Re-explaining context**: re-sending what's already in memory or the repo;
   put durable facts in `CLAUDE.md`/`rules/`, not repeated prose.
 - **Scope creep in a change**: mixing refactor + feature + fix in one diff.
-- **Wrong plan location**: writing plans to `~/.claude/plans/`, `.cursor/plans/`,
-  or any IDE/harness scratch directory. Those are ephemeral working files — the
+- **Wrong plan location**: writing plans to `~/.claude/plans/` or any
+  IDE/harness scratch directory. Those are ephemeral working files — the
   durable artifact belongs in the repo under `docs/work/<slug>/plans/` (via
   `/save-plan`), `solutions/`, `architecture-reports/`, or `qa-reports/` per the
   taxonomy above.
