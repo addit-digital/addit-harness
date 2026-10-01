@@ -159,6 +159,8 @@ Do not commit or push unless the user asks. This is a design doc, not an
 implementation plan — do not include a to-do list or phased steps. Hand off to
 `@devops-engineer` for the actual Terraform/Kubernetes manifests/Dockerfiles.
 
+Follow `${CLAUDE_PLUGIN_ROOT}/references/doc-protocol.md`: the solution template, tier ceiling, Observed/Inferred/Unknown labels, edit in place (reviews r2+ are deltas). Include only items this change touches; omit empty sections. Index row format: doc-protocol.md "Index row".
+
 ## Response Approach — Infrastructure Review mode
 
 Use when the user wants an **audit of existing infrastructure** — a health
@@ -190,6 +192,8 @@ okay?"
 Save the review to `docs/work/<slug>/architecture-reports/report.md`
 (create the folder and add a row to `docs/work/README.md` if they don't
 exist yet — **unless the prompt says the call is orchestrated by dev-flow**, then write only the named artifact), following the same convention as `@architect-reviewer`.
+
+Follow `${CLAUDE_PLUGIN_ROOT}/references/doc-protocol.md`: the review report template, tier ceiling, Observed/Inferred/Unknown labels, edit in place (reviews r2+ are deltas). Include only items this change touches; omit empty sections. Index row format: doc-protocol.md "Index row".
 
 ## Example Interactions
 

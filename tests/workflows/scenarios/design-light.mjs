@@ -24,7 +24,7 @@ export default {
     assert.equal(single.callsByType[`${R}ux-designer`], undefined)
     const [design, review] = single.callList
     assert.match(design.prompt, /Write the result to \/r\/docs\/work\/s\/plans\/plan\.md/)
-    assert.match(design.prompt, /## ADR candidates/)
+    assert.match(design.prompt, /ADR: candidate/)
     assert.doesNotMatch(design.prompt + review.prompt, /solutions\//)
     assert.equal(design.opts.effort, 'medium')
     assert.equal(review.opts.effort, 'low')

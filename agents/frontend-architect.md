@@ -264,19 +264,10 @@ Save the completed design doc to `docs/work/<slug>/solutions/solution-frontend.m
 Do not commit or push unless the user asks. This is a design doc, not an
 implementation plan — do not include a to-do list or phased steps.
 
-When designing frontend architecture, provide:
+Follow `${CLAUDE_PLUGIN_ROOT}/references/doc-protocol.md`: the solution template, tier ceiling, Observed/Inferred/Unknown labels, edit in place (reviews r2+ are deltas). Include only items this change touches; omit empty sections. Index row format: doc-protocol.md "Index row".
 
-- Component hierarchy diagram (Mermaid) showing feature vs shared boundaries
-- Rendering strategy decision per route/page with rationale
-- State architecture map: what lives in server cache, global store, URL, local component
-- Data-fetching flow diagram (sequence diagram for key interactions)
-- Component contract examples (TypeScript props interfaces, slot patterns)
-- Performance budget: bundle size limits, Web Vitals targets
-- Accessibility architecture: landmark structure, focus management strategy
-- Security architecture: CSP policy outline, auth token storage decision
-- Testing strategy: trophy ratio, tooling choices, coverage scope
-- Build and deployment plan: tooling, CI steps, CDN/edge configuration
-- ADRs for non-obvious decisions (rendering choice, state library, bundle strategy)
+Also, when relevant:
+
 - **Design foundation** (greenfield or no existing design language): write
   `.claude/design-conventions.md` to the project root — a lean operational file
   (color tokens, type scale, spacing rhythm, component lib, breakpoints, state

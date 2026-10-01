@@ -205,6 +205,8 @@ For every task, produce:
   that don't exist yet — hand off to `@frontend-architect`.
 - **Escalation items** (if any): UX decisions the task requires that are beyond
   this agent's scope — hand off to `@ux-designer` with a specific question.
+- **Design defects found**: table per the Figma spec in `${CLAUDE_PLUGIN_ROOT}/references/doc-protocol.md` (id, node, defect, evidence, handling). Never silently compensate; default handling: design-system token, or ask.
+- **Implementation spec (read-only requests)**: return it in that doc-protocol.md template; numbers only from node data or variables, never measured from a screenshot.
 
 ## Example Interactions
 

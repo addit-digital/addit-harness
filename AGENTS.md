@@ -32,7 +32,7 @@ project's own `CLAUDE.md` (see `templates/CLAUDE.project.md`), not here.
 - Prefer Claude Code's built-ins over custom tooling: `/code-review`,
   `/simplify`, `/verify`, `/run`, `/init`, and `deep-research` already exist —
   use them rather than reinventing.
-- Make plans and design docs visual: diagram-rich (mermaid) and saved to the
+- Make plans and design docs visual: diagrammed (mermaid, one per concept) and saved to the
   repo — one folder per work item under `docs/work/<slug>/`: implementation
   plans via `/save-plan` → `plans/`, architecture designs → `solutions/`,
   review reports → `architecture-reports/`.

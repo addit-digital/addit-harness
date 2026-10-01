@@ -198,15 +198,4 @@ Save the completed design doc to `docs/work/<slug>/solutions/solution-ux.md`
 Do not commit or push unless the user asks. This is a design doc, not an
 implementation plan — do not include a to-do list or phased steps.
 
-When designing UX flows and interactions, provide:
-
-- **User flow diagram** (Mermaid `flowchart`) — entry, decision nodes, success, error, exit paths
-- **Journey map** — stages × touchpoints × user actions × emotions × pain points (markdown table)
-- **IA / sitemap** (Mermaid diagram) — for navigation or structure work
-- **Key screen wireframes** — layout zones and content priority described per screen; component names from the design system mapped to each zone
-- **State matrix** — loading / empty-first-use / empty-no-results / error-recoverable / error-fatal / success — for every view in the flow
-- **Interaction specs** — micro-interactions, form behavior, modal/drawer rules, optimistic UI intent
-- **UX copy** — CTA labels, error messages, empty state copy, onboarding hints
-- **Design system gap list** — components the flow needs that don't exist; hand off to `@frontend-architect`
-- **Heuristic findings table** (for audits) — heuristic · screen/flow · severity (0–4) · issue · fix
-- **Handoff summary** — what goes to `@frontend-architect` vs `@frontend-developer`
+Follow `${CLAUDE_PLUGIN_ROOT}/references/doc-protocol.md`: the solution template, tier ceiling, Observed/Inferred/Unknown labels, edit in place (reviews r2+ are deltas). Include only items this change touches; omit empty sections. Index row format: doc-protocol.md "Index row".

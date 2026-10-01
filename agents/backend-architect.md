@@ -299,17 +299,4 @@ Save the completed design doc to `docs/work/<slug>/solutions/solution-backend.md
 Do not commit or push unless the user asks. This is a design doc, not an
 implementation plan — do not include a to-do list or phased steps.
 
-When designing architecture, provide:
-
-- Service boundary definitions with responsibilities
-- API contracts (OpenAPI/GraphQL schemas) with example requests/responses
-- Service architecture diagram (Mermaid) showing communication patterns
-- Authentication and authorization strategy
-- Inter-service communication patterns (sync/async)
-- Resilience patterns (circuit breakers, retries, timeouts)
-- Observability strategy (logging, metrics, tracing)
-- Caching architecture with invalidation strategy
-- Technology recommendations with rationale
-- Deployment strategy and rollout plan
-- Testing strategy for services and integrations
-- Documentation of trade-offs and alternatives considered
+Follow `${CLAUDE_PLUGIN_ROOT}/references/doc-protocol.md`: the solution template, tier ceiling, Observed/Inferred/Unknown labels, edit in place (reviews r2+ are deltas). Include only items this change touches; omit empty sections. Index row format: doc-protocol.md "Index row".

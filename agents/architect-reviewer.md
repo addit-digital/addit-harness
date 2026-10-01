@@ -250,6 +250,8 @@ don't exist yet — **unless the prompt says the call is orchestrated by dev-flo
 filename `report-r2.md`, `report-r3.md`, etc. rather than overwriting). Do not
 commit or push unless the user asks.
 
+Follow `${CLAUDE_PLUGIN_ROOT}/references/doc-protocol.md`: the review report template, tier ceiling, Observed/Inferred/Unknown labels, edit in place (reviews r2+ are deltas). Include only items this change touches; omit empty sections. Index row format: doc-protocol.md "Index row".
+
 ## Calibration
 
 When the prompt asks for a structured result, tag every finding with a severity and report all of them — the calling script applies the floor, so never omit a finding to "keep the review short":

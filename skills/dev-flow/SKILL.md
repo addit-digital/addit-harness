@@ -137,8 +137,8 @@ written for.
    work-item folder, sometimes concurrently, so a shared index appended to by more
    than one writer is a real race). Delete every table row whose *first markdown
    link* resolves inside `<slug>/`, then insert one canonical row
-   (`| date | [Title](<slug>/plans/plan.md) | summary |`). Run this after Workflow A,
-   after Workflow B, and on any `haltedBy`.
+   (`| date | [Title](<slug>/plans/plan.md) | summary |`). Row format: references/doc-protocol.md "Index row".
+   Run this after Workflow A, after Workflow B, and on any `haltedBy`.
 2. Report to the user, blockers first: `haltedBy` if set; `designApproved: false`
    ("the design did not converge after N rounds; this is a capped-out draft, not an
    approved design", with `designBlocking` qualifying findings, plus `designBreaker` if
@@ -158,9 +158,9 @@ written for.
 
 1. Append `> dev-flow: approved by user on $(date +%F)` as the last line of
    `docs/work/<slug>/plans/plan.md`.
-2. For each line under the plan's `## ADR candidates` heading (skip `none`), invoke
-   `addit-harness:adr`, then add `Decision record: [ADR-NNNN](<relative path>)` under
-   the solution doc's title.
+2. For each `ADR: candidate "<title>"` line (skip `none`) in the solution docs'
+   `## Decision` — at `light`, in `plan.md` `## Approach` — invoke `addit-harness:adr`;
+   it replaces that line with the ADR link.
 3. Compute `PLAN_SHA=$(shasum -a 256 docs/work/<slug>/plans/plan.md | cut -d' ' -f1)`.
    Do this last: any later edit to `plan.md` invalidates the hash and the gate below
    refuses to start.

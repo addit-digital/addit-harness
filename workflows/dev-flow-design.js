@@ -74,7 +74,7 @@ const FIGMA_SCHEMA = {
   },
   required: ['fileUrl'],
 }
-const ADR_LINE = 'End with "## ADR candidates": one line per decision that is significant and hard to reverse (new dependency, framework, protocol, data model), or "none".'
+const ADR_LINE = 'End "## Approach" with one line `ADR: candidate "<title>" | none` — a candidate is a decision that is significant and hard to reverse (new dependency, framework, protocol, data model).'
 
 // Track vocabulary: A.track is exactly 'backend' | 'frontend' | 'both'. UX is a
 // separate boolean (A.needsUX), not a track value.
@@ -116,7 +116,7 @@ if (A.needsUX && POLICY.ux) {
     if (budget.total && budget.remaining() < 60000) { log('UX loop: budget nearly exhausted, stopping'); break }
     const spec = await callAgent(
       ctx() + `Design UX for: ${request}. Write the spec to ${UX_PATH}. Read .claude/design-conventions.md first if it exists; if it does not, say so and do not invent conventions.` +
-        (lastFindings ? `\n\nPrevious review round raised these — address each: ${JSON.stringify(lastFindings)}` : ''),
+        (lastFindings ? `\n\nRevision: edit ${UX_PATH} IN PLACE per doc-protocol.md. Change only sections these findings name, delete superseded text, keep "## Log" ≤5 lines. Findings: ${JSON.stringify(lastFindings)}` : ''),
       { agentType: 'addit-harness:ux-designer', phase: 'UX' }
     )
     if (!spec) { log(`UX round ${round + 1}: ux-designer returned no spec`); round++; continue }
@@ -192,8 +192,8 @@ if (tier === 'light') {
   let lastKey = null, lastFindings = null
   while (!approved && round < POLICY.designRounds && !haltedBy) {
     if (budget.total && budget.remaining() < 60000) { log('Design loop: budget nearly exhausted, stopping'); break }
-    const feedback = lastFindings ? `\n\nPrevious review round raised these — address each: ${JSON.stringify(lastFindings)}` : ''
-    const designs = (await parallel(TRACKS.map(t => () => designPass(t, solutionPath(t), feedback).then(d => d && { ...t, design: d })))).filter(Boolean)
+    const feedback = t => lastFindings ? `\n\nRevision: edit ${solutionPath(t)} IN PLACE per doc-protocol.md. Change only sections these findings name, delete superseded text, keep "## Log" ≤5 lines, do not restate unchanged sections. Round 2+ reviews are deltas. Findings: ${JSON.stringify(lastFindings)}` : ''
+    const designs = (await parallel(TRACKS.map(t => () => designPass(t, solutionPath(t), feedback(t)).then(d => d && { ...t, design: d })))).filter(Boolean)
     designs.forEach(d => completed.add(d.kind))
     if (designs.length === 0) { log(`Design round ${round + 1}: all architect agents failed or were skipped`); round++; continue }
     const review = await callAgent(
@@ -221,7 +221,7 @@ if (POLICY.planPhase) {
   } else {
     plan = await callAgent(
       ctx() + `Write the implementation plan for the approved design(s) at ${TRACKS.filter(t => completed.has(t.kind)).map(solutionPath).join(', ')}, ` +
-        `save to ${PLAN_PATH}. ${ADR_LINE}`,
+        `save to ${PLAN_PATH}. The ADR candidate lives in the solution's "## Decision" line; do not repeat it in the plan.`,
       { agentType: TRACKS[0].architectType, phase: 'Plan', effort: POLICY.archEffort }
     )
     if (!plan) log('Plan phase: architect returned no plan — nothing was written')
