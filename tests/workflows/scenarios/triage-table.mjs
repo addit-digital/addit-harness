@@ -32,12 +32,15 @@ const EXTRA = [
   { name: 'low confidence floors to standard', track: 'backend', needsUX: false, ev: { ...base, filesToChange: files(1), changeShape: 'content', confidence: 'low' }, want: { S: 0, R: 0, tier: 'standard', overrides: ['low-confidence'] } },
   { name: 'user override is exact (down)', track: 'backend', needsUX: false, userTier: 'light', ev: { ...base, filesToChange: files(1), touchesSecuritySurface: true }, want: { S: 1, R: 3, tier: 'light', overrides: ['security-or-persistence', 'user'] } },
   { name: 'invalid paths are dropped, none left floors to standard', track: 'backend', needsUX: false, ev: { ...base, filesToChange: [{ path: '../etc/passwd', exists: true }, { path: '/abs', exists: true }], changeShape: 'content' }, want: { S: 0, tier: 'standard', overrides: ['no-files'], plannedFiles: [] } },
+  { name: 'absolute paths under either named repo become repo-relative; outside paths stay rejected', track: 'both', needsUX: false, secondaryRepo: '/m',
+    ev: { ...base, filesToChange: [{ path: '/r/pkg/a.go', exists: true }, { path: '/m/app/b.tsx', exists: true }, { path: '/etc/passwd', exists: true }, { path: '/r/../etc/x', exists: true }], riskPaths: ['/r/pkg', '/elsewhere'] },
+    want: { plannedFiles: ['pkg/a.go', 'app/b.tsx'], riskPaths: ['pkg'] } }, // /etc/passwd, /r/../etc/x and /elsewhere are dropped
   { name: 'triage failure defaults to standard', track: 'backend', needsUX: false, ev: null, want: { tier: 'standard', triageFailed: true } },
 ]
 const CASES = [...ROWS, ...EXTRA]
 
 export default {
-  argsList: CASES.map(c => ({ slug: 's', track: c.track, needsUX: c.needsUX, repo: '/r', request: 'x', userTier: c.userTier })),
+  argsList: CASES.map(c => ({ slug: 's', track: c.track, needsUX: c.needsUX, repo: '/r', secondaryRepo: c.secondaryRepo, request: 'x', userTier: c.userTier })),
   respond: (_call, state) => CASES[state.run].ev,
   expect: ({ runs }) => {
     CASES.forEach((c, i) => {

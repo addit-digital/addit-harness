@@ -129,11 +129,24 @@ const derive = (e, ctx) => {
 log(`dev-flow triage start: tier=${A.userTier ?? 'pending'} track=${A.track}`)
 phase('Triage')
 const evidence = await callAgent(
-  UNTRUSTED + `Triage this change request against the repo at ${A.repo}. Answer the schema's questions with facts only — never a verdict, size, tier or recommendation. Request: ${A.request}`,
+  UNTRUSTED + `Triage this change request against the repo at ${A.repo}${A.secondaryRepo ? ` (second repo: ${A.secondaryRepo})` : ''}. Answer the schema's questions with facts only — never a verdict, size, tier or recommendation. Finish by calling the StructuredOutput tool — no prose summary. Request: ${A.request}`,
   { agentType: 'addit-harness:task-triager', phase: 'Triage', schema: TRIAGE_SCHEMA, effort: 'low' }
 )
 if (!evidence) log('Triage: task-triager returned no result — defaulting to standard')
-const derived = evidence ? derive(evidence, { track: A.track, needsUX: !!A.needsUX, userTier: A.userTier }) : null
+// The agent may give a path as absolute (typical for a second repo); an absolute path under a named repo is
+// made repo-relative here, deterministically. Anything else (outside both repos, `..`) stays invalid and is dropped.
+const REPOS = [A.repo, A.secondaryRepo].filter(r => typeof r === 'string' && r)
+const relToRepo = p => {
+  if (typeof p !== 'string') return p
+  for (const r of REPOS) { const pre = r.replace(/\/+$/, '') + '/'; if (p.startsWith(pre)) return p.slice(pre.length) }
+  return p
+}
+const normalizeEvidence = e => ({
+  ...e,
+  filesToChange: (e.filesToChange ?? []).map(f => (f && typeof f === 'object' ? { ...f, path: relToRepo(f.path) } : f)),
+  riskPaths: (e.riskPaths ?? []).map(relToRepo),
+})
+const derived = evidence ? derive(normalizeEvidence(evidence), { track: A.track, needsUX: !!A.needsUX, userTier: A.userTier }) : null
 if (derived) log(`Triage: tier=${derived.tier} S=${derived.S} R=${derived.R} floors=${derived.overrides.join(',') || 'none'}`)
 if (derived?.rejectedPaths.length) log(`Triage: dropped ${derived.rejectedPaths.length} invalid paths`)
 
