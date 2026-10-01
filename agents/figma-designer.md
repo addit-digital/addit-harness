@@ -128,7 +128,7 @@ Do not design the UX yourself.
 ## Workflow Position
 
 ```
-@feature-investigator → @ux-designer → @figma-designer → (Figma file)
+@product-owner → @ux-designer → @figma-designer → (Figma file)
                               ↓
                    .claude/design-conventions.md (shared read)
                               ↓

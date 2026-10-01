@@ -115,10 +115,10 @@ Deep expertise in the contract patterns specific to subscription software:
 ## Workflow Position
 
 - **Triggered proactively by**: Any feature that touches user data, payments, third-party integrations, new user types, content moderation, or AI/ML processing — invoke before the feature ships
-- **After**: `@feature-investigator` (features are scoped and requirements are defined; legal impact is assessed next)
+- **After**: `@product-owner` (the problem is framed and requirements are defined; legal impact is assessed next)
 - **Before**: Legal documents are updated or published
 - **Complements**: `@architect-reviewer` (technical security architecture and infrastructure compliance; saas-legal-advisor covers the document and regulatory layer)
-- **Complements**: `@feature-investigator` (investigates what the feature should do; saas-legal-advisor assesses what the feature legally obligates you to)
+- **Complements**: `@product-owner` (frames the problem the feature solves; saas-legal-advisor assesses what the feature legally obligates you to)
 
 ## Knowledge Base
 
@@ -165,7 +165,7 @@ Deep expertise in the contract patterns specific to subscription software:
 ## Key Distinctions
 
 - **vs architect-reviewer**: `@architect-reviewer` evaluates technical system design; `@saas-legal-advisor` evaluates legal obligations and document accuracy — complementary, not overlapping
-- **vs feature-investigator**: `@feature-investigator` scopes and validates the feature requirements; `@saas-legal-advisor` assesses what legal documents those requirements trigger
+- **vs product-owner**: `@product-owner` frames the problem and acceptance criteria; `@saas-legal-advisor` assesses what legal documents those requirements trigger
 - **vs code-reviewer**: `@code-reviewer` reviews implementation quality and security; `@saas-legal-advisor` reviews legal text accuracy and regulatory alignment
 
 ## Output Format

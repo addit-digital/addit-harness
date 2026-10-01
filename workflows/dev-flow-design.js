@@ -43,13 +43,13 @@ let request = A.request
 let requestResolved = true
 if (A.investigate) {
   const scoped = await agent(
-    UNTRUSTED + `Scope and clarify this request against the codebase at ${A.repo}, return a refined unambiguous requirement: ${A.request}`,
-    { agentType: 'addit-harness:feature-investigator' }
+    UNTRUSTED + `Write the problem statement for this request, grounded in the codebase at ${A.repo}. Problem only — do not propose a solution. Request: ${A.request}`,
+    { agentType: 'addit-harness:product-owner' }
   )
   if (scoped) {
     request = scoped
   } else {
-    log('Investigate: feature-investigator returned no result — proceeding with the original, unrefined request')
+    log('Investigate: product-owner returned no result — proceeding with the original request')
     requestResolved = false
   }
 }

@@ -33,7 +33,7 @@ Set via `model:` in each agent's frontmatter (`agents/*.md`):
 | `backend-developer` | `sonnet` | Implementation/execution — fast + cheap against the conventions |
 | `frontend-developer` | `sonnet` | Implementation/execution — fast + cheap against the conventions |
 | `debugger` | `sonnet` | Iterative; escalate with `/model` if stuck |
-| `feature-investigator` | `sonnet` | Requirements/spec investigation (upstream default) |
+| `product-owner` | `sonnet` | Problem-statement framing (authored) |
 | `saas-legal-advisor` | `opus` | Legal reasoning + compliance assessment — wrong guidance is costly |
 | `cloud-architect` | `opus` | Infra design + review — mistakes are costly and often hard to reverse |
 | `devops-engineer` | `sonnet` | Implementation/execution against a design |

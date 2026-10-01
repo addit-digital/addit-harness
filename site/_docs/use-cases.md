@@ -18,7 +18,7 @@ software-development-lifecycle shape `/dev-flow` is scoped to. See
 
 ```mermaid
 flowchart LR
-  FI["@feature-investigator\nspec / PRD-lite"]
+  FI["@product-owner\nproblem statement"]
   LA["@saas-legal-advisor *(if data/payments/integrations)*\nlegal impact → doc updates"]
   UX["@ux-designer\nflows · wireframes · IA"]
   FG["@figma-designer *(optional)*\nFigma frames + tokens"]
@@ -42,7 +42,7 @@ flowchart LR
   QA --> CR
 ```
 
-1. `@feature-investigator` → requirements/scope (spec/PRD-lite) before any code.
+1. `@product-owner` → problem statement (never a solution) before any design.
 2. `@saas-legal-advisor` *(if the feature touches user data, payments,
    third-party integrations, or account types)* → runs in parallel with UX
    design; produces an impact table (Critical/Important/Advisory) and drafts

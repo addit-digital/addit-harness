@@ -34,8 +34,8 @@ the fields below — if it's already clear from the request, resolve it silently
 
 ## 3. Resolve `investigate`
 
-`true` if the request's scope is still fuzzy enough that `feature-investigator`
-should scope it before any design work starts; `false` if it's already a clear,
+`true` if the request's scope is still fuzzy enough that `product-owner`
+should frame the problem before any design work starts; `false` if it's already a clear,
 bounded requirement. This is a judgment call you make yourself — don't ask the user
 "should I investigate first," just decide from how well-specified the request is.
 

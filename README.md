@@ -140,7 +140,7 @@ merge any custom permissions/hooks back from the backup).
 | `rules/engineering-loop.md` | Always-on plan→verify→commit model + anti-patterns; sets diagram-rich (mermaid) plan/design-doc standards | Authored |
 | `rules/{java,go,typescript}.md` | **Thin auto-loaded pointers** (Tier 1) — route to the references | Authored (routing only, no convention text) |
 | `references/{go,java,typescript}/` | **Convention guides + linked authorities, read on-demand** (Tier 2) | Go: codebase-derived from app-erp; Java/TS: vendored from recognized sources — see each `README.md` |
-| `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, frontend-architect, ux-designer, figma-designer, feature-investigator, backend-developer, frontend-developer, saas-legal-advisor, cloud-architect, devops-engineer, qa-engineer | **Vendored + pinned** (except `backend-architect`/`frontend-architect`/`ux-designer`/`figma-designer`/`backend-developer`/`frontend-developer`/`saas-legal-advisor`/`qa-engineer`, authored) — see `AGENTS_SOURCES.md` |
+| `agents/*.md` | Subagents: code-reviewer, debugger, architect-reviewer, backend-architect, frontend-architect, ux-designer, figma-designer, product-owner, backend-developer, frontend-developer, saas-legal-advisor, cloud-architect, devops-engineer, qa-engineer | **Vendored + pinned** (except `backend-architect`/`frontend-architect`/`ux-designer`/`figma-designer`/`backend-developer`/`frontend-developer`/`saas-legal-advisor`/`qa-engineer`, authored) — see `AGENTS_SOURCES.md` |
 | `AGENTS_SOURCES.md` | Provenance table for vendored agents (source repo, commit SHA, changes) — kept at repo root, not inside `agents/`, since the Claude Code plugin auto-discovers every `.md` file in `agents/` as an agent | Authored |
 | `skills/adr/` | `/adr` — record Architecture Decision Records (**MADR 4.0**) | Adopts MADR (see `skills/SOURCES.md`) |
 | `skills/save-plan/` | `/save-plan` — persist an **implementation plan** to `docs/work/<slug>/plans/` (or `--temp`) so mermaid renders in an IDE/GitHub. Architecture designs → `docs/work/<slug>/solutions/`; review reports → `docs/work/<slug>/architecture-reports/` (written directly by the relevant agent) | Authored |
@@ -212,7 +212,7 @@ flowchart TD
 ```
 
 **Workflow A — investigate, design, plan.** Investigate only runs if the
-request's scope is genuinely unclear (`@feature-investigator` scopes it
+request's scope is genuinely unclear (`@product-owner` frames the problem
 first); UX only runs if the work needs a fresh pass (`@ux-designer` ⇄
 `@figma-designer` ⇄ fidelity-check, looping until approved); Design runs one
 architect per track (`@backend-architect` and/or `@frontend-architect`, in
@@ -340,8 +340,8 @@ defers component/token/a11y architecture to `@frontend-architect`),
 `@figma-designer` (materializes UX specs into Figma frames, components, auto-
 layout, variables, and tokens via the official Figma MCP — composes downstream of
 `@ux-designer`; requires `figma@claude-plugins-official` plugin),
-`@feature-investigator` (investigate a feature/product request before building →
-spec/PRD-lite), `@saas-legal-advisor` (SaaS-specialized legal advisor — assesses
+`@product-owner` (frame a feature/product request as a problem statement before
+design — never a solution), `@saas-legal-advisor` (SaaS-specialized legal advisor — assesses
 legal impact of product changes, drafts and reviews privacy policies, T&C, cookie
 policies, DPAs, and other compliance docs; reads the project's declared primary
 jurisdiction from `CLAUDE.md`; use proactively whenever a feature touches user
@@ -379,7 +379,7 @@ for the phase-by-phase mechanics and how the design/review loops know when to st
 
 ```mermaid
 flowchart LR
-  FI["@feature-investigator\nspec / PRD-lite"]
+  FI["@product-owner\nproblem statement"]
   LA["@saas-legal-advisor *(if data/payments/integrations)*\nlegal impact → doc updates"]
   UX["@ux-designer\nflows · wireframes · IA"]
   FG["@figma-designer *(optional)*\nFigma frames + tokens"]
@@ -403,7 +403,7 @@ flowchart LR
   QA --> CR
 ```
 
-1. `@feature-investigator` → requirements/scope (spec/PRD-lite) before any code.
+1. `@product-owner` → problem statement (never a solution) before any design.
 2. `@saas-legal-advisor` *(if the feature touches user data, payments, third-party
    integrations, or account types)* → runs in parallel with UX design; produces an
    impact table (Critical/Important/Advisory) and drafts updated legal clauses.
@@ -545,7 +545,7 @@ prevented) and Sonnet's strong, cheaper execution against your rules.
 | `backend-developer` | `sonnet` | Implementation/execution — fast + cheap against the conventions |
 | `frontend-developer` | `sonnet` | Implementation/execution — fast + cheap against the conventions |
 | `debugger` | `sonnet` | Iterative; escalate with `/model` if stuck |
-| `feature-investigator` | `sonnet` | Requirements/spec investigation (upstream default) |
+| `product-owner` | `sonnet` | Problem-statement framing (authored) |
 | `saas-legal-advisor` | `opus` | Legal reasoning + compliance assessment — high-stakes advisory; wrong guidance is costly |
 | `cloud-architect` | `opus` | Infra design + review — mistakes are costly and often hard to reverse |
 | `devops-engineer` | `sonnet` | Implementation/execution against a design — fast + cheap, same rationale as the other `*-developer` agents |

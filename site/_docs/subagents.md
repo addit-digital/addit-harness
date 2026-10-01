@@ -19,7 +19,7 @@ Model tiers are covered in full on [Model & cost](../model-cost/).
 - [frontend-architect](#frontend-architect)
 - [ux-designer](#ux-designer)
 - [figma-designer](#figma-designer)
-- [feature-investigator](#feature-investigator)
+- [product-owner](#product-owner)
 - [saas-legal-advisor](#saas-legal-advisor)
 - [cloud-architect](#cloud-architect)
 - [backend-developer](#backend-developer)
@@ -70,11 +70,11 @@ and tokens via the official Figma MCP. Composes downstream of ux-designer;
 requires the `figma@claude-plugins-official` plugin. `sonnet` tier —
 execution-tier, like the developer agents.
 
-## feature-investigator
+## product-owner
 
-Investigates a feature/product request before any code is written → produces
-a spec/PRD-lite. `sonnet` tier — requirements investigation is the upstream
-default.
+Frames a feature/product request as a problem statement before any design —
+never proposes a solution; a solution in the request is passed through verbatim
+and unevaluated. `sonnet` tier.
 
 ## saas-legal-advisor
 

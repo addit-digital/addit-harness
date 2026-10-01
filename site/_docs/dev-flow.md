@@ -42,7 +42,7 @@ flowchart LR
 ```
 
 - **Investigate** — only runs if the request's scope is genuinely unclear;
-  `@feature-investigator` scopes it into an unambiguous requirement first.
+  `@product-owner` frames the problem first.
 - **UX** — only runs if the work needs a fresh UX pass (new flow, new screen) —
   `@ux-designer` ⇄ `@figma-designer` ⇄ fidelity-check, looping until approved.
 - **Design** — one architect per track (`@backend-architect` and/or
