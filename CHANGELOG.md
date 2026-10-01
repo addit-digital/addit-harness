@@ -7,6 +7,8 @@ only on [GitHub Releases](https://github.com/addit-digital/addit-harness/release
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-10-01
+
 ### Fixed
 
 - Typing `/addit-harness` listed every skill twice. The plugin shipped a thin
