@@ -38,6 +38,7 @@ at `docs/work/<slug>/`, holding everything produced for it in per-type subfolder
 | `plans/` | **Implementation plans** — phased steps, to-do lists, acceptance criteria | Main Claude via `/save-plan` |
 | `solutions/` | **Architecture solution/design docs** — no to-do list, pure design | `@backend-architect`, `@frontend-architect`, or main Claude for design-only output |
 | `architecture-reports/` | **Architecture review reports** | `@architect-reviewer` |
+| `specs/` | **Intake brief** `brief.md`; quarantined `owner-proposal.md` | `@product-owner` |
 | `qa-reports/` | **QA/regression verification reports**, evidence-backed | `@qa-engineer` |
 | `legal/` | **Per-change legal analysis** (`legal/assessment.md`) | `@saas-legal-advisor` |
 

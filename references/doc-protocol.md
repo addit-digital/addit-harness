@@ -64,6 +64,23 @@ ADR: candidate "<title>" | none
 
 The `ADR: candidate` line is the only place an ADR candidate is recorded; it is replaced by the ADR link after plan approval.
 
+### Intake brief
+~~~md
+# Brief: <title>
+**Tier:** standard|deep  **Interview:** <date>, <n> questions, <m> defaults applied
+## Original request
+> <verbatim; proposed solution replaced by "[proposed approach moved out]">
+## Goal (≤2 lines)
+## Non-goals (could be goals; excluded)
+## Constraints (hard; numbers; Observed/Inferred/Unknown)
+## Limits (budget, time, files/services/dependencies not to touch)
+## Done criteria
+- [ ] <testable>
+## Assumptions (answered by owner | default applied)
+## Unknowns (question — resolve by)
+~~~
+Problem only, at most 50 lines. A plan links the brief; it never restates it.
+
 ### Review report
 ~~~md
 # Review <item> r<n>

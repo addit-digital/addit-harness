@@ -45,7 +45,7 @@ const callAgent = async (prompt, opts) => {
     haltedBy = c === 'budget' ? 'budget-cap' : 'config-error'; log(`HALT ${haltedBy}: ${msg}`); return null
   }
 }
-const ctx = () => UNTRUSTED + ORCHESTRATED
+const ctx = () => UNTRUSTED + ORCHESTRATED + (A.briefPath ? `Problem brief (supersedes the raw request; read first): ${A.briefPath}\n\n` : '')
 
 const REVIEW_SCHEMA = {
   type: 'object',
@@ -93,7 +93,7 @@ const sortedKey = arr => JSON.stringify([...arr].sort((a, b) => JSON.stringify(a
 phase('Investigate')
 let request = A.request
 let requestResolved = true
-if (A.investigate && tier !== 'light') { // light's call cap has no room for it
+if (A.investigate && tier !== 'light' && !A.briefPath) { // light's call cap has no room for it; a brief means intake already framed the problem
   const scoped = await callAgent(
     ctx() + `Write the problem statement for this request, grounded in the codebase at ${A.repo}. Problem only — do not propose a solution. Request: ${A.request}`,
     { agentType: 'addit-harness:product-owner' }

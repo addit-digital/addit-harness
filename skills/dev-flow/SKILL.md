@@ -41,7 +41,8 @@ and keep it as `userTier` — it is an exact override of the triaged tier (step 
 Decided by the tier chosen in step 6, not by judgment: `deep` → `true`; `standard` →
 `true` only if triage returned `evidence.confidence: 'low'`; `light` → `false`.
 `product-owner` frames the problem before any design work starts. Don't ask the user
-"should I investigate first."
+"should I investigate first." When intake (step 6.3) produced a brief, it satisfies
+this: pass `briefPath` and the workflow skips its own investigator.
 
 ## 4. Resolve `repo` and `secondaryRepo`
 
@@ -97,7 +98,9 @@ Workflow({
 or `lighter` (one tier down); the result is the run's `tier`. If `lighter` lands on
 `light` while `needsUX` is true, say "UX pass skipped at light" and carry on — light
 never runs the UX loop. Resolve `investigate` (step 3) from the final tier.
-Triage is read-only and also reachable directly as `/addit-harness:dev-flow-triage`.
+At `standard`/`deep` the tier-gate question is not a separate prompt: it is slot 1 of the
+first intake batch (step 6.3). Triage is read-only and also reachable directly as
+`/addit-harness:dev-flow-triage`.
 
 Worst-case agent calls per tier (hard caps, asserted by the mock suite; a run that
 needs fewer simply makes fewer). `both` = backend and frontend tracks; the last column
@@ -109,12 +112,21 @@ is one track with a UX pass:
 | `standard` | 21 | 22 | 44 | 37 |
 | `deep` | 21 | 22 | 44 | 37 |
 
+## 6.3. Intake — interview and brief
+
+**Intake.** light: tier gate only; request used as-is; with a Figma URL ask only the Figma spec's Unknowns before implementation guidance. standard: `product-owner` mode=questions; one `AskUserQuestion` batch of ≤4 (slot 1 = tier gate; add track/secondaryRepo if unresolved; then its questions) — skip questions if it returned none; mode=brief; show the brief; continue. deep: same, plus at most one more ≤4 batch for gaps the answers opened; confirm the brief (correct / edit) only if ≥1 default was applied. Headless: all defaults, say so. Never swap the request for the brief silently: the brief quotes it and the owner sees it. Read `specs/owner-proposal.md` if present and pass its text as `ownerProposal`; pass `briefPath`.
+
+The brief is `docs/work/<slug>/specs/brief.md` (absolute path in `repo` as `briefPath`). When
+`specs/owner-proposal.md` exists, pass `request` = the brief's "Original request" quote
+(proposal already replaced by `[proposed approach moved out]`), so the proposal reaches the
+workflow only as the `ownerProposal` text. If the tier gate lands on `light`, skip the brief.
+
 ## 6.5. Run `Workflow A`
 
 ```
 Workflow({
   scriptPath: "${CLAUDE_PLUGIN_ROOT}/workflows/dev-flow-design.js",
-  args: { slug, track, needsUX, investigate, repo, secondaryRepo, request, tier, plannedFiles, riskPaths },
+  args: { slug, track, needsUX, investigate, repo, secondaryRepo, request, tier, plannedFiles, riskPaths, briefPath, ownerProposal },
 })
 ```
 
