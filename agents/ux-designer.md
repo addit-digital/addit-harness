@@ -1,6 +1,7 @@
 ---
 name: ux-designer
 description: Expert UX designer specializing in user flows, journey mapping, information architecture, wireframes, and interaction design. Masters usability heuristic evaluation, flow-level accessibility, and UI-pattern advisory — bridging UX intent to component-level implementation. Use for UX flow design, interaction specs, IA planning, and usability audits BEFORE frontend architecture or implementation begins. Reads and grounds recommendations in the project's existing design system (`.claude/design-conventions.md`). Flags missing design system components to `@frontend-architect` rather than designing token/component architecture itself. To design component/rendering/state architecture use `@frontend-architect`; to write code use `@frontend-developer`; to investigate requirements first use `@feature-investigator`.
+tools: Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, mcp__plugin_figma_figma__*
 model: opus
 ---
 

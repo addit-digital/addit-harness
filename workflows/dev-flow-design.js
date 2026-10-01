@@ -62,7 +62,7 @@ if (A.needsUX) {
   while (!uxApproved && round < DESIGN_MAX_ROUNDS) {
     if (budget.total && budget.remaining() < 60000) { log('UX loop: budget nearly exhausted, stopping'); break }
     const spec = await agent(
-      UNTRUSTED + `Design UX for: ${request}. Apply the design-conventions skill first.` +
+      UNTRUSTED + `Design UX for: ${request}. Read .claude/design-conventions.md first if it exists; if it does not, say so and do not invent conventions.` +
         (lastFindings ? `\n\nPrevious review round raised these — address each: ${JSON.stringify(lastFindings)}` : ''),
       { agentType: 'addit-harness:ux-designer', phase: 'UX' }
     )
@@ -89,7 +89,7 @@ while (!approved && round < DESIGN_MAX_ROUNDS) {
   const feedback = lastFindings ? `\n\nPrevious review round raised these — address each: ${JSON.stringify(lastFindings)}` : ''
   const designs = (await parallel(TRACKS.map(t => () => agent(
     UNTRUSTED + `Design the ${t.kind} approach in ${t.repo} for: ${request}${uxSpec ? `\nUX spec: ${uxSpec}` : ''}${feedback}` +
-      (t.kind === 'frontend' ? ' Apply the design-conventions skill first.' : ''),
+      (t.kind === 'frontend' ? ' Read .claude/design-conventions.md first if it exists; if it does not, say so and do not invent conventions.' : ''),
     { agentType: t.architectType, phase: 'Design' }
   ).then(d => d && { ...t, design: d })))).filter(Boolean)
   if (designs.length === 0) { log(`Design round ${round + 1}: all architect agents failed or were skipped`); round++; continue }
@@ -115,7 +115,7 @@ phase('Plan')
 const plan = await agent(
   UNTRUSTED + `Write the implementation plan for the approved design(s) at ${TRACKS.map(solutionPath).join(', ')}, ` +
     `save to ${PLAN_PATH}. If this design involves a real architectural decision (new dependency, ` +
-    `framework, or protocol choice), also record it via the adr skill.`,
+    `framework, or protocol choice), also write an ADR: docs/adr/NNNN-<kebab-title>.md in MADR format, NNNN = next free number, plus a docs/adr/README.md row.`,
   { agentType: TRACKS[0].architectType, phase: 'Plan' }
 )
 if (!plan) log('Plan phase: architect returned no plan — nothing was written')
