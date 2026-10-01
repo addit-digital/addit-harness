@@ -7,6 +7,8 @@ only on [GitHub Releases](https://github.com/addit-digital/addit-harness/release
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-01
+
 ### Added
 
 - `/dev-flow` triage: one read-only `@task-triager` agent (new, `haiku`) reports facts
