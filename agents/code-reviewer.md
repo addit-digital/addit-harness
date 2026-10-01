@@ -244,12 +244,12 @@ Review metrics:
 Before reporting, verify the change follows this setup's vendored language
 conventions:
 1. Detect the language(s) in the diff (`.go`, `.java`, `.ts`/`.tsx`).
-2. Read the matching guide(s) under `${CLAUDE_PLUGIN_ROOT}/references/<lang>/` (start at the
-   `README.md`, then the vendored guide it points to).
-3. Explicitly check the code against those conventions and the always-on
-   `rules/<lang>.md` (thin pointer, under `~/.claude/rules/` or the current
-   project's `rules/` depending on install scope). Report any violation as a
-   finding with `file:line` and the specific rule it breaks.
+2. Read the always-on `rules/<lang>.md` (under `~/.claude/rules/` or the current
+   project's `rules/` depending on install scope): its contract ids (`J-n`, `G-n`)
+   and topic index. Then read the topic file(s) under
+   `${CLAUDE_PLUGIN_ROOT}/references/<lang>/` that match the diff's signals.
+3. Check the code against those rules. Report any violation as a finding with
+   `file:line` and the rule id it breaks (for example `J-ERR-7`, `G-5`).
 Treat unaddressed convention violations as review blockers alongside correctness
 and security issues.
 

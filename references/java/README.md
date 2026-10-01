@@ -1,24 +1,27 @@
-# Java / Spring — conventions (vendored + authorities)
+# Java / Spring: conventions by topic
 
-On-demand reference (not auto-loaded). The Tier-1 rule `rules/java.md` points
-here. Convention text is **vendored from a recognized collection**, not
-hand-written.
+On-demand reference (not auto-loaded). `rules/java.md` holds the precedence line, the J-1..J-14 contract and the topic index; read the one or two topic files that match the edit. Every rule has an id (`J-<TOPIC>-n`) and a `Src:` (a link, or `harness default` for a rule without an external authority). Rules marked [I] are inference; reviewers cite ids in findings.
 
-## Vendored (read these)
-| File | Source | License |
-|------|--------|---------|
-| `java-best-practices.md` | [sanjeed5/awesome-cursor-rules-mdc](https://github.com/sanjeed5/awesome-cursor-rules-mdc) `java.mdc` (community collection derived from the Google Java Style Guide; modern Java 21). Script-generated — treat as a solid baseline, defer to the authorities below on any conflict. | CC0-1.0 |
+| Topic | Covers |
+|-------|--------|
+| `api-design.md` | factories, builders, immutability, equals/hashCode, Optional, nullness |
+| `errors.md` | exception choice, translation, `ProblemDetail` |
+| `security-validation.md` | `@Valid`, method security, injection, CORS, CSRF, secrets |
+| `concurrency.md` | executors, virtual threads, pinning, `CompletableFuture` |
+| `spring-layering.md` | package by feature, wiring, config properties, `RestClient` |
+| `reactive.md` | no blocking, error operators, Reactor `Context`, `StepVerifier` |
+| `data-jpa.md` | transactions, open-in-view, N+1, pool size, migrations |
+| `testing.md` | slices, `@MockitoBean`, Testcontainers |
+| `resilience.md` | timeouts, retry with jitter, circuit breakers |
+| `observability.md` | SLF4J, Micrometer, trace ids |
+| `kafka.md` | idempotent producer, error handler, DLT, outbox |
+| `build-style.md` | formatter, imports, BOM, wrapper, verification |
 
-> Note: the Google Java Style Guide and Effective Java are authoritative but are
-> HTML/a book, so they're linked rather than copied.
+## Authorities (linked from the rules)
+- [Effective Java, 3rd ed.](https://www.oreilly.com/library/view/effective-java/9780134686097/): item numbers cited in the topics are unverified against the book.
+- [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html): formatting authority.
+- [Spring Boot](https://docs.spring.io/spring-boot/) and [Spring Framework](https://docs.spring.io/spring-framework/reference/) reference docs; [Spring Data JPA](https://docs.spring.io/spring-data/jpa/reference/); [Spring for Apache Kafka](https://docs.spring.io/spring-kafka/reference/).
+- [spring-projects/spring-petclinic](https://github.com/spring-projects/spring-petclinic): sample app structure.
 
-## Authorities to read (link-only)
-- [Effective Java, 3rd ed. (Bloch)](https://www.oreilly.com/library/view/effective-java/9780134686097/) — the single most-cited Java authority (book).
-- [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html) — dominant formatting standard.
-- [Spring reference docs](https://docs.spring.io/spring-boot/) ([Framework](https://docs.spring.io/spring-framework/reference/)) — source of truth for Spring/Spring Boot.
-- [Spring Guides](https://spring.io/guides) — official task-oriented guides.
-- [spring-projects/spring-petclinic](https://github.com/spring-projects/spring-petclinic) — canonical Spring sample app (structure & idioms).
-
-## Stack notes (this user)
-- Both **Spring MVC** and **WebFlux**; **Kafka** ([Spring for Apache Kafka](https://docs.spring.io/spring-kafka/reference/)); **Spring Data** ([JPA](https://docs.spring.io/spring-data/jpa/reference/)); **Gradle and Maven**.
-- REST errors: use `ProblemDetail` (RFC 9457).
+## Per-project overrides
+A project Checkstyle/PMD config sets the J-12 numbers; a project formatter replaces build-style BLD-1/2. There is no per-project Java conventions file.

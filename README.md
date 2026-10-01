@@ -167,7 +167,7 @@ Three ways assets are delivered:
 | Stack | In-repo reference | Linked authorities |
 |-------|-------------------|--------------------|
 | Go | `references/go/app-erp-conventions.md` (codebase-derived: Gin · MongoDB v2 · slog · OTel) + per-project `.claude/go-conventions.md` | Effective Go, Go Code Review Comments, Google Go Style |
-| Java/Spring | sanjeed5 `java.mdc` (CC0, Google-derived) | Effective Java, Google Java Style, Spring docs |
+| Java/Spring | `rules/java.md` contract (J-1..J-14) + 12 cited topic files in `references/java/` | Effective Java, Google Java Style, Spring docs |
 | TS / React / Next / RN | bulletproof-react docs (MIT) + sanjeed5 TS/React/Next/RN `.mdc` (CC0) | react.dev, Next.js docs, TypeScript Handbook, Total TypeScript |
 
 The Go reference is **codebase-derived** (not a third-party style guide) — it
