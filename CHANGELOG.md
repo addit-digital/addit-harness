@@ -7,6 +7,8 @@ only on [GitHub Releases](https://github.com/addit-digital/addit-harness/release
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-10-01
+
 ### Fixed
 
 - `/dev-flow` could not run its scripted workflows in a normal install: it called
